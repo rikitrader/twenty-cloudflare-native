@@ -1,6 +1,29 @@
 # Twenty CRM → Cloudflare: Migration Architecture
 
-Zero changes to Twenty's codebase. Everything below is deployment topology, env mapping, and Cloudflare config against the stock upstream images.
+Zero changes to Twenty's codebase. Everything below is deployment topology, env mapping, and Cloudflare config against the stock upstream images (plus a thin wrapper layer — `Dockerfile` + `cf/` — that adds a backup agent beside Twenty, not inside it).
+
+## 0. Full-stack status (live)
+
+| Service | Role | Status |
+|---|---|---|
+| Workers | Front door: routing, auth guards, status, cache | ✅ live |
+| Durable Objects | 3 container classes, WS proxy, restore orchestration | ✅ live |
+| Containers | All-in-one demo (wrapper image) + dormant server/worker pair | ✅ live |
+| KV | `/_status` at edge + activity/backup timestamps | ✅ live |
+| R2 | Backup store (`backups/`), attachments once S3 keys set | ✅ live |
+| D1 `twenty-ops` | `events` (webhooks) + `backups` ledger | ✅ live |
+| Queues `twenty-events` (+dlq) | Twenty webhooks → durable consumer → D1 | ✅ live |
+| Workflows `twenty-backup` | idle-check → pg_dump via DO tunnel → R2 → verify → ledger | ✅ live |
+| Cron Triggers | `0 12 * * 1-5` warm-up · `0 * * * *` backup | ✅ live |
+| Cache API | Immutable frontend assets at edge | ✅ live |
+| Worker Secrets | ENCRYPTION_KEY, APP_SECRET (legacy), BACKUP_TOKEN, WEBHOOK_TOKEN | ✅ set |
+| Hyperdrive | One command once Neon exists | ⏳ user credentials |
+| D1/KV/Queues *as Twenty's internals* | Impossible without forking (pg wire / Redis protocol / BullMQ) | ❌ documented |
+
+**Ephemerality is mitigated**: hourly backups (skipped while idle) + restore-on-boot mean demo data survives sleeps and redeploys with RPO ≈ 1h. Production-grade persistence still = Neon/Upstash flip (§5).
+
+**Webhook pipeline activation**: in Twenty → Settings → API & Webhooks → add target
+`https://twenty-crm.rikitrader.workers.dev/webhooks/twenty?token=<WEBHOOK_TOKEN>`.
 
 ## 1. Dependency graph (from repo inspection)
 
@@ -64,7 +87,10 @@ Mode flip is automatic: setting both `PG_DATABASE_URL` and `REDIS_URL` secrets s
 | `PG_DATABASE_URL` | Worker Secret (pending — Neon/Hyperdrive string) | external |
 | `REDIS_URL` | Worker Secret (pending — Upstash `rediss://`) | external |
 | `STORAGE_TYPE=s3`, `STORAGE_S3_NAME/ENDPOINT/REGION` | auto-set when R2 keys present | external |
-| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | Worker Secrets (pending — R2 API token) | external |
+| `STORAGE_S3_ACCESS_KEY_ID` / `STORAGE_S3_SECRET_ACCESS_KEY` | Worker Secrets (pending — R2 API token); `AWS_*` also passed as legacy aliases | external |
+| `ENCRYPTION_KEY` / `FALLBACK_ENCRYPTION_KEY` | Worker Secrets (`ENCRYPTION_KEY` set; fallback used during rotation) | both |
+| `BACKUP_TOKEN` | Worker Secret → container agent auth (`/_agent/*`, `/_backup/run`) | demo |
+| `WEBHOOK_TOKEN` | Worker Secret → webhook URL query token | both |
 | `DISABLE_DB_MIGRATIONS` / `DISABLE_CRON_JOBS_REGISTRATION` | hardcoded per upstream compose (worker: true) | external |
 
 ## 5. Activation runbook (the only human steps)

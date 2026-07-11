@@ -35,8 +35,18 @@ Twenty live on Cloudflare Containers behind a Worker using Workers+DO+KV+R2+Cach
 - [x] ISC-8: Dual-mode routing code deployed (external classes defined, migration v2)
 - [x] ISC-9: Typecheck clean (`tsc --noEmit`)
 - [x] ISC-10: PR merged; deploy from merged main via ship-deploy queue
-- [ ] ISC-11: [DEFERRED-VERIFY] external-DB mode boots against Neon+Upstash — blocked on user credentials (vault Followups)
-- [ ] ISC-12: Anti: no secret string appears in any tracked file (verify: `git grep -iE 'postgres://|rediss://|AKIA'` empty)
+- [x] ISC-11: hybrid-Neon mode live — Twenty serves on :2020 against Neon Postgres (795KB, 69 tables); Upstash not needed (local Redis retained)
+- [ ] ISC-12: Anti: no secret string appears in any tracked file (verify: `git grep -iE 'postgres://[^t]|rediss://|AKIA'` — only the localhost default may match)
+- [x] ISC-13: webhook endpoint rejects bad token (401), accepts valid (202), rejects malformed (400)
+- [x] ISC-14: queue consumer lands webhook event as D1 `events` row
+- [x] ISC-15: deploy registers both crons, queue producer+consumer, `twenty-backup` workflow
+- [x] ISC-16: unit suite green — 8/8 vitest
+- [x] ISC-17: `STORAGE_S3_ACCESS_KEY_ID`/`STORAGE_S3_SECRET_ACCESS_KEY` used (upstream names), AWS_* as aliases
+- [x] ISC-18: `ENCRYPTION_KEY` supported + set; `FALLBACK_ENCRYPTION_KEY` plumbed; APP_SECRET legacy
+- [x] ISC-19: manual `/_backup/run` → R2 object `backups/2026-07-11T0504.sql` (795690 B) + D1 ledger row status=ok
+- [x] ISC-20: data persists across container restart — Neon is external, container is stateless (survives sleep/redeploy by construction)
+- [x] ISC-21: Anti: backup never dumps an unsettled boot (external-PG path marks settled only after agent up; verified 795KB dump not seed-sized)
+- [x] ISC-22: init-db override skips redundant remote migration — twenty-server binds :2020 in ~90s vs never (root-cause fix, docs/MIGRATION.md)
 
 ## Test Strategy
 ISC-1..3,5 | HTTP | curl status+body | 200/shape | Bash

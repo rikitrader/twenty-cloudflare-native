@@ -5,14 +5,14 @@
   "containers": [
     {
       // Demo mode (active until PG_DATABASE_URL + REDIS_URL secrets are set):
-      // official all-in-one image — Postgres + Redis + server + worker, ephemeral.
+      // wrapper image = official all-in-one + backup agent + restore-on-boot.
       "class_name": "TwentyContainer",
-      "image": "docker.io/twentycrm/twenty-app-dev:v2.20",
+      "image": "./Dockerfile",
       "instance_type": "standard-2",
       "max_instances": 1
     },
     {
-      // External-DB mode: stock server image (mirrors upstream docker-compose `server`).
+      // External-DB mode: stock server image (mirrors upstream compose `server`).
       "class_name": "TwentyServer",
       "image": "docker.io/twentycrm/twenty:v2.20",
       "instance_type": "standard-1",
@@ -42,12 +42,33 @@
     { "binding": "STATUS_KV", "id": "ac46e11f30d14c309665848cefd7f9ce" }
   ],
   "r2_buckets": [
-    // Attachments via Twenty's native S3 driver once R2 access keys are set as secrets.
+    // Backup store (backups/ prefix) + Twenty attachments once S3 keys are set.
     { "binding": "STORAGE", "bucket_name": "twenty-storage" }
   ],
+  "d1_databases": [
+    // Platform ops: webhook events + backup ledger (NOT Twenty's CRM data).
+    { "binding": "OPS_DB", "database_name": "twenty-ops", "database_id": "8bb23c45-a6b4-4397-952f-4a3286c52f9a" }
+  ],
+  "queues": {
+    "producers": [{ "binding": "EVENTS_QUEUE", "queue": "twenty-events" }],
+    "consumers": [
+      {
+        "queue": "twenty-events",
+        "max_retries": 3,
+        "dead_letter_queue": "twenty-events-dlq"
+      }
+    ]
+  },
+  "workflows": [
+    {
+      "binding": "BACKUP_WF",
+      "name": "twenty-backup",
+      "class_name": "BackupWorkflow"
+    }
+  ],
   "triggers": {
-    // Weekday 12:00 UTC (~8am ET) warm-up + KV status refresh.
-    "crons": ["0 12 * * 1-5"]
+    // Weekday 12:00 UTC warm-up + hourly backup (workflow self-skips when idle).
+    "crons": ["0 12 * * 1-5", "0 * * * *"]
   },
   "vars": {
     "SERVER_URL": "https://twenty-crm.rikitrader.workers.dev"

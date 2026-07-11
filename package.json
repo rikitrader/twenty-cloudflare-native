@@ -3,7 +3,9 @@
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
-    "tail": "wrangler tail"
+    "tail": "wrangler tail",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@cloudflare/containers": "^0.3.7"
@@ -11,6 +13,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260711.1",
     "typescript": "^5.8.0",
+    "vitest": "^3.0.0",
     "wrangler": "^4.0.0"
   }
 }
