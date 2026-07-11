@@ -4,20 +4,52 @@
   "compatibility_date": "2026-06-08",
   "containers": [
     {
+      // Demo mode (active until PG_DATABASE_URL + REDIS_URL secrets are set):
+      // official all-in-one image — Postgres + Redis + server + worker, ephemeral.
       "class_name": "TwentyContainer",
-      // Official all-in-one image: PostgreSQL + Redis + server + worker (s6-supervised).
-      // Ephemeral by design — swap to twentycrm/twenty + external Neon/Upstash for persistence.
       "image": "docker.io/twentycrm/twenty-app-dev:v2.20",
       "instance_type": "standard-2",
+      "max_instances": 1
+    },
+    {
+      // External-DB mode: stock server image (mirrors upstream docker-compose `server`).
+      "class_name": "TwentyServer",
+      "image": "docker.io/twentycrm/twenty:v2.20",
+      "instance_type": "standard-1",
+      "max_instances": 1
+    },
+    {
+      // External-DB mode: BullMQ worker (`yarn worker:prod` entrypoint set in code).
+      "class_name": "TwentyWorker",
+      "image": "docker.io/twentycrm/twenty:v2.20",
+      "instance_type": "standard-1",
       "max_instances": 1
     }
   ],
   "durable_objects": {
-    "bindings": [{ "name": "TWENTY", "class_name": "TwentyContainer" }]
+    "bindings": [
+      { "name": "TWENTY", "class_name": "TwentyContainer" },
+      { "name": "TWENTY_SERVER", "class_name": "TwentyServer" },
+      { "name": "TWENTY_WORKER", "class_name": "TwentyWorker" }
+    ]
   },
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["TwentyContainer"] }],
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["TwentyContainer"] },
+    { "tag": "v2", "new_sqlite_classes": ["TwentyServer", "TwentyWorker"] }
+  ],
+  "kv_namespaces": [
+    // Edge status cache — /_status is served without waking the container.
+    { "binding": "STATUS_KV", "id": "ac46e11f30d14c309665848cefd7f9ce" }
+  ],
+  "r2_buckets": [
+    // Attachments via Twenty's native S3 driver once R2 access keys are set as secrets.
+    { "binding": "STORAGE", "bucket_name": "twenty-storage" }
+  ],
+  "triggers": {
+    // Weekday 12:00 UTC (~8am ET) warm-up + KV status refresh.
+    "crons": ["0 12 * * 1-5"]
+  },
   "vars": {
-    // Updated to the real workers.dev URL after first deploy.
     "SERVER_URL": "https://twenty-crm.rikitrader.workers.dev"
   },
   "observability": { "enabled": true }
