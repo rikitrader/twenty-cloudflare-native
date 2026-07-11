@@ -1,0 +1,24 @@
+{
+  "name": "twenty-crm",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-08",
+  "containers": [
+    {
+      "class_name": "TwentyContainer",
+      // Official all-in-one image: PostgreSQL + Redis + server + worker (s6-supervised).
+      // Ephemeral by design — swap to twentycrm/twenty + external Neon/Upstash for persistence.
+      "image": "docker.io/twentycrm/twenty-app-dev:v2.20",
+      "instance_type": "standard-2",
+      "max_instances": 1
+    }
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "TWENTY", "class_name": "TwentyContainer" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["TwentyContainer"] }],
+  "vars": {
+    // Updated to the real workers.dev URL after first deploy.
+    "SERVER_URL": "https://twenty-crm.rikitrader.workers.dev"
+  },
+  "observability": { "enabled": true }
+}
