@@ -1,0 +1,24 @@
+# Production server/worker image pinned to the exact Twenty v2.20 multi-arch
+# manifest. Both Cloudflare Container classes use this same immutable build.
+FROM twentycrm/twenty@sha256:d3dd949725e6196c57dab66ebe83ba9cdd2561885c35f94ef20f9ae38cd6d333
+
+COPY cf/patch-workflow-run-delete.cjs /cf/patch-workflow-run-delete.cjs
+RUN node /cf/patch-workflow-run-delete.cjs
+
+# Logic-function source lives on Twenty's local storage driver. Cloudflare
+# Container disks are ephemeral, so bake this single workspace's trusted
+# workflow sources into both the server and worker images.
+COPY --chown=1000:1000 cf/workflow-sources/ \
+  /app/packages/twenty-server/.local-storage/1e5ecbe5-5f33-4336-8c99-a205527ab176/55d2c82e-ffe9-43e7-9338-af1dea62c1ed/source/
+
+# Twenty downloads these dependency manifests before building logic functions.
+RUN set -eu; \
+  seed=/app/packages/twenty-server/dist/assets/engine/core-modules/application/application-package/constants/seed-dependencies; \
+  root=/app/packages/twenty-server/.local-storage/1e5ecbe5-5f33-4336-8c99-a205527ab176; \
+  for app in 55d2c82e-ffe9-43e7-9338-af1dea62c1ed 20202020-64aa-4b6f-b003-9c74b97cee20; do \
+    mkdir -p "$root/$app/dependencies"; \
+    cp "$seed/package.json" "$seed/yarn.lock" "$root/$app/dependencies/"; \
+  done; \
+  chown -R 1000:1000 "$root"
+
+LABEL cf.twenty.mode="production-external-v1"

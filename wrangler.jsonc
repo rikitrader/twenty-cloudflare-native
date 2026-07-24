@@ -12,16 +12,16 @@
       "max_instances": 1
     },
     {
-      // External-DB mode: stock server image (mirrors upstream compose `server`).
+      // External-DB mode: patched, source-complete production server image.
       "class_name": "TwentyServer",
-      "image": "docker.io/twentycrm/twenty@sha256:d3dd949725e6196c57dab66ebe83ba9cdd2561885c35f94ef20f9ae38cd6d333",
+      "image": "./Dockerfile.production",
       "instance_type": "standard-1",
       "max_instances": 1
     },
     {
-      // External-DB mode: BullMQ worker (`yarn worker:prod` entrypoint set in code).
+      // External-DB mode: matching BullMQ worker (`yarn worker:prod`).
       "class_name": "TwentyWorker",
-      "image": "docker.io/twentycrm/twenty@sha256:d3dd949725e6196c57dab66ebe83ba9cdd2561885c35f94ef20f9ae38cd6d333",
+      "image": "./Dockerfile.production",
       "instance_type": "standard-1",
       "max_instances": 1
     }

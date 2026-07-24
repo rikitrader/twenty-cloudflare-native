@@ -39,6 +39,11 @@ function storageEnv(env: Env): Record<string, string> {
 function sharedEnv(env: Env): Record<string, string> {
   return {
     SERVER_URL: env.SERVER_URL,
+    // This is a private, single-workspace deployment and all installed logic
+    // functions are source-controlled in Dockerfile.production. LOCAL keeps
+    // those trusted workflows available in Twenty's production image.
+    LOGIC_FUNCTION_TYPE: "LOCAL",
+    SIGN_IN_PREFILLED: "false",
     ...secretsEnv(env),
     ...(env.PG_DATABASE_URL ? { PG_DATABASE_URL: env.PG_DATABASE_URL } : {}),
     ...(env.REDIS_URL ? { REDIS_URL: env.REDIS_URL } : {}),
@@ -171,7 +176,7 @@ export class TwentyContainer extends Container<Env> {
   }
 }
 
-/** External-DB mode: stock server image (runs migrations + cron registration). */
+/** External-DB mode: pinned production server (migrations + cron registration). */
 export class TwentyServer extends Container<Env> {
   defaultPort = 3000;
   sleepAfter = "2h";
@@ -190,7 +195,7 @@ export class TwentyServer extends Container<Env> {
   }
 }
 
-/** External-DB mode: BullMQ worker — same image, worker entrypoint, no HTTP port. */
+/** External-DB mode: BullMQ worker — same production image, no HTTP port. */
 export class TwentyWorker extends Container<Env> {
   sleepAfter = "2h";
   entrypoint = ["yarn", "worker:prod"];
