@@ -5,6 +5,7 @@
     "deploy": "wrangler deploy",
     "tail": "wrangler tail",
     "test": "vitest run",
+    "test:browser:console": "node scripts/check-browser-console.mjs",
     "test:workflow:e2e": "node scripts/test-crm-workflow-e2e.mjs",
     "typecheck": "tsc --noEmit"
   },
