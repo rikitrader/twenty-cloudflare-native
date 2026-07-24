@@ -1,17 +1,26 @@
-import { parseWebhookEvent } from "./lib";
+import { bearerAuthorized, parseWebhookEvent } from "./lib";
 import type { Env, WebhookMessage } from "./types";
 
 /**
  * Twenty webhook → CF Queue producer. Configure in Twenty:
- * Settings → API & Webhooks → target URL
- *   https://twenty-crm.rikitrader.workers.dev/webhooks/twenty?token=<WEBHOOK_TOKEN>
+ * Settings → API & Webhooks → target URL:
+ *   https://twenty-crm.rikitrader.workers.dev/webhooks/twenty
+ * Send `Authorization: Bearer <WEBHOOK_TOKEN>`. The query parameter remains
+ * temporarily supported for existing Twenty webhook configuration.
  */
 export async function handleWebhook(
   request: Request,
   env: Env,
 ): Promise<Response> {
   const url = new URL(request.url);
-  if (!env.WEBHOOK_TOKEN || url.searchParams.get("token") !== env.WEBHOOK_TOKEN)
+  const headerAuthorized = bearerAuthorized(
+    request.headers.get("authorization"),
+    env.WEBHOOK_TOKEN,
+  );
+  const legacyQueryAuthorized =
+    env.WEBHOOK_TOKEN !== undefined &&
+    url.searchParams.get("token") === env.WEBHOOK_TOKEN;
+  if (!headerAuthorized && !legacyQueryAuthorized)
     return new Response("unauthorized", { status: 401 });
   if (request.method !== "POST")
     return new Response("method not allowed", { status: 405 });
@@ -24,7 +33,15 @@ export async function handleWebhook(
     payload: parsed.payload,
     receivedAt: new Date().toISOString(),
   });
-  return new Response("queued", { status: 202 });
+  return new Response("queued", {
+    status: 202,
+    headers: legacyQueryAuthorized
+      ? {
+          deprecation: "true",
+          link: '</webhooks/twenty>; rel="successor-version"',
+        }
+      : undefined,
+  });
 }
 
 /** Queue consumer → D1 events table. Per-message retry; DLQ after max retries. */

@@ -5,6 +5,9 @@ import {
   shouldSkipBackup,
   bearerAuthorized,
   parseWebhookEvent,
+  sanitizedErrorMessage,
+  shouldWriteStatus,
+  evaluateOperationalStatus,
 } from "../src/lib";
 
 describe("backupKey", () => {
@@ -52,6 +55,66 @@ describe("bearerAuthorized", () => {
   it("rejects when no token is configured or header missing", () => {
     expect(bearerAuthorized("Bearer anything", undefined)).toBe(false);
     expect(bearerAuthorized(null, "s3cret")).toBe(false);
+  });
+});
+
+describe("shouldWriteStatus", () => {
+  it("writes health transitions and coalesces unchanged status", () => {
+    expect(shouldWriteStatus(1_000, 0, true, undefined, 60_000)).toBe(true);
+    expect(shouldWriteStatus(30_000, 1_000, true, true, 60_000)).toBe(false);
+    expect(shouldWriteStatus(30_000, 1_000, false, true, 60_000)).toBe(true);
+    expect(shouldWriteStatus(61_001, 1_000, true, true, 60_000)).toBe(true);
+  });
+});
+
+describe("evaluateOperationalStatus", () => {
+  const now = Date.parse("2026-07-24T05:00:00Z");
+
+  it("accepts fresh health and backup evidence", () => {
+    expect(
+      evaluateOperationalStatus(now, {
+        reportedStatus: "ok",
+        checkedIso: "2026-07-24T04:55:00Z",
+        lastBackupIso: "2026-07-24T04:00:00Z",
+        lastBackupError: null,
+        backupRequired: true,
+      }),
+    ).toEqual({ status: "ok", reasons: [] });
+  });
+
+  it("fails closed for stale health or backup errors", () => {
+    expect(
+      evaluateOperationalStatus(now, {
+        reportedStatus: "ok",
+        checkedIso: "2026-07-24T04:00:00Z",
+        lastBackupIso: "2026-07-24T04:00:00Z",
+        lastBackupError: "dump failed",
+        backupRequired: true,
+      }),
+    ).toEqual({
+      status: "degraded",
+      reasons: ["health-stale", "backup-error"],
+    });
+  });
+
+  it("does not require local backups in external service mode", () => {
+    expect(
+      evaluateOperationalStatus(now, {
+        reportedStatus: "ok",
+        checkedIso: "2026-07-24T04:55:00Z",
+        lastBackupIso: null,
+        lastBackupError: null,
+        backupRequired: false,
+      }),
+    ).toEqual({ status: "ok", reasons: [] });
+  });
+});
+
+describe("sanitizedErrorMessage", () => {
+  it("flattens whitespace and bounds stored errors", () => {
+    expect(sanitizedErrorMessage(new Error("dump\n failed\t503"), 12)).toBe(
+      "dump failed",
+    );
   });
 });
 

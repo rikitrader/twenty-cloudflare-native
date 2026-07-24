@@ -77,7 +77,13 @@ const server = http.createServer((req, res) => {
       res.statusCode = 503;
       return res.end("restore not settled yet");
     }
-    const dump = spawn("pg_dump", [PG_URL, "--no-owner"]);
+    // Provider grants (for example Neon's cloud_admin/neon_superuser roles)
+    // are not application data and make restores to plain PostgreSQL fail.
+    const dump = spawn("pg_dump", [
+      PG_URL,
+      "--no-owner",
+      "--no-privileges",
+    ]);
     res.setHeader("content-type", "application/sql");
     dump.stdout.pipe(res);
     let err = "";

@@ -12,7 +12,15 @@ pg_isready -h localhost -q || { echo "postgres never became ready"; exit 1; }
 psql "$ADMIN" -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='default' AND pid <> pg_backend_pid();" >/dev/null 2>&1 || true
 psql "$ADMIN" -v ON_ERROR_STOP=1 -c 'DROP DATABASE IF EXISTS "default" WITH (FORCE);'
 psql "$ADMIN" -v ON_ERROR_STOP=1 -c 'CREATE DATABASE "default";'
-psql "$URL" -q -v ON_ERROR_STOP=0 -f /tmp/restore.sql >/dev/null
+# pg_dump can be newer than the target PostgreSQL server and emit SET options
+# unknown to the older server. Old Neon backups may also contain provider-only
+# default privileges. Remove only those non-data statements, then fail on every
+# remaining SQL error so a partial restore is never marked successful.
+sed \
+  -e '/^SET transaction_timeout = /d' \
+  -e '/^ALTER DEFAULT PRIVILEGES FOR ROLE cloud_admin IN SCHEMA public .* TO neon_superuser /d' \
+  /tmp/restore.sql > /tmp/restore-compatible.sql
+psql "$URL" -q -v ON_ERROR_STOP=1 -f /tmp/restore-compatible.sql >/dev/null
 
 redis-cli flushall >/dev/null 2>&1 || true
 date -u +%Y-%m-%dT%H:%M:%SZ > /tmp/cf-restore-settled

@@ -25,6 +25,66 @@ export function shouldSkipBackup(
   return lastActivityIso <= lastBackupIso;
 }
 
+/** Coalesce noisy status updates while still recording health transitions. */
+export function shouldWriteStatus(
+  nowMs: number,
+  lastWriteMs: number,
+  ok: boolean,
+  lastOk: boolean | undefined,
+  intervalMs: number,
+): boolean {
+  return lastOk !== ok || nowMs - lastWriteMs >= intervalMs;
+}
+
+export interface OperationalStatusInput {
+  reportedStatus: unknown;
+  checkedIso: unknown;
+  lastBackupIso: string | null;
+  lastBackupError: string | null;
+  backupRequired: boolean;
+}
+
+export interface OperationalStatus {
+  status: "ok" | "degraded";
+  reasons: string[];
+}
+
+/** Fail closed when health or required backup evidence becomes stale. */
+export function evaluateOperationalStatus(
+  nowMs: number,
+  input: OperationalStatusInput,
+  healthMaxAgeMs = 10 * 60_000,
+  backupMaxAgeMs = 2 * 60 * 60_000,
+): OperationalStatus {
+  const reasons: string[] = [];
+  const checkedMs =
+    typeof input.checkedIso === "string" ? Date.parse(input.checkedIso) : NaN;
+
+  if (input.reportedStatus !== "ok") reasons.push("upstream-degraded");
+  if (!Number.isFinite(checkedMs) || nowMs - checkedMs > healthMaxAgeMs)
+    reasons.push("health-stale");
+
+  if (input.backupRequired) {
+    const backupMs = input.lastBackupIso
+      ? Date.parse(input.lastBackupIso)
+      : NaN;
+    if (!Number.isFinite(backupMs) || nowMs - backupMs > backupMaxAgeMs)
+      reasons.push("backup-stale");
+    if (input.lastBackupError) reasons.push("backup-error");
+  }
+
+  return {
+    status: reasons.length === 0 ? "ok" : "degraded",
+    reasons,
+  };
+}
+
+/** Keep operational status safe and compact when surfacing workflow failures. */
+export function sanitizedErrorMessage(error: unknown, maxLength = 500): string {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.replace(/\s+/g, " ").trim().slice(0, maxLength).trimEnd();
+}
+
 /** Constant-shape bearer check for the backup/agent endpoints. */
 export function bearerAuthorized(
   authHeader: string | null,

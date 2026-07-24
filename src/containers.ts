@@ -3,6 +3,11 @@ import type { Env } from "./types";
 import { pickLatest } from "./lib";
 
 export const AGENT_PORT = 2021;
+const PORT_READY_OPTIONS = {
+  portReadyTimeoutMS: 120_000,
+  instanceGetTimeoutMS: 120_000,
+  waitInterval: 500,
+} as const;
 
 function secretsEnv(env: Env): Record<string, string> {
   return {
@@ -99,10 +104,10 @@ export class TwentyContainer extends Container<Env> {
     );
   }
 
-  override onStart(): void {
+  override async onStart(): Promise<void> {
     if (!this.restoreKicked) {
       this.restoreKicked = true;
-      void this.tryRestore();
+      await this.tryRestore();
     }
   }
 
@@ -148,6 +153,10 @@ export class TwentyContainer extends Container<Env> {
   }
 
   override async fetch(request: Request): Promise<Response> {
+    await this.startAndWaitForPorts(
+      [this.defaultPort, AGENT_PORT],
+      { ...PORT_READY_OPTIONS, abort: request.signal },
+    );
     const url = new URL(request.url);
     if (url.pathname.startsWith("/_agent/")) {
       return this.agentFetch(url.pathname.slice("/_agent".length), {
@@ -167,6 +176,14 @@ export class TwentyServer extends Container<Env> {
   constructor(ctx: DurableObjectState<{}>, env: Env) {
     super(ctx, env);
     this.envVars = { ...sharedEnv(env), NODE_PORT: "3000" };
+  }
+
+  override async fetch(request: Request): Promise<Response> {
+    await this.startAndWaitForPorts(
+      this.defaultPort,
+      { ...PORT_READY_OPTIONS, abort: request.signal },
+    );
+    return super.fetch(request);
   }
 }
 

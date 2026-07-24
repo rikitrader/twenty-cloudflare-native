@@ -1,6 +1,6 @@
 import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent } from "cloudflare:workers";
 import { getContainer } from "@cloudflare/containers";
-import { backupKey, shouldSkipBackup } from "./lib";
+import { backupKey, sanitizedErrorMessage, shouldSkipBackup } from "./lib";
 import { externalMode, type Env } from "./types";
 
 export interface BackupParams {
@@ -27,23 +27,41 @@ export class BackupWorkflow extends WorkflowEntrypoint<Env, BackupParams> {
     });
     if (skip) return { skipped: skip };
 
-    const key = await step.do(
-      "dump-to-r2",
-      { retries: { limit: 5, delay: "30 seconds", backoff: "exponential" } },
-      async () => {
-        const stub = getContainer(this.env.TWENTY, "main");
-        const res = await stub.fetch(
-          new Request("https://container/_agent/dump"),
+    await step.do("record-attempt", async () => {
+      await this.env.STATUS_KV.put(
+        "last-backup-attempt",
+        new Date(event.timestamp).toISOString(),
+      );
+    });
+
+    let key: string;
+    try {
+      key = await step.do(
+        "dump-to-r2",
+        { retries: { limit: 5, delay: "30 seconds", backoff: "exponential" } },
+        async () => {
+          const stub = getContainer(this.env.TWENTY, "main");
+          const res = await stub.fetch(
+            new Request("https://container/_agent/dump"),
+          );
+          if (!res.ok) throw new Error(`dump failed: HTTP ${res.status}`);
+          const buf = await res.arrayBuffer();
+          if (buf.byteLength < 1024)
+            throw new Error(`dump suspiciously small: ${buf.byteLength}B`);
+          const k = backupKey(new Date(event.timestamp));
+          await this.env.STORAGE.put(k, buf);
+          return k;
+        },
+      );
+    } catch (error) {
+      await step.do("record-failure", async () => {
+        await this.env.STATUS_KV.put(
+          "last-backup-error",
+          sanitizedErrorMessage(error),
         );
-        if (!res.ok) throw new Error(`dump failed: HTTP ${res.status}`);
-        const buf = await res.arrayBuffer();
-        if (buf.byteLength < 1024)
-          throw new Error(`dump suspiciously small: ${buf.byteLength}B`);
-        const k = backupKey(new Date(event.timestamp));
-        await this.env.STORAGE.put(k, buf);
-        return k;
-      },
-    );
+      });
+      throw error;
+    }
 
     await step.do("verify-and-ledger", async () => {
       const head = await this.env.STORAGE.head(key);
@@ -54,6 +72,7 @@ export class BackupWorkflow extends WorkflowEntrypoint<Env, BackupParams> {
         .bind(key, head.size, "ok")
         .run();
       await this.env.STATUS_KV.put("last-backup", new Date().toISOString());
+      await this.env.STATUS_KV.delete("last-backup-error");
     });
 
     return { key };

@@ -5,6 +5,7 @@
     "deploy": "wrangler deploy",
     "tail": "wrangler tail",
     "test": "vitest run",
+    "test:workflow:e2e": "node scripts/test-crm-workflow-e2e.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -14,6 +15,6 @@
     "@cloudflare/workers-types": "^5.20260711.1",
     "typescript": "^5.8.0",
     "vitest": "^3.0.0",
-    "wrangler": "^4.0.0"
+    "wrangler": "4.114.0"
   }
 }

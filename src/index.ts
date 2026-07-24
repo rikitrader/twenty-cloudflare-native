@@ -2,28 +2,57 @@ import { getContainer } from "@cloudflare/containers";
 import { TwentyContainer, TwentyServer, TwentyWorker } from "./containers";
 import { BackupWorkflow } from "./backup";
 import { handleWebhook, consumeBatch } from "./queue";
-import { bearerAuthorized } from "./lib";
+import {
+  bearerAuthorized,
+  evaluateOperationalStatus,
+  shouldWriteStatus,
+} from "./lib";
 import { deploymentMode, externalMode, type Env, type WebhookMessage } from "./types";
 
 export { TwentyContainer, TwentyServer, TwentyWorker, BackupWorkflow };
 
 const IMMUTABLE_ASSET = /\.(js|css|woff2?|png|jpe?g|svg|ico|webp)$/;
-const WARMUP_CRON = "0 12 * * 1-5";
+const BACKUP_CRON = "0 * * * *";
+const STATUS_WRITE_INTERVAL_MS = 60_000;
+let lastStatusWriteMs = 0;
+let lastStatusOk: boolean | undefined;
 
 async function writeStatus(
   env: Env,
   ok: boolean,
   source: "request" | "cron",
+  force = false,
 ): Promise<void> {
-  await env.STATUS_KV.put(
-    "status",
-    JSON.stringify({
-      status: ok ? "ok" : "degraded",
-      mode: deploymentMode(env),
-      checked: new Date().toISOString(),
-      source,
-    }),
-  );
+  const now = Date.now();
+  if (
+    !force &&
+    !shouldWriteStatus(
+      now,
+      lastStatusWriteMs,
+      ok,
+      lastStatusOk,
+      STATUS_WRITE_INTERVAL_MS,
+    )
+  )
+    return;
+
+  // Reserve this interval before the asynchronous put so concurrent requests
+  // coalesce instead of all racing the same KV key.
+  lastStatusWriteMs = now;
+  lastStatusOk = ok;
+  try {
+    await env.STATUS_KV.put(
+      "status",
+      JSON.stringify({
+        status: ok ? "ok" : "degraded",
+        mode: deploymentMode(env),
+        checked: new Date(now).toISOString(),
+        source,
+      }),
+    );
+  } catch (error) {
+    console.warn("status KV write failed", error);
+  }
 }
 
 function wakeWorker(env: Env, ctx: ExecutionContext): void {
@@ -41,13 +70,28 @@ export default {
 
     // Edge status from KV — monitors never wake the container.
     if (url.pathname === "/_status") {
-      const [status, lastBackup] = await Promise.all([
-        env.STATUS_KV.get("status"),
-        env.STATUS_KV.get("last-backup"),
-      ]);
+      const [status, lastBackupAttempt, lastBackup, lastBackupError] =
+        await Promise.all([
+          env.STATUS_KV.get("status"),
+          env.STATUS_KV.get("last-backup-attempt"),
+          env.STATUS_KV.get("last-backup"),
+          env.STATUS_KV.get("last-backup-error"),
+        ]);
       const body = status ? (JSON.parse(status) as Record<string, unknown>) : { status: "unknown" };
+      body.lastBackupAttempt = lastBackupAttempt;
       body.lastBackup = lastBackup;
+      body.lastBackupError = lastBackupError;
+      const operational = evaluateOperationalStatus(Date.now(), {
+        reportedStatus: body.status,
+        checkedIso: body.checked,
+        lastBackupIso: lastBackup,
+        lastBackupError,
+        backupRequired: !externalMode(env),
+      });
+      body.status = operational.status;
+      body.reasons = operational.reasons;
       return new Response(JSON.stringify(body), {
+        status: operational.status === "ok" ? 200 : 503,
         headers: { "content-type": "application/json" },
       });
     }
@@ -91,25 +135,28 @@ export default {
     if (cacheable && response.ok) {
       ctx.waitUntil(caches.default.put(request, response.clone()));
     }
-    ctx.waitUntil(writeStatus(env, response.status < 500, "request"));
+    // Static assets can generate hundreds of requests during one page load.
+    // Dynamic traffic is sufficient for health and backup-idle tracking.
+    if (!cacheable)
+      ctx.waitUntil(writeStatus(env, response.status < 500, "request"));
     return response;
   },
 
-  // Two crons: weekday warm-up (12 UTC) and hourly backup.
+  // Five-minute active health probe plus hourly backup.
   async scheduled(event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    if (event.cron === WARMUP_CRON) {
-      if (externalMode(env)) wakeWorker(env, ctx);
-      const target = externalMode(env)
-        ? getContainer(env.TWENTY_SERVER, "main")
-        : getContainer(env.TWENTY, "main");
-      const res = await target.fetch(
-        new Request(`${env.SERVER_URL.replace(/\/$/, "")}/healthz`),
-      );
-      await writeStatus(env, res.ok, "cron");
+    if (event.cron === BACKUP_CRON) {
+      await env.BACKUP_WF.create({ params: {} });
       return;
     }
-    // Hourly backup — the workflow itself decides idle/external skips.
-    await env.BACKUP_WF.create({ params: {} });
+
+    if (externalMode(env)) wakeWorker(env, ctx);
+    const target = externalMode(env)
+      ? getContainer(env.TWENTY_SERVER, "main")
+      : getContainer(env.TWENTY, "main");
+    const res = await target.fetch(
+      new Request(`${env.SERVER_URL.replace(/\/$/, "")}/healthz`),
+    );
+    await writeStatus(env, res.ok, "cron", true);
   },
 
   async queue(batch: MessageBatch<WebhookMessage>, env: Env): Promise<void> {
