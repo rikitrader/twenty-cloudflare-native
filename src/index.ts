@@ -55,12 +55,14 @@ async function writeStatus(
   }
 }
 
-function wakeWorker(env: Env, ctx: ExecutionContext): void {
-  ctx.waitUntil(
-    getContainer(env.TWENTY_WORKER, "main").fetch(
-      new Request("http://twenty-worker/_wake"),
-    ),
+function workerHealth(env: Env): Promise<Response> {
+  return getContainer(env.TWENTY_WORKER, "main").fetch(
+    new Request("http://twenty-worker/_wake"),
   );
+}
+
+function wakeWorker(env: Env, ctx: ExecutionContext): void {
+  ctx.waitUntil(workerHealth(env));
 }
 
 export default {
@@ -81,12 +83,14 @@ export default {
       body.lastBackupAttempt = lastBackupAttempt;
       body.lastBackup = lastBackup;
       body.lastBackupError = lastBackupError;
+      body.productionReady = externalMode(env);
+      body.durableRedis = externalMode(env);
       const operational = evaluateOperationalStatus(Date.now(), {
         reportedStatus: body.status,
         checkedIso: body.checked,
         lastBackupIso: lastBackup,
         lastBackupError,
-        backupRequired: !externalMode(env),
+        backupRequired: true,
       });
       body.status = operational.status;
       body.reasons = operational.reasons;
@@ -149,14 +153,16 @@ export default {
       return;
     }
 
-    if (externalMode(env)) wakeWorker(env, ctx);
+    const workerOk = externalMode(env)
+      ? (await workerHealth(env)).ok
+      : true;
     const target = externalMode(env)
       ? getContainer(env.TWENTY_SERVER, "main")
       : getContainer(env.TWENTY, "main");
     const res = await target.fetch(
       new Request(`${env.SERVER_URL.replace(/\/$/, "")}/healthz`),
     );
-    await writeStatus(env, res.ok, "cron", true);
+    await writeStatus(env, res.ok && workerOk, "cron", true);
   },
 
   async queue(batch: MessageBatch<WebhookMessage>, env: Env): Promise<void> {

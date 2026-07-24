@@ -60,14 +60,16 @@ export class TwentyContainer extends Container<Env> {
 
   constructor(ctx: DurableObjectState<{}>, env: Env) {
     super(ctx, env);
-    // Hybrid mode: PG_DATABASE_URL set (Neon) but no external Redis — CRM data
-    // persists in Neon while the in-container Redis stays disposable cache.
-    const hybridPg = Boolean(env.PG_DATABASE_URL && !env.REDIS_URL);
+    // Whenever Neon is configured, this all-in-one image doubles as the
+    // authenticated pg_dump companion. In full external mode, user traffic and
+    // BullMQ jobs go to TwentyServer/TwentyWorker; this instance retains its
+    // isolated in-container Redis and exists only for R2 database backups.
+    const externalPg = Boolean(env.PG_DATABASE_URL);
     this.envVars = {
       SERVER_URL: env.SERVER_URL,
       ...secretsEnv(env),
       ...(env.BACKUP_TOKEN ? { BACKUP_TOKEN: env.BACKUP_TOKEN } : {}),
-      ...(hybridPg
+      ...(externalPg
         ? {
             PG_DATABASE_URL: env.PG_DATABASE_URL!,
             // Neon is migrated once, out-of-band (RUN_NEON_INIT=true for a one-shot).
@@ -80,6 +82,7 @@ export class TwentyContainer extends Container<Env> {
           }
         : {}),
     };
+    if (env.REDIS_URL) this.sleepAfter = "10m";
   }
 
   private async waitForAgent(): Promise<boolean> {

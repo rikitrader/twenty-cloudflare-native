@@ -1,7 +1,7 @@
 import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent } from "cloudflare:workers";
 import { getContainer } from "@cloudflare/containers";
 import { backupKey, sanitizedErrorMessage, shouldSkipBackup } from "./lib";
-import { externalMode, type Env } from "./types";
+import type { Env } from "./types";
 
 export interface BackupParams {
   force?: boolean;
@@ -16,7 +16,6 @@ export interface BackupParams {
 export class BackupWorkflow extends WorkflowEntrypoint<Env, BackupParams> {
   async run(event: WorkflowEvent<BackupParams>, step: WorkflowStep) {
     const skip = await step.do("check-idle", async () => {
-      if (externalMode(this.env)) return "external-mode"; // Neon persists; nothing to do
       if (event.payload?.force) return "";
       const status = await this.env.STATUS_KV.get("status");
       const lastBackup = await this.env.STATUS_KV.get("last-backup");
