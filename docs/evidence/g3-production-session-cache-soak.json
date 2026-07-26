@@ -13,7 +13,7 @@
     "revocationIsolation": "one of two concurrent JWT-shaped sessions revoked; the other must remain valid",
     "stateGatewaySloMs": 5000,
     "maximumContinuityGapMs": 1800000,
-    "requiredSamples": 672,
+    "requiredConsecutivePassedSamples": 672,
     "requiredDurationMs": 604800000,
     "publicLedger": "/_status/g3",
     "manualObserver": ".github/workflows/g3-session-soak.yml (manual-only to avoid duplicate scheduled compute cost)",

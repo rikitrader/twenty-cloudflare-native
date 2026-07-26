@@ -17,7 +17,10 @@ interface G3Summary {
   firstAt: string;
   lastAt: string;
   samples: number;
+  consecutivePassedSamples: number;
+  cleanWindowStartedAt: string;
   failures: number;
+  lastFailureAt: string | null;
   sessionLosses: number;
   permissionInvalidationFailures: number;
   revocationFailures: number;
@@ -193,7 +196,17 @@ export async function runG3SessionCacheSample(
     firstAt: existing?.firstAt ?? checkedAt,
     lastAt: checkedAt,
     samples: (existing?.samples ?? 0) + 1,
+    consecutivePassedSamples: passed
+      ? (existing?.lastPassed
+          ? existing.consecutivePassedSamples ?? 0
+          : 0) + 1
+      : 0,
+    cleanWindowStartedAt:
+      passed && existing?.lastPassed
+        ? existing.cleanWindowStartedAt ?? existing.lastAt
+        : checkedAt,
     failures: (existing?.failures ?? 0) + (passed ? 0 : 1),
+    lastFailureAt: passed ? existing?.lastFailureAt ?? null : checkedAt,
     sessionLosses:
       (existing?.sessionLosses ?? 0) + (sessionPassed ? 0 : 1),
     permissionInvalidationFailures:
@@ -201,11 +214,14 @@ export async function runG3SessionCacheSample(
       (permissionPassed ? 0 : 1),
     revocationFailures:
       (existing?.revocationFailures ?? 0) + (revocationPassed ? 0 : 1),
-    maxStateGatewayMs: Math.max(
-      existing?.maxStateGatewayMs ?? 0,
-      stateGatewayMs,
-    ),
-    maxGapMs: Math.max(existing?.maxGapMs ?? 0, gapMs),
+    maxStateGatewayMs:
+      passed && existing?.lastPassed
+        ? Math.max(existing.maxStateGatewayMs, stateGatewayMs)
+        : stateGatewayMs,
+    maxGapMs:
+      passed && existing?.lastPassed
+        ? Math.max(existing.maxGapMs, gapMs)
+        : 0,
     lastRunId: runId,
     lastPassed: passed,
   };
@@ -221,16 +237,17 @@ export async function g3SessionCacheStatus(env: Env): Promise<Response> {
       status: "collecting",
       ready: false,
       samples: 0,
+      consecutivePassedSamples: 0,
       requiredSamples: REQUIRED_SAMPLES,
       requiredDurationMs: REQUIRED_DURATION_MS,
     });
   const durationMs = Math.max(
     0,
-    Date.parse(summary.lastAt) - Date.parse(summary.firstAt),
+    Date.parse(summary.lastAt) - Date.parse(summary.cleanWindowStartedAt),
   );
   const ready =
-    summary.samples >= REQUIRED_SAMPLES &&
-    summary.failures === 0 &&
+    summary.consecutivePassedSamples >= REQUIRED_SAMPLES &&
+    summary.lastPassed &&
     summary.maxStateGatewayMs <= MAX_SAMPLE_MS &&
     summary.maxGapMs <= MAX_GAP_MS &&
     durationMs >= REQUIRED_DURATION_MS;

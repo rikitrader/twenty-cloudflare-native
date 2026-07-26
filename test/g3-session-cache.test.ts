@@ -68,6 +68,7 @@ describe("G3 production session/cache validation", () => {
 
     expect(first).toMatchObject({
       samples: 1,
+      consecutivePassedSamples: 1,
       failures: 0,
       sessionLosses: 0,
       permissionInvalidationFailures: 0,
@@ -76,6 +77,7 @@ describe("G3 production session/cache validation", () => {
     });
     expect(second).toMatchObject({
       samples: 2,
+      consecutivePassedSamples: 2,
       failures: 0,
       maxGapMs: 15 * 60_000,
       lastPassed: true,
@@ -87,6 +89,7 @@ describe("G3 production session/cache validation", () => {
       status: "collecting",
       ready: false,
       samples: 2,
+      consecutivePassedSamples: 2,
       requiredSamples: 672,
     });
   });
@@ -98,6 +101,7 @@ describe("G3 production session/cache validation", () => {
     );
     expect(result).toMatchObject({
       samples: 1,
+      consecutivePassedSamples: 0,
       failures: 1,
       permissionInvalidationFailures: 1,
       lastPassed: false,
@@ -111,6 +115,7 @@ describe("G3 production session/cache validation", () => {
     );
     expect(result).toMatchObject({
       samples: 1,
+      consecutivePassedSamples: 0,
       failures: 1,
       sessionLosses: 1,
       permissionInvalidationFailures: 1,
@@ -129,7 +134,10 @@ describe("G3 production session/cache validation", () => {
         firstAt,
         lastAt,
         samples: 672,
+        consecutivePassedSamples: 672,
+        cleanWindowStartedAt: firstAt,
         failures: 0,
+        lastFailureAt: null,
         sessionLosses: 0,
         permissionInvalidationFailures: 0,
         revocationFailures: 0,
