@@ -8,7 +8,9 @@ import type { Env } from "./types";
 const SUMMARY_KEY = "g3:production:session-cache:summary";
 const SAMPLE_INTERVAL_MS = 15 * 60_000;
 const REQUIRED_DURATION_MS = 7 * 24 * 60 * 60_000;
-const REQUIRED_SAMPLES = REQUIRED_DURATION_MS / SAMPLE_INTERVAL_MS;
+// A seven-day span contains 672 fifteen-minute intervals and therefore 673
+// endpoint samples when both the opening and closing observations are counted.
+const REQUIRED_SAMPLES = REQUIRED_DURATION_MS / SAMPLE_INTERVAL_MS + 1;
 const MAX_SAMPLE_MS = 5_000;
 const MAX_GAP_MS = 30 * 60_000;
 const PROBE_TTL_MS = 30 * 60_000;

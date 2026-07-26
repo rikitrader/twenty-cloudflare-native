@@ -3,7 +3,7 @@
   "capturedAt": "2026-07-26T21:15:46Z",
   "scope": "main production Worker",
   "worker": "https://twenty-crm.rikitrader.workers.dev",
-  "workerVersion": "75ff22a7-60b8-43dc-8ae8-03681082e1b8",
+  "workerVersion": "c17f6614-806c-46e3-ba52-4ed0fc32d337",
   "result": "collecting",
   "checks": {
     "sampler": "Cloudflare scheduled handler on the existing */15 cron",
@@ -13,7 +13,7 @@
     "revocationIsolation": "one of two concurrent JWT-shaped sessions revoked; the other must remain valid",
     "stateGatewaySloMs": 5000,
     "maximumContinuityGapMs": 1800000,
-    "requiredConsecutivePassedSamples": 672,
+    "requiredConsecutivePassedSamples": 673,
     "requiredDurationMs": 604800000,
     "publicLedger": "/_status/g3",
     "manualObserver": ".github/workflows/g3-session-soak.yml (manual-only to avoid duplicate scheduled compute cost)",
@@ -24,7 +24,7 @@
     "ready": false,
     "samples": 1,
     "consecutivePassedSamples": 1,
-    "requiredSamples": 672,
+    "requiredSamples": 673,
     "failures": 0,
     "sessionLosses": 0,
     "permissionInvalidationFailures": 0,
@@ -41,7 +41,7 @@
   },
   "limitations": [
     "A seven-day observation cannot be completed before seven real days have elapsed.",
-    "The gate remains partial until 672 clean production samples span at least seven days and the real-browser role-change scenario passes.",
+    "The gate remains partial until 673 clean production samples (672 fifteen-minute intervals) span at least seven days and the real-browser role-change scenario passes.",
     "The optional GitHub observer is manual-only because the account reported failed payments or a spending-limit block; this does not affect the Cloudflare-native ledger."
   ]
 }

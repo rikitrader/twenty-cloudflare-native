@@ -739,8 +739,9 @@ The main production Worker now runs the G3 session/cache sample on its existing
 15-minute Cloudflare cron. Every sample exercises two isolated session keys,
 permission-cache set/read/delete/read behavior, unaffected-session preservation,
 and one-of-two token revocation through the production Durable Object state
-plane. `/_status/g3` exposes the cumulative no-store ledger. It requires 672
-clean samples spanning at least seven days, no gap over 30 minutes, and a
+plane. `/_status/g3` exposes the cumulative no-store ledger. It requires 673
+clean endpoint samples (672 fifteen-minute intervals) spanning at least seven
+days, no gap over 30 minutes, and a
 five-second maximum gateway time. The GitHub workflow can manually record an
 independent observation of that ledger and no longer targets the retired
 canary; it is intentionally not scheduled, avoiding duplicate compute cost.

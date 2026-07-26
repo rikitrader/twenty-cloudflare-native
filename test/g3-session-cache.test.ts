@@ -90,7 +90,7 @@ describe("G3 production session/cache validation", () => {
       ready: false,
       samples: 2,
       consecutivePassedSamples: 2,
-      requiredSamples: 672,
+      requiredSamples: 673,
     });
   });
 
@@ -133,8 +133,8 @@ describe("G3 production session/cache validation", () => {
       JSON.stringify({
         firstAt,
         lastAt,
-        samples: 672,
-        consecutivePassedSamples: 672,
+        samples: 673,
+        consecutivePassedSamples: 673,
         cleanWindowStartedAt: firstAt,
         failures: 0,
         lastFailureAt: null,
