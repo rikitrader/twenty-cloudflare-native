@@ -1,5 +1,8 @@
 export const STATE_GATEWAY_HOST = "twenty-state.internal";
-export const STATE_GATEWAY_MAX_BODY_BYTES = 1_000_000;
+// Twenty metadata cache entries can legitimately exceed 1 MB. Keep the
+// internal gateway bounded well below the Workers request-body limit while
+// leaving enough headroom for serialized workspace metadata and sessions.
+export const STATE_GATEWAY_MAX_BODY_BYTES = 8 * 1024 * 1024;
 export const STATE_KEY_MAX_LENGTH = 512;
 export const STATE_NAMESPACE_MAX_LENGTH = 128;
 export const STATE_SHARD_MAX_LENGTH = 128;

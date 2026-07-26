@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { handleStateGateway } from "../src/cloudflare-state/gateway";
+import { STATE_GATEWAY_MAX_BODY_BYTES } from "../src/cloudflare-state/contracts";
 import type { Env } from "../src/types";
 
 function stateEnv(methods: Record<string, ReturnType<typeof vi.fn>> = {}): Env {
@@ -126,6 +127,34 @@ describe("state gateway", () => {
       env,
     );
     expect(invalidTtl.status).toBe(400);
+  });
+
+  it("accepts large metadata cache entries while retaining an 8 MiB byte bound", async () => {
+    const setValue = vi.fn().mockResolvedValue({
+      found: true,
+      value: "saved",
+      version: 1,
+    });
+    const env = stateEnv({ setValue });
+    const formerlyRejected = request("/v1/state/set", {
+      namespace: "cache",
+      key: "metadata:workspace",
+      value: "x".repeat(1_100_000),
+      ttlMs: 60_000,
+    });
+    expect((await handleStateGateway(formerlyRejected, env)).status).toBe(200);
+    expect(setValue).toHaveBeenCalledOnce();
+
+    const oversized = request("/v1/state/set", {
+      namespace: "cache",
+      key: "metadata:oversized",
+      value: "x".repeat(STATE_GATEWAY_MAX_BODY_BYTES),
+      ttlMs: 60_000,
+    });
+    const response = await handleStateGateway(oversized, env);
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "invalid body size" });
+    expect(setValue).toHaveBeenCalledOnce();
   });
 
   it("routes typed set and hash operations without exposing Redis commands", async () => {

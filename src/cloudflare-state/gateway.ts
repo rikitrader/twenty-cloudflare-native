@@ -24,9 +24,19 @@ function json(body: unknown, status = 200): Response {
 }
 
 async function readBody(request: Request): Promise<Record<string, unknown>> {
-  const text = await request.text();
-  if (text.length === 0 || text.length > STATE_GATEWAY_MAX_BODY_BYTES)
+  const declaredLength = Number(request.headers.get("content-length"));
+  if (
+    Number.isFinite(declaredLength) &&
+    declaredLength > STATE_GATEWAY_MAX_BODY_BYTES
+  )
     throw new Error("invalid body size");
+  const bytes = await request.arrayBuffer();
+  if (
+    bytes.byteLength === 0 ||
+    bytes.byteLength > STATE_GATEWAY_MAX_BODY_BYTES
+  )
+    throw new Error("invalid body size");
+  const text = new TextDecoder().decode(bytes);
   const parsed = JSON.parse(text) as unknown;
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
     throw new Error("body must be an object");
