@@ -50,13 +50,24 @@ describe("Cloudflare job retry configuration", () => {
     );
   });
 
-  it("keeps migration headroom above the 5x named executor pool", () => {
+  it("caps dormant staging at one server, one worker, and one backup", () => {
+    const serverContainer = staging.slice(
+      staging.indexOf('"class_name": "TwentyServer"'),
+      staging.indexOf('"class_name": "TwentyWorker"'),
+    );
     const workerContainer = staging.slice(
       staging.indexOf('"class_name": "TwentyWorker"'),
+      staging.indexOf('"class_name": "TwentyBackup"'),
+    );
+    const backupContainer = staging.slice(
+      staging.indexOf('"class_name": "TwentyBackup"'),
       staging.indexOf('"durable_objects"'),
     );
-    expect(workerContainer).toContain('"max_instances": 5');
-    expect(staging).toContain('"WORKER_REPLICAS": "4"');
+    expect(serverContainer).toContain('"max_instances": 1');
+    expect(workerContainer).toContain('"max_instances": 1');
+    expect(backupContainer).toContain('"max_instances": 1');
+    expect(staging).toContain('"SERVER_REPLICAS": "1"');
+    expect(staging).toContain('"WORKER_REPLICAS": "1"');
     expect(staging).toContain('"PG_POOL_MAX_CONNECTIONS": "5"');
     const capacityConsumer = queueConsumer(
       staging,

@@ -14,8 +14,8 @@ const TARGET_OPERATIONS =
   BASELINE_PEAK_REQUESTS_PER_MINUTE * TARGET_MULTIPLIER;
 const LOAD_DURATION_MS = 60_000;
 const CLIENT_CONCURRENCY = 256;
-const EXPECTED_SERVER_REPLICAS = 2;
-const EXPECTED_WORKER_REPLICAS = 4;
+const EXPECTED_SERVER_REPLICAS = 1;
+const EXPECTED_WORKER_REPLICAS = 1;
 const RUN_ID = `g8-${randomBytes(12).toString("hex")}`;
 const CHANNEL = `realtime-canary:${RUN_ID}`;
 
@@ -146,7 +146,7 @@ const workerRestart = await probe(
   60_000,
 );
 assert.equal(workerRestart.response.status, 202);
-assert.equal(workerRestart.body.legacyMainRetired, true);
+assert.equal(workerRestart.body.legacyMainRetired, false);
 
 const workerInstances = new Set();
 let lastWorkerWarmup = {};

@@ -59,8 +59,10 @@ for (const file of files) {
     (sum, container) => sum + Number(container.max_instances ?? 0),
     0,
   );
-  if (file === "wrangler.staging.jsonc" && instances > 3)
-    warnings.push(`${file}: ${instances} maximum instances; stop staging outside test windows`);
+  if (file === "wrangler.staging.jsonc" && instances !== 3)
+    errors.push(
+      `${file}: staging must remain capped at one server, one worker, and one backup`,
+    );
   if (file === "wrangler.jsonc" && instances !== 3)
     errors.push(
       `${file}: production must define exactly two core containers and one backup`,
@@ -75,6 +77,9 @@ const productionWorker = productionConfig?.containers?.find(
 );
 const productionBackup = productionConfig?.containers?.find(
   (container) => container.class_name === "TwentyBackup",
+);
+const stagingConfig = JSON.parse(
+  stripJsonComments(await readFile("wrangler.staging.jsonc", "utf8")),
 );
 if (
   productionConfig?.containers?.some(
@@ -95,6 +100,22 @@ if (productionBackup?.instance_type !== "basic")
   errors.push("wrangler.jsonc: production backup must remain basic");
 if (productionBackup?.max_instances !== 1)
   errors.push("wrangler.jsonc: production backup must remain capped at one instance");
+for (const role of ["TwentyServer", "TwentyWorker", "TwentyBackup"]) {
+  const container = stagingConfig.containers?.find(
+    (candidate) => candidate.class_name === role,
+  );
+  if (container?.max_instances !== 1)
+    errors.push(
+      `wrangler.staging.jsonc: ${role} must remain capped at one instance`,
+    );
+}
+if (
+  stagingConfig.vars?.SERVER_REPLICAS !== "1" ||
+  stagingConfig.vars?.WORKER_REPLICAS !== "1"
+)
+  errors.push(
+    "wrangler.staging.jsonc: application replica routing must remain one server and one worker",
+  );
 
 const [containerSource, workerSource, backupSource] = await Promise.all([
   readFile("src/containers.ts", "utf8"),
