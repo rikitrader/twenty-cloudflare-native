@@ -10,28 +10,30 @@ import {
 const env = (values: Partial<Env>): Env => values as Env;
 
 describe("deployment mode", () => {
-  it("requires both durable PostgreSQL and Redis for external mode", () => {
+  it("requires Neon, the Cloudflare backend, and internal service auth", () => {
     expect(externalMode(env({ PG_DATABASE_URL: "postgres://db" }))).toBe(false);
     expect(
       externalMode(
         env({
           PG_DATABASE_URL: "postgres://db",
-          REDIS_URL: "rediss://redis",
+          REDIS_BACKEND: "cloudflare",
+          INTERNAL_SERVICE_TOKEN: "internal-token",
         }),
       ),
     ).toBe(true);
   });
 
-  it("labels all-in-one, hybrid, and production service modes", () => {
-    expect(deploymentMode(env({}))).toBe("all-in-one");
+  it("labels only the supported production topology as external-db", () => {
+    expect(deploymentMode(env({}))).toBe("misconfigured");
     expect(deploymentMode(env({ PG_DATABASE_URL: "postgres://db" }))).toBe(
-      "hybrid-neon",
+      "misconfigured",
     );
     expect(
       deploymentMode(
         env({
           PG_DATABASE_URL: "postgres://db",
-          REDIS_URL: "rediss://redis",
+          REDIS_BACKEND: "cloudflare",
+          INTERNAL_SERVICE_TOKEN: "internal-token",
         }),
       ),
     ).toBe("external-db");
@@ -63,7 +65,7 @@ describe("deployment mode", () => {
       INTERNAL_SERVICE_TOKEN: "internal-token",
     });
     expect(externalMode(hyperdriveOnly)).toBe(false);
-    expect(deploymentMode(hyperdriveOnly)).toBe("all-in-one");
+    expect(deploymentMode(hyperdriveOnly)).toBe("misconfigured");
   });
 
   it("fails closed when Cloudflare mode lacks external topology prerequisites", () => {

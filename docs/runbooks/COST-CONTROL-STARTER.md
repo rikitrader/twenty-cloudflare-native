@@ -13,9 +13,10 @@ spike.
 
 ## Starter profile
 
-The starter deployment should use:
+The production deployment uses:
 
-- one production Worker and one production server/worker container instance;
+- one production Worker, one server container, and one worker container;
+- one `basic` backup companion that wakes only for eligible backups;
 - `standard-1` for the application server and job worker after load testing;
 - `basic` only for the backup companion;
 - a 15-minute health schedule that probes containers only while customer
@@ -23,7 +24,8 @@ The starter deployment should use:
   changes;
 - a 20-minute container sleep policy, allowing idle beta-container memory and
   disk billing to stop;
-- no continuously deployed canary or staging containers outside test windows;
+- no continuously deployed canary, staging, probe, or release containers
+  outside bounded test or upgrade windows;
 - queue batching and bounded retries;
 - D1 only for operational metadata, not CRM data or unbounded raw payloads;
 - R2 for large webhook/archive payloads when retention is required;

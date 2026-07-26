@@ -5,15 +5,7 @@
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
   "containers": [
     {
-      // Demo mode (active until PG_DATABASE_URL + REDIS_URL secrets are set):
-      // wrapper image = official all-in-one + backup agent + restore-on-boot.
-      "class_name": "TwentyContainer",
-      "image": "./Dockerfile",
-      "instance_type": "standard-2",
-      "max_instances": 1
-    },
-    {
-      // External-DB mode: patched, source-complete production server image.
+      // Neon-backed, Redis-free production server.
       "class_name": "TwentyServer",
       "image": "./Dockerfile.production",
       "instance_type": "standard-1",
@@ -36,7 +28,6 @@
   ],
   "durable_objects": {
     "bindings": [
-      { "name": "TWENTY", "class_name": "TwentyContainer" },
       { "name": "TWENTY_SERVER", "class_name": "TwentyServer" },
       { "name": "TWENTY_WORKER", "class_name": "TwentyWorker" },
       { "name": "BACKUP_CONTAINER", "class_name": "TwentyBackup" },
@@ -51,7 +42,13 @@
     { "tag": "v3", "new_sqlite_classes": ["TwentyState"] },
     { "tag": "v4", "new_sqlite_classes": ["TwentyScheduler"] },
     { "tag": "v5", "new_sqlite_classes": ["TwentyPubSub"] },
-    { "tag": "v6", "new_sqlite_classes": ["TwentyBackup"] }
+    { "tag": "v6", "new_sqlite_classes": ["TwentyBackup"] },
+    {
+      // Production is permanently Neon-backed and Redis-free. The legacy
+      // all-in-one Durable Object no longer owns any production data.
+      "tag": "v7",
+      "deleted_classes": ["TwentyContainer"]
+    }
   ],
   "kv_namespaces": [
     // Edge status cache — /_status is served without waking the container.

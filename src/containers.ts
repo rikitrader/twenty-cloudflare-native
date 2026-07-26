@@ -74,7 +74,9 @@ function sharedEnv(env: Env): Record<string, string> {
     // those trusted workflows available in Twenty's production image.
     LOGIC_FUNCTION_TYPE: "LOCAL",
     SIGN_IN_PREFILLED: "false",
-    REDIS_BACKEND: env.REDIS_BACKEND ?? "redis",
+    // Production has no Redis rollback path. Coordination is provided by the
+    // Cloudflare state, queue, scheduler, and pub/sub gateways below.
+    REDIS_BACKEND: "cloudflare",
     CLOUDFLARE_PUBSUB_TRANSPORT:
       env.CLOUDFLARE_PUBSUB_TRANSPORT ?? "poll",
     CLOUDFLARE_STATE_URL: `http://${STATE_GATEWAY_HOST}`,
@@ -94,7 +96,6 @@ function sharedEnv(env: Env): Record<string, string> {
     ...(env.PG_POOL_MAX_CONNECTIONS
       ? { PG_POOL_MAX_CONNECTIONS: env.PG_POOL_MAX_CONNECTIONS }
       : {}),
-    ...(env.REDIS_URL ? { REDIS_URL: env.REDIS_URL } : {}),
     ...storageEnv(env),
   };
 }

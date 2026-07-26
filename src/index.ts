@@ -2,7 +2,6 @@ import { getContainer, getRandom } from "@cloudflare/containers";
 import { WorkerEntrypoint } from "cloudflare:workers";
 import {
   TwentyBackup,
-  TwentyContainer,
   TwentyServer,
   TwentyWorker,
 } from "./containers";
@@ -58,7 +57,6 @@ import type {
 
 export { ContainerProxy } from "@cloudflare/containers";
 export {
-  TwentyContainer,
   TwentyServer,
   TwentyWorker,
   TwentyBackup,
@@ -1021,10 +1019,6 @@ async function handleCanary(
       }),
     );
   }
-  if (url.pathname === "/_canary/restart" && request.method === "POST") {
-    await getContainer(env.TWENTY, "main").destroy();
-    return Response.json({ restarted: true }, { status: 202 });
-  }
   if (
     url.pathname === "/_canary/restart-worker" &&
     request.method === "POST"
@@ -1047,22 +1041,6 @@ async function handleCanary(
         legacyMainRetired: replicas > 1,
       },
       { status: 202 },
-    );
-  }
-  if (
-    url.pathname === "/_canary/container-diagnostics" &&
-    request.method === "GET"
-  ) {
-    const view = url.searchParams.get("view");
-    if (view !== "logs" && view !== "inspect")
-      return Response.json(
-        { error: "view must be logs or inspect" },
-        { status: 400 },
-      );
-    return getContainer(env.TWENTY, "main").fetch(
-      new Request(`http://twenty-canary/_agent/${view}`, {
-        signal: request.signal,
-      }),
     );
   }
   if (
@@ -1491,14 +1469,9 @@ export default {
     // Twenty webhooks → Queue → D1.
     if (url.pathname === "/webhooks/twenty") return handleWebhook(request, env);
 
-    let response: Response;
-    if (externalMode(env)) {
-      wakeWorker(env, ctx);
-      const server = await serverContainer(env);
-      response = await server.fetch(request);
-    } else {
-      response = await getContainer(env.TWENTY, "main").fetch(request);
-    }
+    wakeWorker(env, ctx);
+    const server = await serverContainer(env);
+    let response = await server.fetch(request);
 
     if (
       shellKey &&
@@ -1579,12 +1552,8 @@ export default {
       return;
     }
 
-    const workerOk = externalMode(env)
-      ? (await workerHealth(env)).ok
-      : true;
-    const target = externalMode(env)
-      ? await serverContainer(env)
-      : getContainer(env.TWENTY, "main");
+    const workerOk = (await workerHealth(env)).ok;
+    const target = await serverContainer(env);
     const res = await target.fetch(
       new Request(`${env.SERVER_URL.replace(/\/$/, "")}/healthz`),
     );

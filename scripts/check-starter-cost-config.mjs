@@ -61,8 +61,10 @@ for (const file of files) {
   );
   if (file === "wrangler.staging.jsonc" && instances > 3)
     warnings.push(`${file}: ${instances} maximum instances; stop staging outside test windows`);
-  if (file === "wrangler.jsonc" && instances > 4)
-    errors.push(`${file}: production max_instances exceeds starter budget`);
+  if (file === "wrangler.jsonc" && instances !== 3)
+    errors.push(
+      `${file}: production must define exactly two core containers and one backup`,
+    );
 }
 
 const productionServer = productionConfig?.containers?.find(
@@ -71,6 +73,15 @@ const productionServer = productionConfig?.containers?.find(
 const productionWorker = productionConfig?.containers?.find(
   (container) => container.class_name === "TwentyWorker",
 );
+const productionBackup = productionConfig?.containers?.find(
+  (container) => container.class_name === "TwentyBackup",
+);
+if (
+  productionConfig?.containers?.some(
+    (container) => container.class_name === "TwentyContainer",
+  )
+)
+  errors.push("wrangler.jsonc: legacy all-in-one container must remain retired");
 for (const [role, container] of [
   ["server", productionServer],
   ["worker", productionWorker],
@@ -80,6 +91,10 @@ for (const [role, container] of [
   if (container?.max_instances !== 1)
     errors.push(`wrangler.jsonc: production ${role} must remain capped at one instance`);
 }
+if (productionBackup?.instance_type !== "basic")
+  errors.push("wrangler.jsonc: production backup must remain basic");
+if (productionBackup?.max_instances !== 1)
+  errors.push("wrangler.jsonc: production backup must remain capped at one instance");
 
 const [containerSource, workerSource, backupSource] = await Promise.all([
   readFile("src/containers.ts", "utf8"),

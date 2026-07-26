@@ -71,6 +71,23 @@ describe("security configuration", () => {
     expect(staging).not.toContain('"queue": "twenty-jobs"');
   });
 
+  it("keeps production limited to the Neon server, worker, and backup", () => {
+    expect(production).not.toContain('"class_name": "TwentyContainer"');
+    expect(production).toContain('"class_name": "TwentyServer"');
+    expect(production).toContain('"class_name": "TwentyWorker"');
+    expect(production).toContain('"class_name": "TwentyBackup"');
+    expect(production).toContain('"deleted_classes": ["TwentyContainer"]');
+  });
+
+  it("does not pass a Redis URL into production server or worker containers", () => {
+    const containers = readFileSync(resolve("src/containers.ts"), "utf8");
+    const sharedStart = containers.indexOf("function sharedEnv");
+    const legacyStart = containers.indexOf("export class TwentyContainer");
+    const productionSharedEnv = containers.slice(sharedStart, legacyStart);
+    expect(productionSharedEnv).toContain('REDIS_BACKEND: "cloudflare"');
+    expect(productionSharedEnv).not.toContain("REDIS_URL");
+  });
+
   it("cannot bypass enterprise gates through the local production deploy script", () => {
     expect(packageJson.scripts.deploy).toContain("readiness:check");
     expect(packageJson.scripts.deploy).toContain("security:production:check");

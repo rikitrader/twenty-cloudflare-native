@@ -7,11 +7,7 @@ describe("container outbound registration", () => {
 
   it("uses the Containers SDK static setter instead of shadowing it", () => {
     expect(source).not.toMatch(/static\s+outboundByHost\s*=/);
-    for (const className of [
-      "TwentyContainer",
-      "TwentyServer",
-      "TwentyWorker",
-    ]) {
+    for (const className of ["TwentyServer", "TwentyWorker"]) {
       expect(source).toContain(`${className}.outboundByHost = stateOutbound`);
     }
   });

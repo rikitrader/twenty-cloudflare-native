@@ -7,8 +7,12 @@ Queues webhook pipeline, Workflows backup orchestration, Cron Triggers.
 - Live: https://twenty-crm.rikitrader.workers.dev · demo login `tim@apple.dev` / `tim@apple.dev`
 - Architecture + activation runbook: `docs/MIGRATION.md`
 - Criteria/verification: `ISA.md`
-- External-DB (production) mode activates automatically when `PG_DATABASE_URL`
-  and `REDIS_URL` secrets are set. R2 attachments need `STORAGE_S3_*` secrets.
+- Production is permanently Neon-backed and Redis-free. It requires
+  `PG_DATABASE_URL`, `INTERNAL_SERVICE_TOKEN`, and `REDIS_BACKEND=cloudflare`.
+  R2 attachments need `STORAGE_S3_*` secrets.
+- Production container ceiling: one server, one worker, and one short-lived
+  backup. Canary, staging, probes, and release containers are deploy-on-demand
+  only and must not remain live after validation.
 - Deploy: `bun x wrangler deploy` (needs Docker running for the wrapper image).
   Always `unset CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID` first (OAuth session).
 - Tests: `bun run test` (vitest). Typecheck: `bun x tsc --noEmit`.

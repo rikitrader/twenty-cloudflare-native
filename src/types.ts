@@ -1,6 +1,5 @@
 import type {
   TwentyBackup,
-  TwentyContainer,
   TwentyServer,
   TwentyWorker,
 } from "./containers";
@@ -10,9 +9,7 @@ import type { TwentyPubSub } from "./pubsub-do";
 import type { JobExecutionFailureCode } from "./cloudflare-state/contracts";
 
 export interface Env {
-  // Demo mode: wrapper image over the official all-in-one (adds backup agent).
-  TWENTY: DurableObjectNamespace<TwentyContainer>;
-  // External-DB mode: stock image, one class per process (mirrors upstream compose).
+  // Production is permanently Neon-backed and Redis-free.
   TWENTY_SERVER: DurableObjectNamespace<TwentyServer>;
   TWENTY_WORKER: DurableObjectNamespace<TwentyWorker>;
   BACKUP_CONTAINER: DurableObjectNamespace<TwentyBackup>;
@@ -118,25 +115,17 @@ export interface CloudflareJobFailure {
 export const externalMode = (env: Env): boolean =>
   Boolean(
     env.PG_DATABASE_URL &&
-      (redisBackend(env) === "cloudflare"
-        ? env.INTERNAL_SERVICE_TOKEN
-        : env.REDIS_URL),
+      redisBackend(env) === "cloudflare" &&
+      env.INTERNAL_SERVICE_TOKEN,
   );
 
 export const redisBackend = (env: Env): "redis" | "cloudflare" =>
   env.REDIS_BACKEND === "cloudflare" ? "cloudflare" : "redis";
 
-/** Labels /_status: full external | hybrid (Neon PG + in-container Redis) | demo. */
+/** Production has exactly one supported runtime topology. */
 export const deploymentMode = (env: Env): string =>
-  externalMode(env)
-    ? "external-db"
-    : env.PG_DATABASE_URL
-      ? "hybrid-neon"
-      : "all-in-one";
+  externalMode(env) ? "external-db" : "misconfigured";
 
-/** Production must not silently run the demo image after selecting the
- * Cloudflare backend. Canary mode is deliberately exempt for fault testing. */
+/** Production fails closed instead of silently starting a Redis fallback. */
 export const cloudflareBackendMisconfigured = (env: Env): boolean =>
-  redisBackend(env) === "cloudflare" &&
-  env.CANARY_MODE !== "true" &&
-  !externalMode(env);
+  env.CANARY_MODE !== "true" && !externalMode(env);
