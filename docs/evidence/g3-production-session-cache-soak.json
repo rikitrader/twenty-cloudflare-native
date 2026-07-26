@@ -1,0 +1,38 @@
+{
+  "gate": "G3",
+  "capturedAt": "2026-07-26T21:06:00Z",
+  "scope": "main production Worker",
+  "worker": "https://twenty-crm.rikitrader.workers.dev",
+  "workerVersion": "a7096589-1a34-42d1-b7ca-73daf33f3b20",
+  "result": "collecting",
+  "checks": {
+    "sampler": "Cloudflare scheduled handler on the existing */15 cron",
+    "additionalWorkersOrContainers": 0,
+    "sessionIsolation": "two independent synthetic Twenty session keys through the production state gateway",
+    "permissionInvalidation": "production cache namespace set/read/delete/read with the second session rechecked",
+    "revocationIsolation": "one of two concurrent JWT-shaped sessions revoked; the other must remain valid",
+    "stateGatewaySloMs": 5000,
+    "maximumContinuityGapMs": 1800000,
+    "requiredSamples": 672,
+    "requiredDurationMs": 604800000,
+    "publicLedger": "/_status/g3",
+    "independentObserver": ".github/workflows/g3-session-soak.yml",
+    "automatedTests": "24 files and 150 tests passed"
+  },
+  "liveLedgerAtCapture": {
+    "status": "collecting",
+    "ready": false,
+    "samples": 0,
+    "requiredSamples": 672
+  },
+  "browserValidation": {
+    "productionWelcomePage": "passed",
+    "configuredDemoCredentials": "not provisioned in the production Neon database",
+    "observedResponse": "New workspace setup is disabled",
+    "remaining": "A provisioned production test user is required for the final real-browser concurrent-session and role-change scenario."
+  },
+  "limitations": [
+    "A seven-day observation cannot be completed before seven real days have elapsed.",
+    "The gate remains partial until 672 clean production samples span at least seven days and the real-browser role-change scenario passes."
+  ]
+}

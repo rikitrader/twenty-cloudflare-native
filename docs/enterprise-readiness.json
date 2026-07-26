@@ -55,12 +55,15 @@
       "status": "partial",
       "evidence": [
         "docs/evidence/g3-canary-session-state.json",
-    "docs/evidence/g3-auth-revocation-canary.json",
-    "docs/evidence/g3-state-ttl-boundary-canary.json",
+        "docs/evidence/g3-auth-revocation-canary.json",
+        "docs/evidence/g3-state-ttl-boundary-canary.json",
+        "docs/evidence/g3-production-session-cache-soak.json",
         "src/containers.ts",
         "src/auth-revocation.ts",
+        "src/g3-session-cache.ts",
         "cf/patch-frontend-auth-revocation.cjs",
         "test/auth-revocation.test.ts",
+        "test/g3-session-cache.test.ts",
         ".github/workflows/g3-session-soak.yml",
         "test/container-outbound-registration.test.ts"
       ]

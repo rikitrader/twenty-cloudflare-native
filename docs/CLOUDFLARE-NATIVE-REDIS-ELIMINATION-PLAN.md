@@ -731,17 +731,25 @@ request returned 200 from revocation and 401 for the same token afterward.
 
 G3 is partial rather than blocked. The Worker revocation endpoint and old-token
 401 behavior are live-proven, and the immutable bundle contains the sign-out
-hook. A fresh-profile browser click against the latest image was also observed
-live: it emitted `POST /_auth/revoke` with HTTP 200 and returned to `/welcome`.
-Concurrent-session behavior, live Twenty permission-change invalidation, and the
-seven-day canary soak remain required before it can pass; adapter-level
-permission-key invalidation is covered by the Cloudflare adapter suite. The fresh TTL/eviction boundary
-run is recorded in `docs/evidence/g3-state-ttl-boundary-canary.json`, and
-the canary-only cumulative ledger endpoint is `/_canary/g3/soak` with a
-seven-day/672-sample readiness check.
-the scheduled probe is `.github/workflows/g3-session-soak.yml`. An attempted
-document-level capture-listener enhancement was reverted after its canary image
-failed container readiness; production was not affected.
+hook. A fresh-profile browser click against the isolated image was also
+observed live: it emitted `POST /_auth/revoke` with HTTP 200 and returned to
+`/welcome`.
+
+The main production Worker now runs the G3 session/cache sample on its existing
+15-minute Cloudflare cron. Every sample exercises two isolated session keys,
+permission-cache set/read/delete/read behavior, unaffected-session preservation,
+and one-of-two token revocation through the production Durable Object state
+plane. `/_status/g3` exposes the cumulative no-store ledger. It requires 672
+clean samples spanning at least seven days, no gap over 30 minutes, and a
+five-second maximum gateway time. The GitHub workflow records independent
+observations of that ledger and no longer targets the retired canary.
+
+The fresh TTL/eviction boundary run is recorded in
+`docs/evidence/g3-state-ttl-boundary-canary.json`; the production sampler and
+initial ledger are recorded in
+`docs/evidence/g3-production-session-cache-soak.json`. G3 cannot pass until the
+real seven-day window completes and a provisioned production test user proves
+the final browser-level concurrent-session and live role-change scenario.
 
 ### G6 realtime recovery evidence
 

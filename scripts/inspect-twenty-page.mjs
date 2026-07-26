@@ -3,6 +3,9 @@ import WebSocket from "ws";
 
 const websocketUrl = process.env.TWENTY_CDP_URL;
 assert.ok(websocketUrl, "Set TWENTY_CDP_URL");
+const twentyUrl = new URL(
+  process.env.TWENTY_URL ?? "https://twenty-crm.rikitrader.workers.dev/",
+);
 const testEmail = process.env.TWENTY_TEST_EMAIL ?? "tim@apple.dev";
 const testPassword = process.env.TWENTY_TEST_PASSWORD ?? "tim@apple.dev";
 
@@ -241,7 +244,7 @@ try {
   }
   if (process.env.TWENTY_INSPECT_ACTION === "open-profile-settings") {
     await call("Page.navigate", {
-      url: "https://twenty-crm-redis-free-canary.rikitrader.workers.dev/settings/profile",
+      url: new URL("/settings/profile", twentyUrl).href,
     });
     await waitFor(`document.readyState === "complete"`);
     await new Promise((resolve) => setTimeout(resolve, 5_000));
@@ -253,9 +256,13 @@ try {
   if (process.env.TWENTY_INSPECT_ACTION === "demo-auth-flow") {
     await evaluate(`localStorage.clear()`);
     await call("Page.navigate", {
-      url: "https://twenty-crm-redis-free-canary.rikitrader.workers.dev/",
+      url: twentyUrl.href,
     });
-    await waitFor(`document.body?.innerText?.includes("Continue with Email")`);
+    await waitFor(`Boolean(
+      document.querySelector('input[autocomplete="email"]') ||
+      [...document.querySelectorAll("button")].find(
+        (button) => button.innerText.includes("Continue with Email"))
+    )`);
     await evaluate(`[...document.querySelectorAll("button")].find(
       (button) => button.innerText.includes("Continue with Email"))?.click()`);
     await waitFor(`Boolean(document.querySelector(

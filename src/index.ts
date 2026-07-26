@@ -54,6 +54,10 @@ import type {
   ProductionReleaseControl,
   ReleaseMaintenance,
 } from "./release-contracts";
+import {
+  g3SessionCacheStatus,
+  runG3SessionCacheSample,
+} from "./g3-session-cache";
 
 export { ContainerProxy } from "@cloudflare/containers";
 export {
@@ -1361,6 +1365,9 @@ export default {
     const operations = await handleJobFailureOperations(request, env);
     if (operations) return operations;
 
+    if (url.pathname === "/_status/g3" && request.method === "GET")
+      return g3SessionCacheStatus(env);
+
     // Edge status from KV — monitors never wake the container.
     if (url.pathname === "/_status") {
       const [status, lastBackupAttempt, lastBackup, lastBackupError, maintenance] =
@@ -1529,6 +1536,7 @@ export default {
       await env.BACKUP_WF.create({ params: {} });
       return;
     }
+    await runG3SessionCacheSample(env);
 
     const lastCustomerActivity =
       await env.STATUS_KV.get("last-customer-activity");
