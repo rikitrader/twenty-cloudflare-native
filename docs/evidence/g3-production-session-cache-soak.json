@@ -16,7 +16,7 @@
     "requiredSamples": 672,
     "requiredDurationMs": 604800000,
     "publicLedger": "/_status/g3",
-    "independentObserver": ".github/workflows/g3-session-soak.yml",
+    "manualObserver": ".github/workflows/g3-session-soak.yml (manual-only to avoid duplicate scheduled compute cost)",
     "automatedTests": "24 files and 150 tests passed"
   },
   "liveLedgerAtCapture": {
@@ -33,6 +33,7 @@
   },
   "limitations": [
     "A seven-day observation cannot be completed before seven real days have elapsed.",
-    "The gate remains partial until 672 clean production samples span at least seven days and the real-browser role-change scenario passes."
+    "The gate remains partial until 672 clean production samples span at least seven days and the real-browser role-change scenario passes.",
+    "The optional GitHub observer is manual-only because the account reported failed payments or a spending-limit block; this does not affect the Cloudflare-native ledger."
   ]
 }

@@ -741,8 +741,9 @@ permission-cache set/read/delete/read behavior, unaffected-session preservation,
 and one-of-two token revocation through the production Durable Object state
 plane. `/_status/g3` exposes the cumulative no-store ledger. It requires 672
 clean samples spanning at least seven days, no gap over 30 minutes, and a
-five-second maximum gateway time. The GitHub workflow records independent
-observations of that ledger and no longer targets the retired canary.
+five-second maximum gateway time. The GitHub workflow can manually record an
+independent observation of that ledger and no longer targets the retired
+canary; it is intentionally not scheduled, avoiding duplicate compute cost.
 
 The fresh TTL/eviction boundary run is recorded in
 `docs/evidence/g3-state-ttl-boundary-canary.json`; the production sampler and
