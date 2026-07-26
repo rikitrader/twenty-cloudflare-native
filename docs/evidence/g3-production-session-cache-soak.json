@@ -1,9 +1,9 @@
 {
   "gate": "G3",
-  "capturedAt": "2026-07-26T21:06:00Z",
+  "capturedAt": "2026-07-26T21:15:46Z",
   "scope": "main production Worker",
   "worker": "https://twenty-crm.rikitrader.workers.dev",
-  "workerVersion": "a7096589-1a34-42d1-b7ca-73daf33f3b20",
+  "workerVersion": "75ff22a7-60b8-43dc-8ae8-03681082e1b8",
   "result": "collecting",
   "checks": {
     "sampler": "Cloudflare scheduled handler on the existing */15 cron",
@@ -22,8 +22,16 @@
   "liveLedgerAtCapture": {
     "status": "collecting",
     "ready": false,
-    "samples": 0,
-    "requiredSamples": 672
+    "samples": 1,
+    "consecutivePassedSamples": 1,
+    "requiredSamples": 672,
+    "failures": 0,
+    "sessionLosses": 0,
+    "permissionInvalidationFailures": 0,
+    "revocationFailures": 0,
+    "maxStateGatewayMs": 1959,
+    "lastPassed": true,
+    "cleanWindowStartedAt": "2026-07-26T21:15:43.431Z"
   },
   "browserValidation": {
     "productionWelcomePage": "passed",
