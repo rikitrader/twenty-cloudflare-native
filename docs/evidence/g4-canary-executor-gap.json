@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "gate": "G4",
+  "status": "superseded",
+  "supersededBy": "docs/evidence/g4-final-job-safety.json",
+  "capturedAt": "2026-07-25T02:23:39Z",
+  "environment": {
+    "worker": "twenty-crm-redis-free-canary",
+    "isolatedCanary": true,
+    "productionModified": false
+  },
+  "observations": {
+    "applicationQueue": {
+      "name": "twenty-jobs-canary-v2",
+      "backlogCount": 122,
+      "backlogBytes": 43708,
+      "oldestMessageTimestampMs": 1784942340337,
+      "deliveryPaused": false,
+      "consumerCount": 1,
+      "consumerMaxConcurrency": 1
+    },
+    "executorProbes": [
+      {
+        "result": "timeout",
+        "timeoutMs": 30000,
+        "status": 503
+      },
+      {
+        "result": "timeout",
+        "timeoutMs": 30000,
+        "status": 503
+      }
+    ],
+    "recoveryAttempts": [
+      "destroyed the isolated canary server container binding",
+      "destroyed the isolated canary worker container binding",
+      "deployed a new isolated canary Worker version"
+    ],
+    "latestLedgerSignal": {
+      "source": "application",
+      "reason": "executor-outcome-ambiguous",
+      "queueName": "cron-queue",
+      "jobName": "CalendarEventListFetchCronJob",
+      "failedAt": "2026-07-25T01:33:01.193Z"
+    }
+  },
+  "impact": {
+    "production": "none",
+    "canary": "executor restored; the inherited application backlog is draining under production-parity consumer capacity"
+  },
+  "resolution": {
+    "rootCause": "The security package rewrite installed CommonJS brace-expansion@2 beside root ESM balanced-match@4. Node resolved the incompatible ESM namespace object, so init-db exited with TypeError: balanced is not a function before Twenty server, worker, or the job executor could start.",
+    "imageFix": "Install balanced-match@1.0.2 inside brace-expansion@2's own node_modules while retaining balanced-match@4 for the modern brace-expansion tree.",
+    "imageDigest": "sha256:60479dc0a655840bc1a398696d632259ea6b685653ef5dc53123c050049ecbeb",
+    "canaryVersionId": "b1844bb1-aed2-4620-aa24-be60c37d904e",
+    "localValidation": {
+      "serverAndWorkerProcessesRunning": true,
+      "nestApplicationStarted": true,
+      "httpStatus": 200
+    },
+    "liveValidation": {
+      "directExecutorStatus": 204,
+      "faultSuitePassed": true,
+      "scenarios": [
+        "normal completion",
+        "permanent response quarantine",
+        "transient retry exhaustion",
+        "disconnect ambiguity quarantine",
+        "process crash ambiguity quarantine",
+        "post-crash completion"
+      ],
+      "queueMetrics": {
+        "initialObservedBacklog": 156,
+        "afterExecutorRepair": 67,
+        "afterCapacityParity": 53,
+        "latestObservedBacklog": 48,
+        "deadLetterBacklog": 0,
+        "dedicatedCanaryBacklog": 0
+      },
+      "consumerCapacity": {
+        "maxBatchSize": 10,
+        "maxConcurrency": 5
+      }
+    }
+  },
+  "remainingGateGaps": [
+    "terminate the complete Cloudflare Container instance during a live in-flight job, not only the Twenty worker process",
+    "record a processor-by-processor idempotency disposition for handlers with external side effects",
+    "prove the inherited application backlog reaches zero or a documented steady-state bound",
+    "add executor-readiness and queue-oldest-age alerts"
+  ]
+}

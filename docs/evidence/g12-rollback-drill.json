@@ -1,0 +1,31 @@
+{
+  "gate": "G12",
+  "passed": true,
+  "environment": "isolated-redis-free-canary",
+  "productionTouched": false,
+  "productionVersionBefore": "5b42c895-ed4a-4a31-93df-1a14c43acbef",
+  "productionVersionAfter": "5b42c895-ed4a-4a31-93df-1a14c43acbef",
+  "startedAt": "2026-07-25T15:05:22.674Z",
+  "decisionAt": "2026-07-25T15:06:27.724Z",
+  "rollbackCompletedAt": "2026-07-25T15:07:13.560Z",
+  "reconciledAt": "2026-07-25T15:07:57.031Z",
+  "rollback": {
+    "from": "cloudflare",
+    "to": "redis",
+    "mechanism": "REDIS_BACKEND deployment flag",
+    "statusReportedBackend": "redis",
+    "decisionToCompletionMs": 45836,
+    "targetMs": 900000
+  },
+  "queueReconciliation": {
+    "delayedJobsEnqueued": 25,
+    "delayedBySeconds": 45,
+    "uniqueJobIds": 25,
+    "completedJobs": 25,
+    "missingJobs": 0,
+    "dlqBefore": 0,
+    "dlqAfter": 0,
+    "queueBacklogAfter": 0,
+    "decisionToReconciledMs": 89307
+  }
+}

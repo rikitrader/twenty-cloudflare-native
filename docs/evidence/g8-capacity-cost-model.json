@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-25T08:31:31.191Z",
+  "currency": "USD",
+  "billingMonthHours": 720,
+  "sources": {
+    "workersQueuesContainers": "https://developers.cloudflare.com/workers/platform/pricing/",
+    "durableObjects": "https://developers.cloudflare.com/durable-objects/platform/pricing/"
+  },
+  "currentPricing": {
+    "workersPaidBaseMonthly": 5,
+    "workersRequestsIncluded": 10000000,
+    "workersRequestsPerAdditionalMillion": 0.3,
+    "workersCpuMsIncluded": 30000000,
+    "workersCpuPerAdditionalMillionMs": 0.02,
+    "queueOperationsIncluded": 1000000,
+    "queueOperationsPerAdditionalMillion": 0.4,
+    "durableObjectRequestsIncluded": 1000000,
+    "durableObjectRequestsPerAdditionalMillion": 0.15,
+    "durableObjectGbSecondsIncluded": 400000,
+    "durableObjectPerAdditionalMillionGbSeconds": 12.5,
+    "sqliteRowsReadIncluded": 25000000000,
+    "sqliteRowsReadPerAdditionalMillion": 0.001,
+    "sqliteRowsWrittenIncluded": 50000000,
+    "sqliteRowsWrittenPerAdditionalMillion": 1,
+    "sqliteStorageGbMonthIncluded": 5,
+    "sqliteStoragePerAdditionalGbMonth": 0.2,
+    "containerMemoryGibHoursIncluded": 25,
+    "containerMemoryPerAdditionalGibSecond": 0.0000025,
+    "containerCpuMinutesIncluded": 375,
+    "containerCpuPerAdditionalVcpuSecond": 0.00002,
+    "containerDiskGbHoursIncluded": 200,
+    "containerDiskPerAdditionalGbSecond": 0.00000007
+  },
+  "observedBaseline": {
+    "requestsIn14Days": 16149,
+    "extrapolatedRequestsPer30Days": 34605,
+    "note": "Observed request volume is inside Workers request allowances. Container runtime, PostgreSQL, storage, email, and egress costs cannot be inferred from request count alone."
+  },
+  "sustainedFiveTimesPeakUpperBound": {
+    "description": "Conservative upper bound that sustains the tested five-times production peak every minute for a 30-day month.",
+    "externalOperations": 329400000,
+    "mix": {
+      "jobs": 16502400,
+      "server": 33004800,
+      "realtime": 82382400,
+      "state": 197510400
+    },
+    "assumptions": {
+      "queueOperationsPerMessage": 3,
+      "queueConsumerBatchFill": 10,
+      "workerAverageCpuMsPerInvocation": 2,
+      "durableObjectMemoryGib": 0.125,
+      "durableObjectAverageActiveMs": 10,
+      "stateWritesPerOperation": 1,
+      "realtimeWritesPerPublish": 2,
+      "jobReceiptAndResultWritesPerJob": 4,
+      "steadyStateContainers": "two standard-1 servers plus four standard-1 workers",
+      "standard1": {
+        "memoryGib": 4,
+        "maxVcpu": 0.5,
+        "diskGb": 8
+      },
+      "containerCpuUtilization": 0.2,
+      "containersAlwaysActive": true
+    },
+    "monthlyUnits": {
+      "workerInvocationsIncludingQueueBatches": 331050240,
+      "workerCpuMs": 662100480,
+      "queueOperations": 49507200,
+      "durableObjectRequests": 345902400,
+      "durableObjectGbSeconds": 432378,
+      "sqliteRowsWritten": 428284800,
+      "containerMemoryGibHours": 17280,
+      "containerActiveVcpuMinutes": 25920,
+      "containerDiskGbHours": 34560
+    },
+    "estimatedMonthlyCost": {
+      "workersBase": 5,
+      "workersRequests": 96.315072,
+      "workersCpu": 12.6420096,
+      "queues": 19.40288,
+      "durableObjectRequests": 51.73536,
+      "durableObjectDuration": 0.404725,
+      "sqliteRowsRead": 0,
+      "sqliteRowsWritten": 378.2848,
+      "sqliteStorage": 0,
+      "containerMemory": 155.295,
+      "containerCpu": 30.654,
+      "containerDisk": 8.65872,
+      "total": 758.3925666
+    },
+    "sensitivity": {
+      "low": {
+        "containerCpuUtilization": 0.1,
+        "durableObjectAverageActiveMs": 5,
+        "estimatedMonthlyCost": 742.4358416
+      },
+      "high": {
+        "containerCpuUtilization": 0.5,
+        "durableObjectAverageActiveMs": 50,
+        "estimatedMonthlyCost": 826.6674666
+      }
+    }
+  },
+  "exclusions": [
+    "PostgreSQL provider charges",
+    "R2 object storage and operations because retained application bytes are workload-specific",
+    "Container and Worker network egress",
+    "Email delivery",
+    "Cloudflare Access plan charges",
+    "Temporary fifth worker migration slot if it remains active",
+    "Taxes and negotiated enterprise discounts"
+  ],
+  "interpretation": "The sustained scenario is intentionally much larger than observed demand. SQLite row writes dominate this synthetic upper bound; production sharding, TTL, event retention, and actual operation mix must be measured during G13 before committing a budget."
+}

@@ -1,0 +1,42 @@
+{
+  "gate": "G11",
+  "passed": true,
+  "environment": "enterprise-staging",
+  "productionTouched": false,
+  "runId": "g11-19f15cdd2236ee28a039",
+  "startedAt": "2026-07-25T09:06:08.430Z",
+  "completedAt": "2026-07-25T09:06:45.058Z",
+  "source": {
+    "workflowId": "g11-1784970392501-74ea4591",
+    "artifactKey": "backups/2026-07-25T0906.sql",
+    "manifestKey": "backups/2026-07-25T0906.sql.manifest.json",
+    "bytes": 404689,
+    "sha256": "5b496dcc6fce3469d752895929a643f5d111f489b071eadee262b3663a40b43f",
+    "createdAt": "2026-07-25T09:06:32.968Z",
+    "encryption": {
+      "atRest": "r2-provider-managed",
+      "inTransit": "tls"
+    }
+  },
+  "recoveryTarget": {
+    "isolation": "disposable-local-container-with-tmpfs",
+    "image": "postgres@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15",
+    "liveDatabaseCredentialsProvided": false
+  },
+  "integrity": {
+    "r2ManifestMatched": true,
+    "sha256Matched": true,
+    "bytesMatched": true
+  },
+  "validation": {
+    "restoreExitCode": 0,
+    "applicationTableCount": 107,
+    "applicationSequenceCount": 1,
+    "restoredDatabaseBytes": 16332479
+  },
+  "objectives": {
+    "rtoMs": 36628,
+    "restoreMs": 593,
+    "rpoMsAtDrillStart": 0
+  }
+}

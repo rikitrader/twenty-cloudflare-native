@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "twenty-enterprise-staging-probe",
+  "main": "src/staging-access-probe.ts",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["global_fetch_strictly_public"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "services": [
+    {
+      "binding": "STAGING",
+      "service": "twenty-crm-enterprise-staging",
+      "entrypoint": "StagingCanaryService"
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "gate": "G3",
+  "capturedAt": "2026-07-25T17:24:00Z",
+  "scope": "isolated canary only",
+  "canaryUrl": "https://twenty-crm-redis-free-canary.rikitrader.workers.dev",
+  "workerVersion": "00c9f03d-310f-4106-83ac-088864b57b25",
+  "productionChanged": false,
+  "checks": {
+    "revokeEndpoint": { "status": 200, "body": { "revoked": true } },
+    "revocationStore": "SHA-256 fingerprint stored in STATE_DO under auth-revocation namespace",
+    "oldAccessTokenAfterRevocation": { "status": 401, "body": "unauthorized" },
+    "frontendImmutableBundle": { "patched": true, "contains": "/_auth/revoke" },
+    "freshProfileBrowserLogout": {
+      "status": "passed",
+      "network": "POST /_auth/revoke",
+      "response": 200,
+      "postLogoutUrl": "/welcome",
+      "bundleListenerGuard": "#nav-item-logout absent; callback patch present"
+    },
+    "soakLedgerEndpoint": {
+      "status": 200,
+      "emptyLedgerReady": false,
+      "retentionDays": 30,
+      "requiredWindowDays": 7
+    },
+    "automatedTests": {
+      "authRevocation": "passed",
+      "concurrentSessionIsolation": "passed",
+      "fullSuite": "135 passed"
+    }
+  },
+  "result": "partial",
+  "limitations": [
+    "Concurrent-session and live Twenty permission-change invalidation plus seven-day soak evidence remain outstanding; adapter-level permission-key invalidation is tested."
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-25T03:39:26Z",
+  "scope": "isolated-canary",
+  "result": "passed",
+  "productionChanged": false,
+  "resources": {
+    "operationsWorker": {
+      "name": "twenty-crm-redis-free-canary",
+      "versionId": "49ff0d26-0047-4207-8905-9c9efeee0b37"
+    },
+    "accessProbeWorker": {
+      "name": "twenty-g9-access-probe",
+      "versionId": "1b5d18e5-3a1a-4a19-8858-252b41c96fc9",
+      "publicFetchCompatibility": "global_fetch_strictly_public"
+    },
+    "accessApplication": {
+      "id": "bcbfe272-81ba-4ca6-85ce-56896fba7e41",
+      "domain": "twenty-crm-redis-free-canary.rikitrader.workers.dev/_ops/*"
+    },
+    "serviceToken": {
+      "id": "634fa4b4-0dfc-4aa1-b54e-65a212f50635",
+      "name": "Twenty Redis-Free Canary G9 Automation",
+      "expiresAt": "2026-08-24T03:29:06Z",
+      "clientSecretVersion": 2
+    },
+    "serviceAuthPolicy": {
+      "id": "d41d009a-3dc0-4de7-9de1-5caf6a39fd19",
+      "name": "Service Auth - Twenty G9 Canary",
+      "decision": "non_identity",
+      "precedence": 2
+    },
+    "expirationNotification": {
+      "id": "7ac3706597bb4ed1ad4416217f7a3019",
+      "name": "Twenty G9 Access Service Token Expiry",
+      "enabled": true,
+      "delivery": "account email"
+    }
+  },
+  "credentialControls": {
+    "serviceCredentialStoredOnlyAsEncryptedProbeWorkerSecrets": true,
+    "serviceCredentialAbsentFromOperationsWorker": true,
+    "serviceCredentialAbsentFromRepositoryAndLocalDisk": true,
+    "operatorAndProbeBearerTokensRotatedForTest": true
+  },
+  "checks": {
+    "unauthenticatedDirectRequestDenied": true,
+    "serviceTokenAuthenticatedThroughCloudflareAccess": true,
+    "serviceJwtSignatureIssuerAudienceAndExpiryValidated": true,
+    "serviceJwtEmptySubjectMappedFromCommonName": true,
+    "probeOriginAndPathAllowlistEnforced": true,
+    "atomicFailureAndAuditIngestion": true,
+    "optimisticVersionConflictRejected": true,
+    "uncertainOutcomeRequiresConfirmation": true,
+    "operatorReplayCompleted": true,
+    "immutableReplayAuditRecorded": true,
+    "operatorDismissalAudited": true,
+    "listPayloadRedaction": true,
+    "realtimeQueueMetrics": true
+  },
+  "privacy": {
+    "clientIdPersisted": false,
+    "clientSecretPersisted": false,
+    "bearerTokensPersisted": false,
+    "jobIdsPersisted": false
+  },
+  "remainingForG9Pass": []
+}

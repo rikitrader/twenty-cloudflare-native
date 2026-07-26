@@ -2,11 +2,27 @@
 # agent (:2021) and restore-on-boot support. Zero changes to Twenty itself.
 FROM twentycrm/twenty-app-dev@sha256:9932df2e4db0db12cbf51d0ed5fa4f6c6849cb320e6fa94fe78cf315a7162ad2
 COPY cf/ /cf/
+# Keep the auth patch as a distinct build input so Docker cannot reuse a stale
+# aggregate cf/ layer after a security patch changes.
+COPY cf/patch-frontend-auth-revocation.cjs /cf/patch-frontend-auth-revocation.cjs
 RUN chmod +x /cf/boot.sh /cf/restore.sh /cf/init-db.sh
+# Keep the isolated canary on the same exact security patch set as production.
+RUN apk add --no-cache \
+  c-ares=1.34.8-r0 \
+  curl=8.20.0-r0 \
+  libcurl=8.20.0-r0 && \
+  rm -f /var/log/apk.log && \
+  chmod +x /cf/patch-vulnerable-node-packages.sh && \
+  /cf/patch-vulnerable-node-packages.sh
 # Twenty exposes generic delete commands for Workflow Runs but its own v2.20
 # query hooks reject both mutations unconditionally. Let the normal resolver
 # handle them so role permissions still apply and the UI can soft-delete runs.
 RUN node /cf/patch-workflow-run-delete.cjs
+# The adapters remain dormant unless REDIS_BACKEND=cloudflare. Baking them into
+# the all-in-one image lets the isolated canary exercise the same application
+# contracts without requiring a production database.
+RUN node /cf/patch-cloudflare-state-adapters.cjs
+RUN echo "frontend-auth-revocation-patch-v1" && node /cf/patch-frontend-auth-revocation.cjs
 # Neon persists file metadata, but Cloudflare Container disks are ephemeral.
 # Rehydrate the workflow's three existing logic-function sources from the image
 # so Twenty can build them after every container restart.

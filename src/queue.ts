@@ -5,22 +5,19 @@ import type { Env, WebhookMessage } from "./types";
  * Twenty webhook → CF Queue producer. Configure in Twenty:
  * Settings → API & Webhooks → target URL:
  *   https://twenty-crm.rikitrader.workers.dev/webhooks/twenty
- * Send `Authorization: Bearer <WEBHOOK_TOKEN>`. The query parameter remains
- * temporarily supported for existing Twenty webhook configuration.
+ * Send `Authorization: Bearer <WEBHOOK_TOKEN>`. Credentials in query strings
+ * are rejected because URLs are routinely retained in logs and analytics.
  */
 export async function handleWebhook(
   request: Request,
   env: Env,
 ): Promise<Response> {
-  const url = new URL(request.url);
-  const headerAuthorized = bearerAuthorized(
-    request.headers.get("authorization"),
-    env.WEBHOOK_TOKEN,
-  );
-  const legacyQueryAuthorized =
-    env.WEBHOOK_TOKEN !== undefined &&
-    url.searchParams.get("token") === env.WEBHOOK_TOKEN;
-  if (!headerAuthorized && !legacyQueryAuthorized)
+  if (
+    !bearerAuthorized(
+      request.headers.get("authorization"),
+      env.WEBHOOK_TOKEN,
+    )
+  )
     return new Response("unauthorized", { status: 401 });
   if (request.method !== "POST")
     return new Response("method not allowed", { status: 405 });
@@ -35,12 +32,6 @@ export async function handleWebhook(
   });
   return new Response("queued", {
     status: 202,
-    headers: legacyQueryAuthorized
-      ? {
-          deprecation: "true",
-          link: '</webhooks/twenty>; rel="successor-version"',
-        }
-      : undefined,
   });
 }
 

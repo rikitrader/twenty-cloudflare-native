@@ -2,6 +2,7 @@
   "name": "twenty-crm",
   "main": "src/index.ts",
   "compatibility_date": "2026-06-08",
+  "version_metadata": { "binding": "CF_VERSION_METADATA" },
   "containers": [
     {
       // Demo mode (active until PG_DATABASE_URL + REDIS_URL secrets are set):
@@ -24,18 +25,33 @@
       "image": "./Dockerfile.production",
       "instance_type": "standard-1",
       "max_instances": 1
+    },
+    {
+      // Read-only pg_dump companion; restore is intentionally disabled.
+      "class_name": "TwentyBackup",
+      "image": "./Dockerfile.production",
+      "instance_type": "basic",
+      "max_instances": 1
     }
   ],
   "durable_objects": {
     "bindings": [
       { "name": "TWENTY", "class_name": "TwentyContainer" },
       { "name": "TWENTY_SERVER", "class_name": "TwentyServer" },
-      { "name": "TWENTY_WORKER", "class_name": "TwentyWorker" }
+      { "name": "TWENTY_WORKER", "class_name": "TwentyWorker" },
+      { "name": "BACKUP_CONTAINER", "class_name": "TwentyBackup" },
+      { "name": "STATE_DO", "class_name": "TwentyState" },
+      { "name": "SCHEDULER_DO", "class_name": "TwentyScheduler" },
+      { "name": "PUBSUB_DO", "class_name": "TwentyPubSub" }
     ]
   },
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["TwentyContainer"] },
-    { "tag": "v2", "new_sqlite_classes": ["TwentyServer", "TwentyWorker"] }
+    { "tag": "v2", "new_sqlite_classes": ["TwentyServer", "TwentyWorker"] },
+    { "tag": "v3", "new_sqlite_classes": ["TwentyState"] },
+    { "tag": "v4", "new_sqlite_classes": ["TwentyScheduler"] },
+    { "tag": "v5", "new_sqlite_classes": ["TwentyPubSub"] },
+    { "tag": "v6", "new_sqlite_classes": ["TwentyBackup"] }
   ],
   "kv_namespaces": [
     // Edge status cache — /_status is served without waking the container.
@@ -49,13 +65,46 @@
     // Platform ops: webhook events + backup ledger (NOT Twenty's CRM data).
     { "binding": "OPS_DB", "database_name": "twenty-ops", "database_id": "8bb23c45-a6b4-4397-952f-4a3286c52f9a" }
   ],
+  "ratelimits": [
+    {
+      "name": "OPS_RATE_LIMITER",
+      "namespace_id": "2001",
+      "simple": { "limit": 60, "period": 60 }
+    }
+  ],
+  "send_email": [
+    {
+      "name": "OPS_ALERT_EMAIL",
+      "destination_address": "rikitrader@gmail.com",
+      "allowed_sender_addresses": ["twenty-alerts@sismo911.com"]
+    }
+  ],
   "queues": {
-    "producers": [{ "binding": "EVENTS_QUEUE", "queue": "twenty-events" }],
+    "producers": [
+      { "binding": "EVENTS_QUEUE", "queue": "twenty-events" },
+      { "binding": "JOBS_QUEUE", "queue": "twenty-jobs" },
+      { "binding": "JOBS_DLQ", "queue": "twenty-jobs-dlq" }
+    ],
     "consumers": [
       {
         "queue": "twenty-events",
         "max_retries": 3,
         "dead_letter_queue": "twenty-events-dlq"
+      },
+      {
+        "queue": "twenty-jobs",
+        "max_batch_size": 10,
+        "max_batch_timeout": 1,
+        "max_retries": 10,
+        "max_concurrency": 5,
+        "dead_letter_queue": "twenty-jobs-dlq"
+      },
+      {
+        "queue": "twenty-jobs-dlq",
+        "max_batch_size": 10,
+        "max_batch_timeout": 5,
+        "max_retries": 10,
+        "max_concurrency": 2
       }
     ]
   },
@@ -67,14 +116,24 @@
     }
   ],
   "triggers": {
-    // Active production health probe every five minutes + hourly backup.
-    "crons": ["*/5 * * * *", "0 * * * *"]
+    // Cost-controlled production health probe every fifteen minutes + hourly backup.
+    // The probe still validates the server and worker; backups remain hourly.
+    "crons": ["*/15 * * * *", "0 * * * *"]
   },
   "vars": {
     "SERVER_URL": "https://twenty-crm.rikitrader.workers.dev",
+    "REDIS_BACKEND": "cloudflare",
+    "CLOUDFLARE_PUBSUB_TRANSPORT": "poll",
+    "CLOUDFLARE_QUEUE_DRAIN": "true",
+    "ACCESS_REQUIRED": "true",
+    "ACCESS_TEAM_DOMAIN": "https://rikitrader.cloudflareaccess.com",
+    "ACCESS_AUD": "6ccb2a4887272c13bc25d6b8d634b47479622bf4da96cd009a2d65d87092c175",
     "STORAGE_S3_ENDPOINT": "https://e9a13cb086224245b63e1e902c7afc64.r2.cloudflarestorage.com",
     "STORAGE_S3_NAME": "twenty-storage",
-    "STORAGE_S3_REGION": "auto"
+    "STORAGE_S3_REGION": "auto",
+    "JOB_DLQ_NAME": "twenty-jobs-dlq",
+    "OPS_ALERT_FROM": "twenty-alerts@sismo911.com",
+    "OPS_ALERT_TO": "rikitrader@gmail.com"
   },
   "observability": { "enabled": true }
 }

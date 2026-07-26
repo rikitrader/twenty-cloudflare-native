@@ -26,7 +26,8 @@ describe("handleWebhook", () => {
     expect(send).toHaveBeenCalledOnce();
   });
 
-  it("temporarily accepts but marks legacy query authentication deprecated", async () => {
+  it("rejects credentials in query strings", async () => {
+    const send = vi.fn();
     const response = await handleWebhook(
       new Request(
         "https://example.com/webhooks/twenty?token=hook-secret",
@@ -35,11 +36,11 @@ describe("handleWebhook", () => {
           body: JSON.stringify({ eventName: "company.created" }),
         },
       ),
-      webhookEnv(),
+      webhookEnv(send),
     );
 
-    expect(response.status).toBe(202);
-    expect(response.headers.get("deprecation")).toBe("true");
+    expect(response.status).toBe(401);
+    expect(send).not.toHaveBeenCalled();
   });
 
   it("rejects missing credentials before parsing the body", async () => {

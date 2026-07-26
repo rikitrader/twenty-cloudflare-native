@@ -1,0 +1,27 @@
+{
+  "invoice": "IN-72768235",
+  "period": "2026-06-25/2026-07-24",
+  "totalUsd": 285.26,
+  "charges": {
+    "containerMemoryUsd": 109.52,
+    "containerDiskUsd": 6.10,
+    "containerCpuUsd": 2.43,
+    "d1RowsWrittenUsd": 51.00,
+    "d1RowsReadUsd": 97.97,
+    "durableObjectsComputeDurationUsd": 12.50,
+    "regularTwitchNeuronsUsd": 0.74,
+    "workersPaidUsd": 5.00
+  },
+  "containerMemoryGiBSeconds": 43898067,
+  "containerMemoryGiBHours": 12193.9075,
+  "estimatedAverageActiveGiBOver30Days": 16.94,
+  "costControlChange": {
+    "file": "wrangler.jsonc",
+    "previousHealthProbe": "*/5 * * * *",
+    "newHealthProbe": "*/15 * * * *",
+    "backupProbe": "0 * * * *",
+    "estimatedHealthWakeupReduction": "66.7%",
+    "deployed": false,
+    "deploymentBlockedBy": "readiness and production security gates"
+  }
+}

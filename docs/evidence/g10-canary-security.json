@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-25T17:29:00Z",
+  "scope": "isolated-canary",
+  "result": "passed",
+  "productionChanged": false,
+  "productionConfigPreflight": {
+    "command": "npm run security:production:check",
+    "result": "failed",
+    "missing": [
+      "vars.REDIS_BACKEND=cloudflare",
+      "vars.ACCESS_REQUIRED=true",
+      "production Access issuer",
+      "production Access audience"
+    ]
+  },
+  "worker": {
+    "name": "twenty-crm-redis-free-canary",
+    "version": "00c9f03d-310f-4106-83ac-088864b57b25",
+    "statusKv": {
+      "name": "twenty-status-canary",
+      "id": "7162a0faeaf34a76af57770dd3999844"
+    }
+  },
+  "access": {
+    "applicationId": "bcbfe272-81ba-4ca6-85ce-56896fba7e41",
+    "name": "Twenty Redis-Free Canary Operations",
+    "destination": "twenty-crm-redis-free-canary.rikitrader.workers.dev/_ops/*",
+    "audience": "62f876361452a8953f1dcf96c286bb44338fa3cec3e5239a46276c0919ba932e",
+    "sessionDuration": "1h",
+    "bindingCookie": true,
+    "httpOnlyCookie": true,
+    "policy": {
+      "id": "e1e09dad-e8a3-47fb-a7a4-d4609f7dc80b",
+      "name": "Allow Twenty canary operator",
+      "decision": "allow",
+      "precedence": 1,
+      "selector": "exact operator email"
+    }
+  },
+  "liveChecks": {
+    "unauthenticatedOpsStatus": 302,
+    "unauthenticatedOpsRedirectedToAccess": true,
+    "unprotectedCanaryRouteReachedWorkerStatus": 401,
+    "statusRouteBeforeIsolatedKv": 500,
+    "statusRouteAfterIsolatedKv": 503,
+    "statusRouteAfterIsolatedKvBody": {
+      "status": "degraded",
+      "redisBackend": "cloudflare",
+      "cloudflareStateReady": true
+    },
+    "pathScopingVerified": true,
+    "productionDeploymentUnchanged": true
+  },
+  "implementedControls": {
+    "workerSideJwtSignatureVerification": true,
+    "optionalAccessGroupAllowlist": true,
+    "exactIssuerAndAudience": true,
+    "rs256Allowlist": true,
+    "requiredExpirationIssuedAtAndSubject": true,
+    "remoteJwksKeyRotation": true,
+    "bearerSecondFactor": true,
+    "perIdentityRateLimit": "60 requests per 60 seconds",
+    "noStoreAndApiSecurityHeaders": true,
+    "queryStringWebhookCredentialsRejected": true,
+    "cloudflareBackendFailClosedWithoutExternalTopology": true,
+    "plaintextTokenConfigCheck": true,
+    "threatModelRecorded": true
+  },
+  "localVerification": {
+    "testFiles": 22,
+    "tests": 135,
+    "typecheck": "passed",
+    "dependencyAudit": "bun audit --audit-level=high: no vulnerabilities found"
+  },
+  "productionDeployment": {
+    "worker": "twenty-crm",
+    "version": "5b42c895-ed4a-4a31-93df-1a14c43acbef",
+    "createdAt": "2026-07-24T15:45:07.962Z",
+    "unchanged": true
+  },
+  "remainingForG10Pass": [
+    "production-topology Access application with separate audience",
+    "organization IdP and phishing-resistant operator MFA",
+    "group-based authorization and service-token monitoring policy",
+    "production custom-domain WAF rules",
+    "Access and Worker Logpush to immutable retention",
+    "full secret inventory, least-privilege review, and rotation drill"
+  ]
+}

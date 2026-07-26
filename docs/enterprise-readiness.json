@@ -1,0 +1,250 @@
+{
+  "schemaVersion": 1,
+  "objective": "Twenty operates without Redis or BullMQ on a production-grade Cloudflare data, compute, security, and operations plane.",
+  "gates": [
+    {
+      "id": "G0",
+      "name": "reproducible-build",
+      "status": "passed",
+      "evidence": [
+        "docs/evidence/g0-reproducible-build.json",
+        "docs/CONTAINER-VULNERABILITY-POLICY.md",
+        "Dockerfile.production",
+        "cf/patch-vulnerable-node-packages.sh",
+        "scripts/verify-reproducible-image.sh",
+        "package.json",
+        "bun.lock",
+        ".github/workflows/deploy.yml",
+        ".github/workflows/supply-chain.yml"
+      ]
+    },
+    {
+      "id": "G1",
+      "name": "complete-contract",
+      "status": "passed",
+      "evidence": [
+        "docs/twenty-v2.20-contract.json",
+        "docs/twenty-v2.20-runtime-contract.json",
+        "scripts/inventory-twenty-contract.mjs",
+        "scripts/check-twenty-contract.sh",
+        "scripts/runtime-contract-lib.mjs",
+        "scripts/capture-twenty-redis-trace.mjs",
+        "scripts/check-runtime-contract.mjs",
+        "test/runtime-contract.test.ts",
+        ".github/workflows/deploy.yml",
+        "docs/evidence/g1-contract-closure-canary.json",
+        "docs/evidence/g1-authenticated-contract-canary.json"
+      ]
+    },
+    {
+      "id": "G2",
+      "name": "state-correctness",
+      "status": "passed",
+      "evidence": [
+        "docs/evidence/g2-canary-state-correctness.json",
+        "src/cloudflare-state/state-do.ts",
+        "src/cloudflare-state/contracts.ts",
+        "src/index.ts",
+        "scripts/run-state-fault-canary.mjs",
+        "test/state-gateway.test.ts"
+      ]
+    },
+    {
+      "id": "G3",
+      "name": "session-cache-e2e",
+      "status": "partial",
+      "evidence": [
+        "docs/evidence/g3-canary-session-state.json",
+    "docs/evidence/g3-auth-revocation-canary.json",
+    "docs/evidence/g3-state-ttl-boundary-canary.json",
+        "src/containers.ts",
+        "src/auth-revocation.ts",
+        "cf/patch-frontend-auth-revocation.cjs",
+        "test/auth-revocation.test.ts",
+        ".github/workflows/g3-session-soak.yml",
+        "test/container-outbound-registration.test.ts"
+      ]
+    },
+    {
+      "id": "G4",
+      "name": "job-safety",
+      "status": "passed",
+      "evidence": [
+        "src/jobs.ts",
+        "src/job-policy.ts",
+        "src/cloudflare-state/state-do.ts",
+        "src/cloudflare-state/lock-policy.ts",
+        "test/jobs.test.ts",
+        "test/job-config.test.ts",
+        "test/lock-policy.test.ts",
+        "test/canary-fault-safety.test.ts",
+        "scripts/run-job-fault-canary.mjs",
+        "scripts/check-processor-idempotency.mjs",
+        "docs/evidence/g4-canary-job-faults.json",
+        "docs/evidence/g4-canary-executor-gap.json",
+        "docs/evidence/g4-processor-idempotency.json",
+        "docs/evidence/g4-final-job-safety.json",
+        "wrangler.jsonc",
+        "wrangler.canary.jsonc"
+      ]
+    },
+    {
+      "id": "G5",
+      "name": "scheduler-correctness",
+      "status": "passed",
+      "evidence": [
+        "docs/evidence/g5-canary-scheduler-correctness.json",
+        "src/schedule.ts",
+        "src/schedule-do.ts",
+        "src/jobs.ts",
+        "scripts/run-scheduler-fault-canary.mjs",
+        "test/schedule.test.ts"
+      ]
+    },
+    {
+      "id": "G6",
+      "name": "realtime-recovery",
+      "status": "passed",
+      "evidence": [
+        "src/pubsub-do.ts",
+        "src/pubsub-gateway.ts",
+        "cf/cloudflare-adapters/redis-compat.cjs",
+        "test/pubsub-gateway.test.ts",
+        "test/cloudflare-adapters.test.ts",
+        "scripts/run-realtime-canary.mjs",
+        "docs/evidence/g6-canary-realtime.json",
+        "wrangler.staging-probe.jsonc",
+        "src/staging-access-probe.ts",
+        "docs/evidence/g6-production-topology-staging-realtime.json",
+        "docs/evidence/g6-local-eviction.json",
+        "scripts/run-realtime-eviction.mjs",
+        "scripts/eviction-fixture-worker.ts"
+      ]
+    },
+    {
+      "id": "G7",
+      "name": "zero-redis-production-topology",
+      "status": "passed",
+      "evidence": [
+        "wrangler.staging.jsonc",
+        "Dockerfile.production",
+        "docs/evidence/g9-production-topology-staging-drill.json",
+        "docs/evidence/g7-zero-redis-production-topology.json",
+        "test/security-config.test.ts"
+      ]
+    },
+    {
+      "id": "G8",
+      "name": "capacity-and-cost",
+      "status": "passed",
+      "evidence": [
+        "scripts/run-capacity-canary.mjs",
+        "wrangler.staging.jsonc",
+        "src/jobs.ts",
+        "src/cloudflare-state/state-do.ts",
+        "cf/cloudflare-adapters/queue-driver.cjs",
+        "test/jobs.test.ts",
+        "test/job-config.test.ts",
+        "docs/evidence/g8-production-topology-capacity.json",
+        "docs/evidence/g8-capacity-cost-model.json"
+      ]
+    },
+    {
+      "id": "G9",
+      "name": "operations-and-dlq",
+      "status": "passed",
+      "evidence": [
+        "migrations/0002_job_failures.sql",
+        "src/job-failures.ts",
+        "test/job-failures.test.ts",
+        "scripts/check-d1-migrations.ts",
+        "scripts/run-dlq-ops-canary.mjs",
+        "scripts/run-operations-alert-canary.mjs",
+        "src/operations-alerts.ts",
+        "src/g9-access-probe.ts",
+        "wrangler.g9-probe.jsonc",
+        "docs/runbooks/DLQ-OPERATIONS.md",
+        "docs/evidence/g9-canary-dlq-operations.json",
+        "docs/evidence/g9-canary-access-service-auth.json",
+        "docs/evidence/g9-canary-bounded-bulk-replay.json",
+        "docs/evidence/g9-canary-operations-alerts.json",
+        "docs/evidence/g9-production-topology-staging-drill.json",
+        "wrangler.staging.jsonc",
+        "src/staging-access-probe.ts",
+        "wrangler.staging-probe.jsonc",
+        "test/staging-access-probe.test.ts",
+        ".github/workflows/deploy.yml"
+      ]
+    },
+    {
+      "id": "G10",
+      "name": "security",
+      "status": "partial",
+      "evidence": [
+        "src/access.ts",
+        "src/types.ts",
+        "src/job-failures.ts",
+        "src/queue.ts",
+        "test/access.test.ts",
+        "test/security-config.test.ts",
+        "docs/THREAT-MODEL.md",
+        "docs/evidence/g10-canary-security.json",
+        "docs/evidence/g10-canary-credential-rotation.json",
+        "docs/evidence/g10-production-internal-token.json",
+        "docs/runbooks/PRODUCTION-ACCESS-PROVISIONING.md",
+        "wrangler.canary.jsonc",
+        "wrangler.staging.jsonc",
+        "src/staging-access-probe.ts",
+        "wrangler.staging-probe.jsonc",
+        "test/staging-access-probe.test.ts",
+        "docs/evidence/g9-production-topology-staging-drill.json",
+        "docs/evidence/g10-production-shaped-staging-ops.json"
+      ]
+    },
+    {
+      "id": "G11",
+      "name": "recovery",
+      "status": "passed",
+      "evidence": [
+        "src/backup.ts",
+        "src/backup-manifest.ts",
+        "src/containers.ts",
+        "cf/agent.js",
+        "migrations/0003_backup_integrity.sql",
+        "scripts/run-recovery-drill.mjs",
+        "test/backup-manifest.test.ts",
+        "docs/runbooks/RECOVERY.md",
+        "docs/evidence/g11-recovery-drill.json",
+        "wrangler.staging.jsonc"
+      ]
+    },
+    {
+      "id": "G12",
+      "name": "rollback",
+      "status": "passed",
+      "evidence": [
+        "cf/cloudflare-adapters/rollback-queue-driver.cjs",
+        "cf/patch-cloudflare-state-adapters.cjs",
+        "src/index.ts",
+        "wrangler.canary.jsonc",
+        "scripts/run-rollback-drill.mjs",
+        "test/cloudflare-adapters.test.ts",
+        "docs/runbooks/ROLLBACK.md",
+        "docs/evidence/g12-rollback-drill.json"
+      ]
+    },
+    {
+      "id": "G13",
+      "name": "production-observation",
+      "status": "blocked",
+      "evidence": [
+        "docs/evidence/g13-production-observation.json",
+        "docs/evidence/g13-production-cutover.json",
+        "scripts/run-production-observation.mjs",
+        ".github/workflows/g13-production-observation.yml",
+        "scripts/run-production-cutover.mjs",
+        "docs/runbooks/PRODUCTION-CUTOVER.md"
+      ]
+    }
+  ]
+}

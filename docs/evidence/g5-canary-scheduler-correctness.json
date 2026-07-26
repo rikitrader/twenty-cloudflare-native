@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "gate": "G5",
+  "status": "passed",
+  "capturedAt": "2026-07-25T01:39:39Z",
+  "environment": {
+    "worker": "twenty-crm-redis-free-canary",
+    "url": "https://twenty-crm-redis-free-canary.rikitrader.workers.dev",
+    "isolatedCanary": true,
+    "productionModified": false,
+    "productionVersion": "5b42c895-ed4a-4a31-93df-1a14c43acbef",
+    "finalCanaryVersion": "a8321726-c9ef-4bf5-bfda-fb214a81fa85"
+  },
+  "probe": {
+    "runId": "13ce258f-8a39-4c8b-bcbc-6e67ca8a6d17",
+    "startedAt": "2026-07-25T01:39:04.428Z",
+    "completedAt": "2026-07-25T01:39:07.915Z",
+    "missedAlarm": {
+      "lagMsAtResponse": 6084,
+      "processed": true,
+      "passed": true
+    },
+    "duplicateSafety": {
+      "duplicateMessagesInjectedBeforeAlarm": 2,
+      "alarmDeliveries": 1,
+      "duplicateAlarmInvocations": 2,
+      "completedExecutionAttempts": 1,
+      "passed": true
+    },
+    "occurrenceIdentity": {
+      "jobId": "schedule:86ac215ae01cf6e0f97c92e1a5925449fea3f97f25dda8f73cd0ebe175cbd919",
+      "deterministicSha256": true,
+      "scheduleRemovedAfterEndDate": true,
+      "passed": true
+    },
+    "calendar": {
+      "timezone": "America/New_York",
+      "springForward": "2026-03-08T07:30:00.000Z",
+      "fallBackFirst": "2026-11-01T05:30:00.000Z",
+      "fallBackNext": "2026-11-02T06:30:00.000Z",
+      "duplicateFallBackWallClockRun": false,
+      "passed": true
+    },
+    "dedicatedQueueAfterProbe": {
+      "name": "twenty-redis-canary-probe",
+      "backlogCount": 0,
+      "backlogBytes": 0,
+      "passed": true
+    }
+  },
+  "validation": {
+    "typecheck": "passed",
+    "tests": {
+      "files": 17,
+      "assertions": 91,
+      "passed": true
+    },
+    "liveSuite": "passed"
+  },
+  "implementation": [
+    "src/schedule.ts",
+    "src/schedule-do.ts",
+    "src/jobs.ts",
+    "src/index.ts",
+    "scripts/run-scheduler-fault-canary.mjs",
+    "test/schedule.test.ts"
+  ],
+  "documentationBasis": [
+    "https://github.com/harrisiirak/cron-parser",
+    "https://developers.cloudflare.com/durable-objects/api/alarms/",
+    "https://developers.cloudflare.com/queues/"
+  ],
+  "notes": [
+    "The scheduler probe uses a dedicated isolated canary queue so scheduler correctness is measured independently from the separate Twenty container-executor gate.",
+    "The probe token was rotated away after capture and its temporary directory was deleted."
+  ]
+}

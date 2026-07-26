@@ -1,13 +1,43 @@
 import { Container } from "@cloudflare/containers";
 import type { Env } from "./types";
 import { pickLatest } from "./lib";
+import { handleStateGateway } from "./cloudflare-state/gateway";
+import { STATE_GATEWAY_HOST } from "./cloudflare-state/contracts";
+import { handleQueueGateway } from "./jobs";
+import { handlePubSubGateway } from "./pubsub-gateway";
 
 export const AGENT_PORT = 2021;
+export const JOB_EXECUTOR_PORT = 2022;
+export const JOB_GATEWAY_HOST = "twenty-queue.internal";
+export const EVENT_GATEWAY_HOST = "twenty-events.internal";
+const stateOutbound = {
+  [STATE_GATEWAY_HOST]: (request: Request, env: Env) =>
+    handleStateGateway(request, env),
+  [JOB_GATEWAY_HOST]: (request: Request, env: Env) =>
+    handleQueueGateway(request, env),
+  [EVENT_GATEWAY_HOST]: (request: Request, env: Env) =>
+    handlePubSubGateway(request, env),
+};
 const PORT_READY_OPTIONS = {
-  portReadyTimeoutMS: 120_000,
-  instanceGetTimeoutMS: 120_000,
+  // Twenty can exceed two minutes during a beta Container rollout. A longer
+  // readiness budget prevents a cold start from becoming a user-visible 1101.
+  portReadyTimeoutMS: 300_000,
+  instanceGetTimeoutMS: 300_000,
   waitInterval: 500,
 } as const;
+
+function portReadyOptions(env: Env, abort: AbortSignal) {
+  return {
+    ...PORT_READY_OPTIONS,
+    // The isolated all-in-one canary initializes and upgrades a fresh Postgres
+    // database on first boot. Queue consumers may run for 15 minutes, so keep
+    // that one boot request alive long enough to reach the executor port.
+    ...(env.CANARY_MODE === "true"
+      ? { portReadyTimeoutMS: 10 * 60_000 }
+      : {}),
+    abort,
+  };
+}
 
 function secretsEnv(env: Env): Record<string, string> {
   return {
@@ -44,8 +74,26 @@ function sharedEnv(env: Env): Record<string, string> {
     // those trusted workflows available in Twenty's production image.
     LOGIC_FUNCTION_TYPE: "LOCAL",
     SIGN_IN_PREFILLED: "false",
+    REDIS_BACKEND: env.REDIS_BACKEND ?? "redis",
+    CLOUDFLARE_PUBSUB_TRANSPORT:
+      env.CLOUDFLARE_PUBSUB_TRANSPORT ?? "poll",
+    CLOUDFLARE_STATE_URL: `http://${STATE_GATEWAY_HOST}`,
+    CLOUDFLARE_QUEUE_URL: `http://${JOB_GATEWAY_HOST}`,
+    CLOUDFLARE_EVENTS_URL: `http://${EVENT_GATEWAY_HOST}`,
+    CLOUDFLARE_STATE_SHARD: "workspace:default",
+    CLOUDFLARE_JOB_EXECUTOR_PORT: String(JOB_EXECUTOR_PORT),
+    CLOUDFLARE_QUEUE_DRAIN: env.CLOUDFLARE_QUEUE_DRAIN ?? "true",
+    ...(env.INTERNAL_SERVICE_TOKEN
+      ? { INTERNAL_SERVICE_TOKEN: env.INTERNAL_SERVICE_TOKEN }
+      : {}),
+    ...(env.CANARY_MODE === "true"
+      ? { CLOUDFLARE_CANARY_MODE: "true" }
+      : {}),
     ...secretsEnv(env),
     ...(env.PG_DATABASE_URL ? { PG_DATABASE_URL: env.PG_DATABASE_URL } : {}),
+    ...(env.PG_POOL_MAX_CONNECTIONS
+      ? { PG_POOL_MAX_CONNECTIONS: env.PG_POOL_MAX_CONNECTIONS }
+      : {}),
     ...(env.REDIS_URL ? { REDIS_URL: env.REDIS_URL } : {}),
     ...storageEnv(env),
   };
@@ -72,15 +120,29 @@ export class TwentyContainer extends Container<Env> {
     const externalPg = Boolean(env.PG_DATABASE_URL);
     this.envVars = {
       SERVER_URL: env.SERVER_URL,
+      REDIS_BACKEND: env.REDIS_BACKEND ?? "redis",
+      CLOUDFLARE_PUBSUB_TRANSPORT:
+        env.CLOUDFLARE_PUBSUB_TRANSPORT ?? "poll",
+      CLOUDFLARE_STATE_URL: `http://${STATE_GATEWAY_HOST}`,
+      CLOUDFLARE_QUEUE_URL: `http://${JOB_GATEWAY_HOST}`,
+      CLOUDFLARE_EVENTS_URL: `http://${EVENT_GATEWAY_HOST}`,
+      CLOUDFLARE_STATE_SHARD: "workspace:default",
+      CLOUDFLARE_JOB_EXECUTOR_PORT: String(JOB_EXECUTOR_PORT),
+      CLOUDFLARE_QUEUE_DRAIN: env.CLOUDFLARE_QUEUE_DRAIN ?? "true",
+      ...(env.INTERNAL_SERVICE_TOKEN
+        ? { INTERNAL_SERVICE_TOKEN: env.INTERNAL_SERVICE_TOKEN }
+        : {}),
+      ...(env.CANARY_MODE === "true"
+        ? { CLOUDFLARE_CANARY_MODE: "true" }
+        : {}),
       ...secretsEnv(env),
       ...(env.BACKUP_TOKEN ? { BACKUP_TOKEN: env.BACKUP_TOKEN } : {}),
       ...(externalPg
         ? {
             PG_DATABASE_URL: env.PG_DATABASE_URL!,
-            // Neon is migrated once, out-of-band (RUN_NEON_INIT=true for a one-shot).
-            // Every normal boot skips init-db — re-seeding demo data over a remote
-            // DB per-row is pathologically slow and blocks twenty-server from :2020.
-            DISABLE_DB_MIGRATIONS: env.RUN_NEON_INIT === "true" ? "false" : "true",
+            // Database releases are owned by twenty-crm-release. A normal
+            // Container start can never initialize or upgrade Neon.
+            DISABLE_DB_MIGRATIONS: "true",
             DISABLE_CRON_JOBS_REGISTRATION: "true",
             SIGN_IN_PREFILLED: "false",
             ...storageEnv(env),
@@ -126,6 +188,11 @@ export class TwentyContainer extends Container<Env> {
   /** Fail-open: every early return boots a fresh demo, never blocks serving. */
   async tryRestore(): Promise<void> {
     try {
+      if (this.env.CANARY_MODE === "true") {
+        await this.waitForAgent();
+        await this.agentFetch("/mark-settled", { method: "POST" });
+        return console.log("restore: isolated canary, boot fresh");
+      }
       if (this.env.PG_DATABASE_URL) {
         // External Postgres (Neon) IS the durable store — never restore over it.
         // Settle immediately so hourly dumps (now real Neon backups) can run.
@@ -161,29 +228,64 @@ export class TwentyContainer extends Container<Env> {
   }
 
   override async fetch(request: Request): Promise<Response> {
-    await this.startAndWaitForPorts(
-      [this.defaultPort, AGENT_PORT],
-      { ...PORT_READY_OPTIONS, abort: request.signal },
-    );
     const url = new URL(request.url);
+    if (url.pathname === "/_jobs/execute") {
+      await this.startAndWaitForPorts(JOB_EXECUTOR_PORT, {
+        ...portReadyOptions(this.env, request.signal),
+      });
+      return this.containerFetch(
+        new Request("http://job-executor/execute", {
+          method: request.method,
+          headers: request.headers,
+          body: request.body,
+        }),
+        JOB_EXECUTOR_PORT,
+      );
+    }
     if (url.pathname.startsWith("/_agent/")) {
+      await this.startAndWaitForPorts(
+        AGENT_PORT,
+        portReadyOptions(this.env, request.signal),
+      );
       return this.agentFetch(url.pathname.slice("/_agent".length), {
         method: request.method,
         body: request.body,
       });
     }
+    await this.startAndWaitForPorts(
+      [this.defaultPort, AGENT_PORT],
+      portReadyOptions(this.env, request.signal),
+    );
     return super.fetch(request);
   }
 }
 
-/** External-DB mode: pinned production server (migrations + cron registration). */
+/** External-DB mode: pinned production server; releases run out-of-band. */
 export class TwentyServer extends Container<Env> {
   defaultPort = 3000;
-  sleepAfter = "2h";
+  // Active customers are kept warm by the traffic-aware cron. When there are
+  // no customers, release provisioned memory/disk promptly to control cost.
+  sleepAfter = "20m";
 
   constructor(ctx: DurableObjectState<{}>, env: Env) {
     super(ctx, env);
-    this.envVars = { ...sharedEnv(env), NODE_PORT: "3000" };
+    this.envVars = {
+      ...sharedEnv(env),
+      NODE_PORT: "3000",
+      // The pinned production database is already initialized. Schema upgrade
+      // and cron registration are explicit release operations, not work that
+      // every beta-container restart should repeat.
+      DISABLE_DB_MIGRATIONS: "true",
+      DISABLE_CRON_JOBS_REGISTRATION: "true",
+    };
+  }
+
+  async warm(): Promise<void> {
+    await this.start();
+  }
+
+  async quiesce(): Promise<void> {
+    await this.destroy();
   }
 
   override async fetch(request: Request): Promise<Response> {
@@ -191,13 +293,18 @@ export class TwentyServer extends Container<Env> {
       this.defaultPort,
       { ...PORT_READY_OPTIONS, abort: request.signal },
     );
+    if (new URL(request.url).pathname === "/_cloudflare/instance")
+      return Response.json({
+        role: "server",
+        instanceId: this.ctx.id.toString(),
+      });
     return super.fetch(request);
   }
 }
 
 /** External-DB mode: BullMQ worker — same production image, no HTTP port. */
 export class TwentyWorker extends Container<Env> {
-  sleepAfter = "2h";
+  sleepAfter = "20m";
   entrypoint = ["yarn", "worker:prod"];
 
   constructor(ctx: DurableObjectState<{}>, env: Env) {
@@ -209,8 +316,87 @@ export class TwentyWorker extends Container<Env> {
     };
   }
 
+  async quiesce(): Promise<void> {
+    await this.destroy();
+  }
+
   override async fetch(_request: Request): Promise<Response> {
+    const url = new URL(_request.url);
+    if (url.pathname === "/_jobs/execute") {
+      await this.startAndWaitForPorts(JOB_EXECUTOR_PORT, {
+        ...PORT_READY_OPTIONS,
+        abort: _request.signal,
+      });
+      const response = await this.containerFetch(
+        new Request("http://job-executor/execute", {
+          method: _request.method,
+          headers: _request.headers,
+          body: _request.body,
+        }),
+        JOB_EXECUTOR_PORT,
+      );
+      const headers = new Headers(response.headers);
+      headers.set("x-cloudflare-container-instance", this.ctx.id.toString());
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      });
+    }
     await this.start();
     return new Response("twenty-worker running");
   }
 }
+
+/**
+ * Read-only PostgreSQL export companion. It runs only pg_dump + the
+ * authenticated backup agent; it cannot restore into the live database and
+ * does not start Twenty, BullMQ, or Redis.
+ */
+export class TwentyBackup extends Container<Env> {
+  defaultPort = AGENT_PORT;
+  sleepAfter = "10m";
+  entrypoint = ["node", "/cf/agent.js"];
+
+  constructor(ctx: DurableObjectState<{}>, env: Env) {
+    super(ctx, env);
+    this.envVars = {
+      BACKUP_ONLY: "true",
+      ...(env.BACKUP_TOKEN ? { BACKUP_TOKEN: env.BACKUP_TOKEN } : {}),
+      ...(env.PG_DATABASE_URL
+        ? { PG_DATABASE_URL: env.PG_DATABASE_URL }
+        : {}),
+    };
+  }
+
+  override async fetch(request: Request): Promise<Response> {
+    if (!this.env.PG_DATABASE_URL)
+      return new Response("PG_DATABASE_URL is not configured", { status: 503 });
+    const url = new URL(request.url);
+    if (url.pathname !== "/_agent/dump" && url.pathname !== "/_agent/state")
+      return new Response("not found", { status: 404 });
+    await this.startAndWaitForPorts(
+      this.defaultPort,
+      { ...PORT_READY_OPTIONS, abort: request.signal },
+    );
+    const headers = new Headers(request.headers);
+    if (this.env.BACKUP_TOKEN)
+      headers.set("authorization", `Bearer ${this.env.BACKUP_TOKEN}`);
+    return this.containerFetch(
+      new Request(`http://backup-agent${url.pathname.slice(7)}`, {
+        method: request.method,
+        headers,
+        signal: request.signal,
+      }),
+      this.defaultPort,
+    );
+  }
+}
+
+// The Containers SDK registers these handlers through an inherited static
+// setter. A static class field shadows that setter and silently leaves the
+// ContainerProxy registry empty, causing internal hostnames to fall through to
+// DNS and return 530. Assign after class definition so the SDK setter runs.
+TwentyContainer.outboundByHost = stateOutbound;
+TwentyServer.outboundByHost = stateOutbound;
+TwentyWorker.outboundByHost = stateOutbound;

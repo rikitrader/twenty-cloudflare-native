@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "gate": "G13",
+  "capturedAt": "2026-07-25T19:04:01Z",
+  "scope": "production read-only observation",
+  "endpoint": "https://twenty-crm.rikitrader.workers.dev/_status",
+  "productionChanged": false,
+  "sample": {
+    "httpStatus": 200,
+    "status": "ok",
+    "productionReady": false,
+    "durableRedis": false,
+    "redisBackend": "redis",
+    "cloudflareStateReady": false,
+    "result": "failed"
+  },
+  "result": "blocked",
+  "remaining": [
+    "Controlled Redis-free production cutover",
+    "Fourteen continuous days of passing samples",
+    "SLO, no-Redis-process, and no-Redis-traffic evidence"
+  ],
+  "collector": "scripts/run-production-observation.mjs",
+  "workflow": ".github/workflows/g13-production-observation.yml",
+  "activation": "Set repository variable G13_OBSERVATION_ENABLED=true only after the controlled Redis-free production cutover. Scheduled samples run every 15 minutes; manual dispatch remains available for validation."
+}

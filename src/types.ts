@@ -1,4 +1,13 @@
-import type { TwentyContainer, TwentyServer, TwentyWorker } from "./containers";
+import type {
+  TwentyBackup,
+  TwentyContainer,
+  TwentyServer,
+  TwentyWorker,
+} from "./containers";
+import type { TwentyState } from "./cloudflare-state/state-do";
+import type { TwentyScheduler } from "./schedule-do";
+import type { TwentyPubSub } from "./pubsub-do";
+import type { JobExecutionFailureCode } from "./cloudflare-state/contracts";
 
 export interface Env {
   // Demo mode: wrapper image over the official all-in-one (adds backup agent).
@@ -6,10 +15,29 @@ export interface Env {
   // External-DB mode: stock image, one class per process (mirrors upstream compose).
   TWENTY_SERVER: DurableObjectNamespace<TwentyServer>;
   TWENTY_WORKER: DurableObjectNamespace<TwentyWorker>;
+  BACKUP_CONTAINER: DurableObjectNamespace<TwentyBackup>;
+  // Redis-free state, schedule, and pub/sub Durable Objects.
+  STATE_DO: DurableObjectNamespace<TwentyState>;
+  SCHEDULER_DO: DurableObjectNamespace<TwentyScheduler>;
+  PUBSUB_DO: DurableObjectNamespace<TwentyPubSub>;
+  // Hyperdrive is available to Worker-runtime database operations. Cloudflare
+  // scopes its generated endpoint to the Worker runtime, so Containers use the
+  // separately encrypted PG_DATABASE_URL origin credential below.
+  HYPERDRIVE?: Hyperdrive;
+  CF_VERSION_METADATA?: {
+    id: string;
+    tag?: string;
+    timestamp?: string;
+  };
   STATUS_KV: KVNamespace;
   STORAGE: R2Bucket;
   OPS_DB: D1Database;
+  OPS_RATE_LIMITER?: RateLimit;
+  OPS_ALERT_EMAIL?: SendEmail;
   EVENTS_QUEUE: Queue<WebhookMessage>;
+  JOBS_QUEUE: Queue<CloudflareTwentyJob>;
+  CANARY_QUEUE?: Queue<CloudflareTwentyJob>;
+  JOBS_DLQ: Queue<CloudflareJobFailure>;
   BACKUP_WF: Workflow;
   SERVER_URL: string;
   // Secrets. ENCRYPTION_KEY is Twenty's primary secret; APP_SECRET is legacy.
@@ -18,10 +46,29 @@ export interface Env {
   APP_SECRET?: string;
   BACKUP_TOKEN?: string;
   WEBHOOK_TOKEN?: string;
-  // One-shot: set true to force Twenty's migration/seed against a fresh Neon DB.
-  RUN_NEON_INIT?: string;
-  // Setting both flips routing to external-DB mode on the next request.
+  INTERNAL_SERVICE_TOKEN?: string;
+  // Explicit backend selection. Redis remains the default rollback path.
+  REDIS_BACKEND?: "redis" | "cloudflare";
+  CLOUDFLARE_PUBSUB_TRANSPORT?: "websocket" | "poll";
+  CLOUDFLARE_QUEUE_DRAIN?: string;
+  // Isolated validation mode: never restore production R2 backups.
+  CANARY_MODE?: string;
+  CANARY_TOKEN?: string;
+  OPS_TOKEN?: string;
+  ACCESS_REQUIRED?: string;
+  ACCESS_TEAM_DOMAIN?: string;
+  ACCESS_AUD?: string;
+  ACCESS_ALLOWED_GROUPS?: string;
+  OPS_ALERT_FROM?: string;
+  OPS_ALERT_TO?: string;
+  JOB_QUEUE_NAME?: string;
+  JOB_DLQ_NAME?: string;
+  CANARY_QUEUE_NAME?: string;
+  SERVER_REPLICAS?: string;
+  WORKER_REPLICAS?: string;
+  // PostgreSQL plus the selected coordination backend enables external mode.
   PG_DATABASE_URL?: string; // Neon/Supabase (optionally via Hyperdrive)
+  PG_POOL_MAX_CONNECTIONS?: string;
   REDIS_URL?: string; // Upstash (rediss://)
   // R2 via Twenty's native S3 driver. Upstream names take precedence;
   // AWS_* kept as aliases for older credential chains.
@@ -40,8 +87,44 @@ export interface WebhookMessage {
   receivedAt: string;
 }
 
+export interface CloudflareTwentyJob {
+  schemaVersion: 1;
+  id: string;
+  queueName: string;
+  jobName: string;
+  data: unknown;
+  createdAt: string;
+  retryLimit: number;
+  priority: number;
+  notBefore?: number;
+  dedupeKey?: string;
+  dedupeClaimed?: boolean;
+  retainDedupe?: boolean;
+  replayOfFailureId?: string;
+}
+
+export interface CloudflareJobFailure {
+  schemaVersion: 1;
+  failureId: string;
+  job: unknown;
+  reason:
+    | JobExecutionFailureCode
+    | "invalid-queue-envelope"
+    | "platform-retry-exhausted";
+  failedAt: string;
+  source: "application" | "platform";
+}
+
 export const externalMode = (env: Env): boolean =>
-  Boolean(env.PG_DATABASE_URL && env.REDIS_URL);
+  Boolean(
+    env.PG_DATABASE_URL &&
+      (redisBackend(env) === "cloudflare"
+        ? env.INTERNAL_SERVICE_TOKEN
+        : env.REDIS_URL),
+  );
+
+export const redisBackend = (env: Env): "redis" | "cloudflare" =>
+  env.REDIS_BACKEND === "cloudflare" ? "cloudflare" : "redis";
 
 /** Labels /_status: full external | hybrid (Neon PG + in-container Redis) | demo. */
 export const deploymentMode = (env: Env): string =>
@@ -50,3 +133,10 @@ export const deploymentMode = (env: Env): string =>
     : env.PG_DATABASE_URL
       ? "hybrid-neon"
       : "all-in-one";
+
+/** Production must not silently run the demo image after selecting the
+ * Cloudflare backend. Canary mode is deliberately exempt for fault testing. */
+export const cloudflareBackendMisconfigured = (env: Env): boolean =>
+  redisBackend(env) === "cloudflare" &&
+  env.CANARY_MODE !== "true" &&
+  !externalMode(env);

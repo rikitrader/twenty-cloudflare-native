@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-25T06:25:40.098Z",
+  "scope": "production-topology-staging",
+  "result": "passed",
+  "worker": "twenty-crm-enterprise-staging",
+  "accessProtected": true,
+  "productionChanged": false,
+  "stagingWorkerVersion": "764c2db7-fa65-4bc4-9a6d-9e478527d333",
+  "probeWorkerVersion": "6ec236f2-a1ba-4f3e-8789-a6cddd748484",
+  "transport": {
+    "publicBoundary": "Cloudflare Access",
+    "automationBoundary": "bearer-protected staging probe",
+    "upgradedHop": "private Worker service binding",
+    "eventStore": "SQLite Durable Object retained log",
+    "websocketMode": "hibernatable"
+  },
+  "checks": {
+    "unauthenticatedDenied": true,
+    "backlogReplay": true,
+    "liveDelivery": true,
+    "reconnectMissedEventRecovery": true,
+    "multiSubscriberFanout": true,
+    "retentionGapDetected": true,
+    "staleSocketClosedWith4009": true
+  },
+  "closureChecks": {
+    "graphqlSubscriptionReconnect": "not-applicable: authenticated schema has subscriptionType=null",
+    "forcedDurableObjectEviction": "passed in docs/evidence/g6-local-eviction.json",
+    "aiStreamCancellation": "passed in test/cloudflare-adapters.test.ts",
+    "multiServerFiveTimesPeak": "passed in docs/evidence/g8-production-topology-capacity.json"
+  },
+  "privacy": {
+    "tokensPersisted": false,
+    "applicationPayloadsPersisted": false,
+    "channelIdentifierPersisted": false
+  },
+  "productionWorker": {
+    "name": "twenty-crm",
+    "unchangedVersionId": "5b42c895-ed4a-4a31-93df-1a14c43acbef"
+  }
+}

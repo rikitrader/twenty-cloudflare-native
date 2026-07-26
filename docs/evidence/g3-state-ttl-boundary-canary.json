@@ -1,0 +1,22 @@
+{
+  "gate": "G3",
+  "capturedAt": "2026-07-25T16:24:00Z",
+  "scope": "isolated canary only",
+  "worker": "twenty-crm-redis-free-canary",
+  "runId": "g3-ttl-1785000069",
+  "productionChanged": false,
+  "result": "passed",
+  "checks": {
+    "concurrentAtomicIncrements": { "operations": 64, "finalValue": 64, "finalVersion": 64, "uniqueResults": 64 },
+    "lockFencing": { "firstToken": 1, "secondToken": 2, "tokenAfterExpiry": 3 },
+    "ttlMilliseconds": 3000,
+    "logicalExpiry": { "valueFound": false, "setMembers": [], "hashValues": [], "listValues": [] },
+    "alarmCleanup": { "values": 2, "sets": 0, "hashes": 0, "lists": 0, "keyExpiries": 0, "locks": 0 },
+    "persistentStateAfterCleanup": { "counter": 64, "counterVersion": 64 },
+    "durableObjectIncarnationAfterCleanup": "98973c50-84ff-4bf7-bdb7-5bb21f81c673"
+  },
+  "remainingForG3Pass": [
+    "Concurrent authenticated browser sessions and permission-cache invalidation",
+    "Seven-day canary soak with session-loss and state-gateway SLOs"
+  ]
+}

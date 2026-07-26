@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-24T21:06:40Z",
+  "scope": "isolated-canary",
+  "result": "passed",
+  "productionChanged": false,
+  "resources": {
+    "worker": "twenty-crm-redis-free-canary",
+    "codeVersion": "e0c6eba5-fbec-4f86-933e-eb9a4f584998",
+    "activeVersionAfterCredentialRotation": "a84f0baa-a2d4-4483-852a-0f0454c9aaba",
+    "database": {
+      "name": "twenty-ops-canary",
+      "id": "c4614a52-d127-4b70-8614-c9da9ad217ee"
+    },
+    "jobQueue": "twenty-jobs-canary-v2",
+    "canaryQueue": "twenty-redis-canary-probe",
+    "deadLetterQueue": "twenty-jobs-canary-v2-dlq"
+  },
+  "checks": {
+    "d1MigrationsApplied": true,
+    "existingPlatformDlqBacklogIngested": true,
+    "unauthenticatedOperationsDenied": true,
+    "atomicFailureAndAuditIngestion": true,
+    "optimisticVersionConflictRejected": true,
+    "uncertainOutcomeRequiresConfirmation": true,
+    "operatorReplayCompletedThroughQueueAndContainer": true,
+    "immutableReplayAuditRecorded": true,
+    "operatorDismissalAudited": true,
+    "listResponseOmitsJobPayload": true,
+    "realtimeQueueMetricsReturned": true,
+    "credentialsRotatedAfterVerification": true
+  },
+  "localVerification": {
+    "testFiles": 14,
+    "tests": 74,
+    "typecheck": "passed",
+    "migrationExecution": "passed",
+    "wranglerCanaryDryRun": "passed",
+    "wranglerProductionDryRun": "passed",
+    "gitDiffCheck": "passed"
+  },
+  "ledgerAfterVerification": {
+    "failures": [
+      {
+        "source": "application",
+        "status": "dismissed",
+        "reason": "permanent-executor-response",
+        "records": 3,
+        "deliveries": 3
+      },
+      {
+        "source": "application",
+        "status": "replayed",
+        "reason": "executor-outcome-ambiguous",
+        "records": 3,
+        "deliveries": 3
+      },
+      {
+        "source": "platform",
+        "status": "quarantined",
+        "reason": "platform-retry-exhausted",
+        "records": 14,
+        "deliveries": 14
+      }
+    ],
+    "auditEvents": {
+      "dismissed": 3,
+      "ingested": 20,
+      "replay_enqueued": 3,
+      "replay_requested": 3
+    }
+  },
+  "productionDeployment": {
+    "worker": "twenty-crm",
+    "version": "5b42c895-ed4a-4a31-93df-1a14c43acbef",
+    "createdAt": "2026-07-24T15:45:07.962Z",
+    "unchanged": true
+  },
+  "remainingForG9Pass": []
+}

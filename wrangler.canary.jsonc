@@ -1,0 +1,144 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "twenty-crm-redis-free-canary",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-06-08",
+	"workers_dev": true,
+	"preview_urls": false,
+	"containers": [
+		{
+			"class_name": "TwentyContainer",
+			"image": "./Dockerfile",
+			"instance_type": "standard-2",
+			"max_instances": 1
+		}
+	],
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "TWENTY",
+				"class_name": "TwentyContainer"
+			},
+			{
+				"name": "TWENTY_WORKER",
+				"class_name": "TwentyContainer"
+			},
+			{
+				"name": "STATE_DO",
+				"class_name": "TwentyState"
+			},
+			{
+				"name": "SCHEDULER_DO",
+				"class_name": "TwentyScheduler"
+			},
+			{
+				"name": "PUBSUB_DO",
+				"class_name": "TwentyPubSub"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "canary-v1",
+			"new_sqlite_classes": [
+				"TwentyContainer",
+				"TwentyState",
+				"TwentyScheduler",
+				"TwentyPubSub"
+			]
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "STATUS_KV",
+			"id": "7162a0faeaf34a76af57770dd3999844"
+		}
+	],
+	"d1_databases": [
+		{
+			"binding": "OPS_DB",
+			"database_name": "twenty-ops-canary",
+			"database_id": "c4614a52-d127-4b70-8614-c9da9ad217ee"
+		}
+	],
+	"ratelimits": [
+		{
+			"name": "OPS_RATE_LIMITER",
+			"namespace_id": "2002",
+			"simple": {
+				"limit": 60,
+				"period": 60
+			}
+		}
+	],
+	"send_email": [
+		{
+			"name": "OPS_ALERT_EMAIL",
+			"destination_address": "rikitrader@gmail.com",
+			"allowed_sender_addresses": ["twenty-alerts@sismo911.com"]
+		}
+	],
+	"queues": {
+		"producers": [
+			{
+				"binding": "JOBS_QUEUE",
+				"queue": "twenty-jobs-canary-v2"
+			},
+			{
+				"binding": "CANARY_QUEUE",
+				"queue": "twenty-redis-canary-probe"
+			},
+			{
+				"binding": "JOBS_DLQ",
+				"queue": "twenty-jobs-canary-v2-dlq"
+			}
+		],
+		"consumers": [
+			{
+				"queue": "twenty-jobs-canary-v2",
+				"max_batch_size": 10,
+				"max_batch_timeout": 1,
+				"max_retries": 10,
+				"max_concurrency": 5,
+				"dead_letter_queue": "twenty-jobs-canary-v2-dlq"
+			},
+			{
+				"queue": "twenty-redis-canary-probe",
+				"max_batch_size": 1,
+				"max_batch_timeout": 1,
+				"max_retries": 10,
+				"max_concurrency": 2,
+				"dead_letter_queue": "twenty-jobs-canary-v2-dlq"
+			},
+			{
+				"queue": "twenty-jobs-canary-v2-dlq",
+				"max_batch_size": 10,
+				"max_batch_timeout": 5,
+				"max_retries": 10,
+				"max_concurrency": 1
+			}
+		]
+	},
+	"triggers": {
+		// Cost-controlled canary probe; detailed soak runs are workflow-driven.
+		"crons": ["*/15 * * * *"]
+	},
+	"vars": {
+		"SERVER_URL": "https://twenty-crm-redis-free-canary.rikitrader.workers.dev",
+		"REDIS_BACKEND": "cloudflare",
+		"CLOUDFLARE_PUBSUB_TRANSPORT": "poll",
+		"CLOUDFLARE_QUEUE_DRAIN": "true",
+		"CANARY_MODE": "true",
+		"ACCESS_REQUIRED": "true",
+		"ACCESS_TEAM_DOMAIN": "https://rikitrader.cloudflareaccess.com",
+		"ACCESS_AUD": "62f876361452a8953f1dcf96c286bb44338fa3cec3e5239a46276c0919ba932e",
+		"OPS_ALERT_FROM": "twenty-alerts@sismo911.com",
+		"OPS_ALERT_TO": "rikitrader@gmail.com",
+		"JOB_QUEUE_NAME": "twenty-jobs-canary-v2",
+		"JOB_DLQ_NAME": "twenty-jobs-canary-v2-dlq",
+		"CANARY_QUEUE_NAME": "twenty-redis-canary-probe"
+	},
+	"observability": {
+		"enabled": true
+	}
+}

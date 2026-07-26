@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "gate": "G2",
+  "status": "passed",
+  "capturedAt": "2026-07-25T01:21:52Z",
+  "environment": {
+    "worker": "twenty-crm-redis-free-canary",
+    "url": "https://twenty-crm-redis-free-canary.rikitrader.workers.dev",
+    "isolatedCanary": true,
+    "productionModified": false,
+    "productionVersion": "5b42c895-ed4a-4a31-93df-1a14c43acbef",
+    "finalCanaryVersion": "c555ea5a-5a50-49c6-bcf8-07fad4bcf835"
+  },
+  "probe": {
+    "runId": "3bd73dd4-5961-4d50-9b60-54b0e39c9c51",
+    "namespace": "canary:g2:3bd73dd4-5961-4d50-9b60-54b0e39c9c51",
+    "concurrency": {
+      "operations": 64,
+      "uniqueResults": 64,
+      "finalValue": 64,
+      "finalVersion": 64,
+      "passed": true
+    },
+    "lockOwnershipAndFencing": {
+      "firstToken": 1,
+      "competingOwnerAcquired": false,
+      "nonOwnerRelease": false,
+      "ownerRelease": true,
+      "secondToken": 2,
+      "tokenAfterExpiry": 3,
+      "passed": true
+    },
+    "ttlAndAlarm": {
+      "ttlMs": 3000,
+      "scalarExpired": true,
+      "setExpired": true,
+      "hashExpired": true,
+      "listExpired": true,
+      "physicalExpiredRowsBeforeRead": {
+        "values": 0,
+        "sets": 0,
+        "hashes": 0,
+        "lists": 0,
+        "keyExpiries": 0,
+        "locks": 0
+      },
+      "sharedObjectNextAlarmAt": 1785021195467,
+      "sharedObjectNextAlarmWasNotOverdue": true,
+      "passed": true
+    },
+    "incarnationResetPersistence": {
+      "mechanism": "isolated canary Worker secret-version update followed by Durable Object incarnation change",
+      "beforeIncarnationId": "fcd483a8-d9a1-4600-9ea2-0738b50d67ef",
+      "afterIncarnationId": "adca1b18-fc0b-453e-afab-ac5678ce06dc",
+      "incarnationChanged": true,
+      "persistedCounter": 64,
+      "persistedCounterVersion": 64,
+      "passed": true
+    }
+  },
+  "validation": {
+    "typecheck": "passed",
+    "tests": {
+      "files": 17,
+      "assertions": 88,
+      "passed": true
+    },
+    "canaryDryRun": "passed",
+    "liveSuite": "passed"
+  },
+  "implementation": [
+    "src/cloudflare-state/state-do.ts",
+    "src/cloudflare-state/contracts.ts",
+    "src/index.ts",
+    "scripts/run-state-fault-canary.mjs"
+  ],
+  "documentationBasis": [
+    "https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/",
+    "https://developers.cloudflare.com/durable-objects/examples/durable-object-ttl/",
+    "https://developers.cloudflare.com/durable-objects/examples/testing-with-durable-objects/"
+  ],
+  "notes": [
+    "The diagnostics endpoint is bearer-protected and disabled unless CANARY_MODE is exactly true.",
+    "Diagnostics read physical SQLite row counts without invoking expiry-on-read cleanup.",
+    "The State Durable Object is shared by multiple namespaces, so a future global alarm is valid after the probe namespace is clean; the gate requires no expired probe rows and no overdue global alarm.",
+    "The temporary probe token was rotated away after capture and its temporary directory was deleted."
+  ]
+}

@@ -12,6 +12,17 @@ export function pickLatest(keys: string[]): string | null {
   return keys.reduce((a, b) => (b > a ? b : a));
 }
 
+export function boundedReplicaCount(
+  value: string | undefined,
+  maximum = 16,
+): number {
+  if (!value || !/^\d+$/.test(value)) return 1;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed >= 1
+    ? Math.min(parsed, maximum)
+    : 1;
+}
+
 /**
  * Skip when there has been no traffic since the last backup — never wake a
  * sleeping container just to dump untouched (or worse, freshly-seeded) data.
@@ -34,6 +45,37 @@ export function shouldWriteStatus(
   intervalMs: number,
 ): boolean {
   return lastOk !== ok || nowMs - lastWriteMs >= intervalMs;
+}
+
+/** Keep paid containers warm only while real customer traffic is recent. */
+export function hasRecentCustomerActivity(
+  nowMs: number,
+  lastActivityIso: string | null,
+  activeWindowMs = 20 * 60_000,
+): boolean {
+  if (!lastActivityIso) return false;
+  const lastActivityMs = Date.parse(lastActivityIso);
+  return (
+    Number.isFinite(lastActivityMs) &&
+    lastActivityMs <= nowMs &&
+    nowMs - lastActivityMs <= activeWindowMs
+  );
+}
+
+/** Browser navigations can use the versioned, anonymous SPA shell at the edge. */
+export function isEdgeShellRequest(
+  method: string,
+  pathname: string,
+  accept: string | null,
+): boolean {
+  return (
+    method === "GET" &&
+    Boolean(accept?.includes("text/html")) &&
+    !pathname.startsWith("/_") &&
+    !pathname.startsWith("/graphql") &&
+    !pathname.startsWith("/metadata") &&
+    !pathname.includes(".")
+  );
 }
 
 export interface OperationalStatusInput {

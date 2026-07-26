@@ -1,0 +1,881 @@
+{
+  "schemaVersion": 1,
+  "gate": "G4",
+  "policyVersion": 1,
+  "sourceContract": "docs/twenty-v2.20-contract.json",
+  "processorCount": 87,
+  "invariant": "Only an authenticated executor response explicitly marked not-started may be retried. Every started, unclassified, transport-lost, or expired-lease outcome is quarantined without invoking the processor again.",
+  "processors": [
+    {
+      "file": "engine/core-modules/application/application-marketplace/crons/marketplace-catalog-sync.cron.job.js",
+      "processorExpression": "MarketplaceCatalogSyncCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/application/application-oauth/stale-registration-cleanup/crons/stale-registration-cleanup.cron.job.js",
+      "processorExpression": "StaleRegistrationCleanupCronJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/application/application-upgrade/crons/application-version-check.cron.job.js",
+      "processorExpression": "ApplicationVersionCheckCronJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/application/jobs/backfill-application-installation.job.js",
+      "processorExpression": "_backfillapplicationinstallationjobconstants.BACKFILL_APPLICATION_INSTALLATION_JOB_NAME",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/billing/jobs/update-subscription-quantity.job.js",
+      "processorExpression": "UpdateSubscriptionQuantityJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/billing/reminders/crons/billing-reminder.cron.job.js",
+      "processorExpression": "BillingReminderCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/code-interpreter/crons/jobs/code-interpreter-session-cleanup.cron.job.js",
+      "processorExpression": "CodeInterpreterSessionCleanupCronJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/email/email-sender.job.js",
+      "processorExpression": "EmailSenderJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/emailing-domain/jobs/emailing-domain-workspace-cleanup.job.js",
+      "processorExpression": "EmailingDomainWorkspaceCleanupJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/enterprise/cron/jobs/enterprise-key-validation.cron.job.js",
+      "processorExpression": "EnterpriseKeyValidationCronJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/event-logs/cleanup/crons/event-log-cleanup.cron.job.js",
+      "processorExpression": "EventLogCleanupCronJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/event-logs/cleanup/jobs/event-log-cleanup.job.js",
+      "processorExpression": "EventLogCleanupJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/event-logs/ingest/create-event-log-from-internal-event.js",
+      "processorExpression": "CreateEventLogFromInternalEvent.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/file/file-upload/crons/jobs/pending-file-cleanup.cron.job.js",
+      "processorExpression": "PendingFileCleanupCronJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/file/files-field/jobs/files-field-deletion.job.js",
+      "processorExpression": "FilesFieldDeletionJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/file/jobs/file-deletion.job.js",
+      "processorExpression": "FileDeletionJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/file/jobs/file-workspace-folder-deletion.job.js",
+      "processorExpression": "FileWorkspaceFolderDeletionJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/jwt/crons/jobs/rotate-signing-keys.cron.job.js",
+      "processorExpression": "RotateSigningKeysCronJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/logic-function/logic-function-trigger/jobs/logic-function-trigger.job.js",
+      "processorExpression": "LogicFunctionTriggerJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/logic-function/logic-function-trigger/triggers/cron/cron-trigger.cron.job.js",
+      "processorExpression": "CronTriggerCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/logic-function/logic-function-trigger/triggers/database-event/call-database-event-trigger-jobs.job.js",
+      "processorExpression": "CallDatabaseEventTriggerJobsJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/onboarding/jobs/install-onboarding-apps.job.js",
+      "processorExpression": "_installonboardingappsjobconstants.INSTALL_ONBOARDING_APPS_JOB_NAME",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/public-domain/crons/jobs/check-public-domains-valid-records.cron.job.js",
+      "processorExpression": "CheckPublicDomainsValidRecordsCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/sdk-client/jobs/generate-sdk-client.job.js",
+      "processorExpression": "_generatesdkclientjobconstants.GENERATE_SDK_CLIENT_JOB_NAME",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/user/jobs/update-workspace-member-email.job.js",
+      "processorExpression": "UpdateWorkspaceMemberEmailJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/workspace/crons/jobs/check-custom-domain-valid-records.cron.job.js",
+      "processorExpression": "CheckCustomDomainValidRecordsCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/workspace/handle-workspace-member-deleted.job.js",
+      "processorExpression": "HandleWorkspaceMemberDeletedJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-agent-monitor/jobs/evaluate-agent-turn.job.js",
+      "processorExpression": "EvaluateAgentTurnJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-agent-monitor/jobs/run-evaluation-input.job.js",
+      "processorExpression": "RunEvaluationInputJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/jobs/stream-agent-chat.job.js",
+      "processorExpression": "_streamagentchatjobnameconstant.STREAM_AGENT_CHAT_JOB_NAME",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/metadata-modules/navigation-menu-item/jobs/navigation-menu-item-deletion.job.js",
+      "processorExpression": "NavigationMenuItemDeletionJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/metadata-modules/webhook/jobs/call-webhook-jobs-for-metadata.job.js",
+      "processorExpression": "CallWebhookJobsForMetadataJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/metadata-modules/webhook/jobs/call-webhook-jobs.job.js",
+      "processorExpression": "CallWebhookJobsJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/metadata-modules/webhook/jobs/call-webhook.job.js",
+      "processorExpression": "CallWebhookJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/trash-cleanup/crons/trash-cleanup.cron.job.js",
+      "processorExpression": "TrashCleanupCronJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/trash-cleanup/jobs/trash-cleanup.job.js",
+      "processorExpression": "TrashCleanupJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/workspace-manager/workspace-cleaner/crons/clean-onboarding-workspaces.job.js",
+      "processorExpression": "CleanOnboardingWorkspacesJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/workspace-manager/workspace-cleaner/crons/clean-suspended-workspaces.job.js",
+      "processorExpression": "CleanSuspendedWorkspacesJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/workspace-manager/workspace-cleaner/jobs/clean-workspace-deletion-warning-user-vars.job.js",
+      "processorExpression": "CleanWorkspaceDeletionWarningUserVarsJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/calendar/blocklist-manager/jobs/blocklist-item-delete-calendar-events.job.js",
+      "processorExpression": "BlocklistItemDeleteCalendarEventsJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/calendar/blocklist-manager/jobs/blocklist-reimport-calendar-events.job.js",
+      "processorExpression": "BlocklistReimportCalendarEventsJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/calendar/calendar-event-cleaner/jobs/calendar-channel-deletion-cleanup.job.js",
+      "processorExpression": "CalendarChannelDeletionCleanupJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/calendar/calendar-event-cleaner/jobs/delete-connected-account-associated-calendar-data.job.js",
+      "processorExpression": "DeleteConnectedAccountAssociatedCalendarDataJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-event-list-fetch.cron.job.js",
+      "processorExpression": "CalendarEventListFetchCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-events-import.cron.job.js",
+      "processorExpression": "CalendarEventsImportCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-ongoing-stale.cron.job.js",
+      "processorExpression": "CalendarOngoingStaleCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-relaunch-failed-calendar-channels.cron.job.js",
+      "processorExpression": "CalendarRelaunchFailedCalendarChannelsCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-event-list-fetch.job.js",
+      "processorExpression": "CalendarEventListFetchJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-events-import.job.js",
+      "processorExpression": "CalendarEventsImportJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-ongoing-stale.job.js",
+      "processorExpression": "CalendarOngoingStaleJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-relaunch-failed-calendar-channel.job.js",
+      "processorExpression": "CalendarRelaunchFailedCalendarChannelJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/calendar/calendar-event-participant-manager/jobs/calendar-event-participant-match-participant.job.js",
+      "processorExpression": "CalendarEventParticipantMatchParticipantJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/connected-account/webhook-subscription-manager/crons/jobs/webhook-subscription-renewal.cron.job.js",
+      "processorExpression": "WebhookSubscriptionRenewalCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/connected-account/webhook-subscription-manager/jobs/create-webhook-subscription.job.js",
+      "processorExpression": "CreateWebhookSubscriptionJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/contact-creation-manager/jobs/create-company-and-contact.job.js",
+      "processorExpression": "CreateCompanyAndContactJob.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/emailing/jobs/materialize-campaign.job.js",
+      "processorExpression": "_campaignconstant.MATERIALIZE_CAMPAIGN_JOB",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/emailing/jobs/refresh-campaign-stats.job.js",
+      "processorExpression": "_campaignconstant.REFRESH_CAMPAIGN_STATS_JOB",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/emailing/jobs/send-campaign-email.job.js",
+      "processorExpression": "_campaignconstant.SEND_CAMPAIGN_EMAIL_JOB",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/blocklist-manager/jobs/messaging-blocklist-item-delete-messages.job.js",
+      "processorExpression": "BlocklistItemDeleteMessagesJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/blocklist-manager/jobs/messaging-blocklist-reimport-messages.job.js",
+      "processorExpression": "BlocklistReimportMessagesJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/message-cleaner/jobs/messaging-connected-account-deletion-cleanup.job.js",
+      "processorExpression": "MessagingConnectedAccountDeletionCleanupJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/message-cleaner/jobs/messaging-message-channel-deletion-cleanup.job.js",
+      "processorExpression": "MessagingMessageChannelDeletionCleanupJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-message-list-fetch.cron.job.js",
+      "processorExpression": "MessagingMessageListFetchCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-messages-import.cron.job.js",
+      "processorExpression": "MessagingMessagesImportCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-ongoing-stale.cron.job.js",
+      "processorExpression": "MessagingOngoingStaleCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-relaunch-failed-message-channels.cron.job.js",
+      "processorExpression": "MessagingRelaunchFailedMessageChannelsCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-add-single-message-to-cache-for-import.job.js",
+      "processorExpression": "MessagingAddSingleMessageToCacheForImportJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-clean-cache.js",
+      "processorExpression": "MessagingCleanCacheJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-inbound-email-import.job.js",
+      "processorExpression": "MessagingInboundEmailImportJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-message-list-fetch.job.js",
+      "processorExpression": "MessagingMessageListFetchJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-messages-import.job.js",
+      "processorExpression": "MessagingMessagesImportJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-ongoing-stale.job.js",
+      "processorExpression": "MessagingOngoingStaleJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-relaunch-failed-message-channel.job.js",
+      "processorExpression": "MessagingRelaunchFailedMessageChannelJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/message-participant-manager/jobs/message-participant-match-participant.job.js",
+      "processorExpression": "MessageParticipantMatchParticipantJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/messaging/monitoring/crons/jobs/messaging-message-channel-sync-status-monitoring.cron.job.js",
+      "processorExpression": "MessagingMessageChannelSyncStatusMonitoringCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/timeline/jobs/upsert-timeline-activity-from-internal-event.job.js",
+      "processorExpression": "UpsertTimelineActivityFromInternalEvent.name",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/workflow/workflow-executor/workflow-actions/delay/jobs/resume-delayed-workflow.job.js",
+      "processorExpression": "_resumedelayedworkflowjobname.RESUME_DELAYED_WORKFLOW_JOB_NAME",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/workflow/workflow-runner/jobs/run-workflow.job.js",
+      "processorExpression": "_runworkflowjobname.RUN_WORKFLOW_JOB_NAME",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/jobs/workflow-clean-workflow-runs.cron.job.js",
+      "processorExpression": "WorkflowCleanWorkflowRunsCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/jobs/workflow-handle-staled-runs.cron.job.js",
+      "processorExpression": "WorkflowHandleStaledRunsCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/jobs/workflow-run-enqueue.cron.job.js",
+      "processorExpression": "WorkflowRunEnqueueCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/jobs/workflow-clean-workflow-runs.job.js",
+      "processorExpression": "WorkflowCleanWorkflowRunsJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/jobs/workflow-handle-staled-runs.job.js",
+      "processorExpression": "WorkflowHandleStaledRunsJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/jobs/workflow-run-enqueue.job.js",
+      "processorExpression": "WorkflowRunEnqueueJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/workflow/workflow-status/jobs/workflow-statuses-update.job.js",
+      "processorExpression": "WorkflowStatusesUpdateJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/workflow/workflow-trigger/automated-trigger/crons/jobs/workflow-cron-trigger-cron.job.js",
+      "processorExpression": "WorkflowCronTriggerCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "modules/workflow/workflow-trigger/jobs/workflow-trigger.job.js",
+      "processorExpression": "WorkflowTriggerJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    }
+  ],
+  "capturedAt": "2026-07-25T03:16:25.288Z"
+}

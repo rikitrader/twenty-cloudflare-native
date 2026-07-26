@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-24T20:40:36Z",
+  "worker": "twenty-crm-redis-free-canary",
+  "productionWorkerTouched": false,
+  "productionDeploymentSnapshot": {
+    "worker": "twenty-crm",
+    "versionId": "5b42c895-ed4a-4a31-93df-1a14c43acbef",
+    "createdOn": "2026-07-24T15:45:07.962414Z"
+  },
+  "deployment": {
+    "codeVersionId": "920cf76b-dadf-4076-b41c-0c1084d9916c",
+    "activeSecretVersionId": "91ee2543-fc1d-4d3a-8464-1e6278f3c38f"
+  },
+  "queue": {
+    "name": "twenty-redis-canary-probe",
+    "maxRetries": 10,
+    "maxConcurrency": 2,
+    "deadLetterQueue": "twenty-jobs-canary-v2-dlq",
+    "deadLetterBacklogBefore": 9,
+    "deadLetterBacklogAfter": 13,
+    "postTestBacklog": 0
+  },
+  "scenarios": [
+    {
+      "name": "success",
+      "observed": "completed"
+    },
+    {
+      "name": "permanent-executor-response",
+      "observed": "quarantined",
+      "reason": "permanent-executor-response"
+    },
+    {
+      "name": "transient-retry-exhaustion",
+      "observed": "quarantined",
+      "reason": "retry-limit-exceeded"
+    },
+    {
+      "name": "connection-loss",
+      "observed": "quarantined",
+      "reason": "executor-outcome-ambiguous"
+    },
+    {
+      "name": "worker-process-crash",
+      "observed": "quarantined",
+      "reason": "executor-outcome-ambiguous"
+    },
+    {
+      "name": "post-crash-recovery",
+      "observed": "completed"
+    }
+  ],
+  "privacy": {
+    "jobIdsPersisted": false,
+    "tokensPersisted": false,
+    "payloadsPersisted": false
+  },
+  "cleanup": {
+    "completedAt": "2026-07-24T20:48:11Z",
+    "queue": "twenty-redis-canary-probe",
+    "purgedMessages": 1,
+    "reason": "A disposable disconnect message from the pre-fix 15-minute timeout run remained leased; the corrected 30-second disconnect and crash scenarios had already passed."
+  },
+  "executorRepairRerun": {
+    "capturedAt": "2026-07-25T02:15:59Z",
+    "workerVersionId": "e516fa2f-75d8-4bf9-8f18-345e3e8386d9",
+    "imageDigest": "sha256:60479dc0a655840bc1a398696d632259ea6b685653ef5dc53123c050049ecbeb",
+    "directExecutorStatus": 204,
+    "allSixScenariosPassed": true,
+    "productionModified": false,
+    "jobIdsPersisted": false
+  },
+  "result": "passed"
+}

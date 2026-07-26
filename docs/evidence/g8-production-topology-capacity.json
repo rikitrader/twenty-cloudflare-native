@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-25T08:31:31.191Z",
+  "scope": "production-topology-staging",
+  "result": "passed",
+  "productionChanged": false,
+  "stagingWorkerVersion": "0e6cf348-94c6-4567-ba5c-b986d6e734da",
+  "containerImageDigest": "sha256:12af64cb217787feaf3a5c9af0ed0b0473c2d6ad9a12ac2c750f5fe161603639",
+  "baseline": {
+    "source": "Cloudflare GraphQL workersInvocationsAdaptive",
+    "worker": "twenty-crm",
+    "windowDays": 14,
+    "peakRequestsPerMinute": 1525,
+    "peakTimestamp": "2026-07-23T22:49:00Z"
+  },
+  "target": {
+    "multiplier": 5,
+    "operations": 7625,
+    "intendedDurationMs": 60000,
+    "achievedDurationMs": 60307,
+    "intendedRequestsPerSecond": 127.08333333333333,
+    "clientConcurrency": 256
+  },
+  "topology": {
+    "serverReplicas": 2,
+    "workerReplicas": 4,
+    "workerMigrationHeadroom": 1,
+    "queueBatchSize": 10,
+    "queueMaxConcurrency": 4,
+    "postgresPoolConnectionsPerContainer": 5
+  },
+  "mix": {
+    "job": 382,
+    "server": 764,
+    "realtime": 1907,
+    "state": 4572
+  },
+  "results": {
+    "successfulOperations": 7625,
+    "failedOperations": 0,
+    "overallLatency": {
+      "p50Ms": 74.89850000001024,
+      "p95Ms": 249.01679199998034,
+      "p99Ms": 427.3044590000063,
+      "maxMs": 1062.8419579999754
+    },
+    "latencyByType": {
+      "job": {
+        "p50Ms": 87.4478329999838,
+        "p95Ms": 116.25429200002691,
+        "p99Ms": 313.06587499997113,
+        "maxMs": 348.4270419999957
+      },
+      "server": {
+        "p50Ms": 169.00954200001433,
+        "p95Ms": 261.2512080000135,
+        "p99Ms": 319.30295799998567,
+        "maxMs": 828.7312499999534
+      },
+      "realtime": {
+        "p50Ms": 73.41158299997915,
+        "p95Ms": 114.02725000004284,
+        "p99Ms": 614.5096249999478,
+        "maxMs": 1062.8419579999754
+      },
+      "state": {
+        "p50Ms": 73.76462500001071,
+        "p95Ms": 85.75145899999188,
+        "p99Ms": 307.59249999996973,
+        "maxMs": 884.3866670000134
+      }
+    },
+    "stateUniqueAtomicValues": 4572,
+    "realtimeUniqueEventIds": 1907,
+    "jobsCompleted": 382,
+    "jobsPending": 0,
+    "jobCompletionLatency": {
+      "p50Ms": 1373,
+      "p95Ms": 4191,
+      "p99Ms": 5439,
+      "maxMs": 5885
+    },
+    "finalCanaryQueueBacklog": 0
+  },
+  "slo": {
+    "overallP95UnderMs": 5000,
+    "overallP99UnderMs": 10000,
+    "jobCompletionP95UnderMs": 30000,
+    "jobCompletionP99UnderMs": 120000,
+    "allPassed": true
+  },
+  "hotspotAnalysis": {
+    "failedPredecessorJobP95Ms": 47068,
+    "cause": "one-message Queue batches plus serial in-batch dispatch",
+    "correction": "ten-message batches with bounded parallel per-message processing and four Queue consumers",
+    "deliverySafety": "two-phase reserved-to-running execution receipts distinguish pre-handler transport failure from ambiguous post-start failure",
+    "legacyRollout": "one non-routed migration slot prevents an old singleton invocation from blocking a named executor",
+    "database": "PG_POOL_MAX_CONNECTIONS=5 bounds six steady-state processes at 30 pooled PostgreSQL connections"
+  },
+  "privacy": {
+    "tokensPersisted": false,
+    "jobIdsPersisted": false,
+    "instanceIdsPersisted": false,
+    "applicationPayloadsPersisted": false
+  }
+}

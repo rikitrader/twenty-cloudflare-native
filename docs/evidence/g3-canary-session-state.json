@@ -1,0 +1,66 @@
+{
+  "gate": "G3",
+  "capturedAt": "2026-07-25T17:24:00Z",
+  "scope": "isolated canary only",
+  "canaryUrl": "https://twenty-crm-redis-free-canary.rikitrader.workers.dev",
+  "productionChanged": false,
+  "finding": {
+    "severity": "critical",
+    "rootCause": "Static class fields shadowed the @cloudflare/containers inherited outboundByHost setter, leaving ContainerProxy without internal hostname handlers.",
+    "observedFailure": "Container requests to twenty-state.internal fell through to DNS and returned HTTP 530.",
+    "impact": "New-account workspace provisioning failed after issuing an account token, and all container-originated cache/session/state operations were unavailable.",
+    "fix": "Register outboundByHost after each container class definition so the SDK setter populates its ContainerProxy registry.",
+    "regressionTest": "test/container-outbound-registration.test.ts"
+  },
+  "liveVerification": {
+    "fixedCanaryVersionAfterCredentialRotation": "00c9f03d-310f-4106-83ac-088864b57b25",
+    "internalStateCalls": {
+      "eventCount": 84,
+      "http200": 84,
+      "non200": 0,
+      "paths": [
+        "/v1/lock/acquire",
+        "/v1/lock/release",
+        "/v1/set/add",
+        "/v1/set/remove",
+        "/v1/state/delete",
+        "/v1/state/expire",
+        "/v1/state/get",
+        "/v1/state/increment",
+        "/v1/state/mget",
+        "/v1/state/set"
+      ]
+    },
+    "browser": {
+      "cleanProfileExtensionErrors": false,
+      "freshSignup": "passed",
+      "workspaceProvisioning": "passed",
+      "profileOnboarding": "passed",
+      "authenticatedApplicationLoad": "passed",
+      "seedCompanyCount": 5,
+      "sessionSurvivedDurableObjectContainerReset": "passed",
+      "reloadMetadataAndGraphqlResponses": "HTTP 200",
+      "logoutInvalidation": "passed: fresh-profile click emitted POST /_auth/revoke (HTTP 200) and returned to /welcome"
+    }
+  },
+  "freshAuthenticatedLifecycle": {
+    "signupWorkspaceProfileAndGraphql": "passed",
+    "logoutClientTokenRemoval": "passed",
+    "workerRevocationEndpoint": "passed",
+    "oldAccessTokenAfterRevocation": "401 unauthorized",
+    "revocationStorage": "SHA-256 token fingerprint in auth-revocation Durable Object namespace",
+    "frontendBundlePatch": "passed",
+    "result": "partial",
+    "remaining": "Concurrent-session and live Twenty permission-change invalidation evidence remain; adapter-level permission-key invalidation is covered by cloudflare-adapters tests. The cumulative soak ledger is deployed at /_canary/g3/soak."
+  },
+  "remainingEvidence": [
+    "Concurrent-session and live Twenty permission-change invalidation scenarios",
+    "Seven-day canary soak with session-loss and state-gateway SLOs"
+  ],
+  "tests": {
+    "typecheck": "passed",
+    "testFiles": 22,
+    "tests": 135,
+    "result": "passed"
+  }
+}

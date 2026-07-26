@@ -1,0 +1,38 @@
+{
+  "gate": "G1",
+  "capturedAt": "2026-07-25T15:31:00Z",
+  "scope": "isolated-redis-free-canary",
+  "worker": "twenty-crm-redis-free-canary",
+  "productionChanged": false,
+  "authenticatedBrowser": {
+    "signup": true,
+    "workspaceProvisioning": true,
+    "profileOnboarding": true,
+    "authenticatedCompaniesGraphql": true,
+    "seedCompanyCount": 5,
+    "sessionStorageBackedByCloudflareState": true
+  },
+  "workflowReplay": {
+    "personalEmailBranch": "passed",
+    "newCompanyBranch": "passed",
+    "existingCompanyBranch": "passed",
+    "workflowRunDeleteRestore": "passed",
+    "cleanup": "passed",
+    "payloadsPersisted": false
+  },
+  "contractCoverage": {
+    "status": "partial",
+    "newlyExercised": [
+      "authenticated-login",
+      "workflow-crud-and-execution"
+    ],
+    "remaining": [
+      "ai-cancel-and-heartbeat",
+      "authenticated-cache-invalidation",
+      "delayed-job-delivery",
+      "failed-job-retry-and-dlq",
+      "graphql-subscription-reconnect",
+      "job-crash-and-stall-recovery"
+    ]
+  }
+}

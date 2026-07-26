@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-25T06:26:41Z",
+  "scope": "production-topology-staging",
+  "result": "passed",
+  "productionChanged": false,
+  "worker": {
+    "name": "twenty-crm-enterprise-staging",
+    "activeVersionId": "764c2db7-fa65-4bc4-9a6d-9e478527d333",
+    "redisBackend": "cloudflare",
+    "redisUrlBindingPresent": false,
+    "redisUrlSecretPresent": false
+  },
+  "containers": {
+    "serverClass": "TwentyServer",
+    "workerClass": "TwentyWorker",
+    "allInOneClassBound": false,
+    "imageDigest": "sha256:143c99c79cdf0d52b0d4036a8555f98abbd5320264f2be71cb91eac4c749a297",
+    "productionDockerfile": "Dockerfile.production",
+    "redisServerBinaryPresent": false,
+    "redisApkInstalled": false,
+    "redisUrlImageEnvironmentPresent": false,
+    "workerObservedRunning": true
+  },
+  "database": {
+    "provider": "Neon",
+    "isolatedSchemaOnlyBranch": "br-raspy-grass-ah8k6x6t",
+    "containerConnection": "encrypted direct PostgreSQL origin secret",
+    "workerHyperdriveId": "c881ca75b80141f1a581ae6b3015ff49"
+  },
+  "cloudflareReplacements": {
+    "jobs": "Queues plus execution receipts in SQLite Durable Objects",
+    "events": "Queues plus retained pubsub log in SQLite Durable Objects",
+    "stateAndLocks": "SQLite Durable Objects",
+    "operations": "D1",
+    "status": "KV",
+    "objects": "R2"
+  },
+  "runtimeProof": {
+    "cloudflareQueueExecutorCompletedWithoutRedis": true,
+    "operatorReplayTraversedSeparateWorkerContainer": true,
+    "realtimeReplayAndFanoutCompletedWithoutRedis": true,
+    "redisProcessRequired": false,
+    "redisNetworkEndpointConfigured": false
+  },
+  "productionWorker": {
+    "name": "twenty-crm",
+    "unchangedVersionId": "5b42c895-ed4a-4a31-93df-1a14c43acbef"
+  }
+}

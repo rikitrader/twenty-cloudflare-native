@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-25T16:08:02.171Z",
+  "worker": "twenty-crm-redis-free-canary",
+  "productionWorkerTouched": false,
+  "productionDeploymentSnapshot": {
+    "worker": "twenty-crm",
+    "versionId": "5b42c895-ed4a-4a31-93df-1a14c43acbef"
+  },
+  "deployment": {
+    "faultSuiteVersionId": "38d09fe5-d6f2-4940-a19b-f5b79d9ecbb4",
+    "finalCanaryVersionId": "02e05b46-9002-4934-b24e-33963ea1d445",
+    "containerImageDigest": "sha256:f678c907d5d9a7af2d80f1a6d3cd47b90e12186572dcbc22db3e3b9be6800948"
+  },
+  "durableObjectProtocol": {
+    "storage": "SQLite-backed retained event log",
+    "retentionMs": 3600000,
+    "maxReplayEvents": 1000,
+    "hibernatableWebSockets": true,
+    "serializedCursorAttachments": true,
+    "explicitRetentionGap": true
+  },
+  "liveFaultScenarios": {
+    "unauthenticatedDenied": true,
+    "backlogReplay": true,
+    "liveDelivery": true,
+    "reconnectMissedEventRecovery": true,
+    "multiSubscriberFanout": true,
+    "retentionGapDetected": true,
+    "staleSocketClosedWith4009": true
+  },
+  "latestRun": {
+    "channel": "realtime-canary:71d839a9-881a-4f0c-97da-78b7fdd59047",
+    "eventIds": [187, 188, 189, 190],
+    "allAssertionsPassed": true
+  },
+  "authenticatedApplicationCompatibility": {
+    "graphqlSubscriptionType": null,
+    "interpretation": "Twenty v2.20 does not expose a GraphQL subscription root; authenticated edge realtime transport is validated by the canary suite instead.",
+    "adapterWebSocketTransportTests": 14,
+    "adapterWebSocketTransportResult": "passed"
+  },
+  "localEvictionHarness": {
+    "result": "passed",
+    "evidence": "docs/evidence/g6-local-eviction.json"
+  },
+  "twentyContainerIntegration": {
+    "transport": "cursor-aware long polling",
+    "internalHostname": "twenty-events.internal",
+    "cursorObserved": true,
+    "pollObserved": true,
+    "publishObserved": true,
+    "gatewayOutcomes": "ok",
+    "nativeWebSocketFinding": "Node native WebSocket did not traverse the Cloudflare Container outbound host interceptor, so it is not the selected container transport.",
+    "postDeployRootStatus": 200,
+    "postDeployRootLatencySeconds": 2.253611
+  },
+  "validation": {
+    "typecheck": "passed",
+    "testFiles": 17,
+    "tests": 87,
+    "testsPassed": 87
+  },
+  "closureChecks": {
+    "graphqlSubscriptionReconnect": {
+      "result": "not-applicable",
+      "reason": "Authenticated Twenty v2.20 introspection returned subscriptionType=null; no GraphQL subscription operation exists to reconnect."
+    },
+    "durableObjectEviction": {
+      "result": "passed",
+      "evidence": "docs/evidence/g6-local-eviction.json"
+    },
+    "aiStreamCancellation": {
+      "result": "passed",
+      "evidence": "test/cloudflare-adapters.test.ts direct AI surface and iterator cancellation tests"
+    },
+    "multiServerFiveTimesPeak": {
+      "result": "passed",
+      "evidence": "docs/evidence/g8-production-topology-capacity.json"
+    }
+  },
+  "privacy": {
+    "tokensPersisted": false,
+    "applicationPayloadsPersisted": false
+  },
+  "result": "passed"
+}

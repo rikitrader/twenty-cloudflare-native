@@ -8,6 +8,9 @@ import {
   sanitizedErrorMessage,
   shouldWriteStatus,
   evaluateOperationalStatus,
+  boundedReplicaCount,
+  hasRecentCustomerActivity,
+  isEdgeShellRequest,
 } from "../src/lib";
 
 describe("backupKey", () => {
@@ -29,6 +32,16 @@ describe("pickLatest", () => {
       ]),
     ).toBe("backups/2026-07-11T0100.sql");
     expect(pickLatest([])).toBeNull();
+  });
+});
+
+describe("boundedReplicaCount", () => {
+  it("defaults invalid input to one and caps configured replicas", () => {
+    expect(boundedReplicaCount(undefined)).toBe(1);
+    expect(boundedReplicaCount("0")).toBe(1);
+    expect(boundedReplicaCount("two")).toBe(1);
+    expect(boundedReplicaCount("2")).toBe(2);
+    expect(boundedReplicaCount("99", 8)).toBe(8);
   });
 });
 
@@ -64,6 +77,33 @@ describe("shouldWriteStatus", () => {
     expect(shouldWriteStatus(30_000, 1_000, true, true, 60_000)).toBe(false);
     expect(shouldWriteStatus(30_000, 1_000, false, true, 60_000)).toBe(true);
     expect(shouldWriteStatus(61_001, 1_000, true, true, 60_000)).toBe(true);
+  });
+});
+
+describe("hasRecentCustomerActivity", () => {
+  const now = Date.parse("2026-07-26T02:00:00Z");
+
+  it("keeps containers warm only inside the bounded activity window", () => {
+    expect(
+      hasRecentCustomerActivity(now, "2026-07-26T01:45:00Z"),
+    ).toBe(true);
+    expect(
+      hasRecentCustomerActivity(now, "2026-07-26T01:30:00Z"),
+    ).toBe(false);
+    expect(hasRecentCustomerActivity(now, null)).toBe(false);
+    expect(hasRecentCustomerActivity(now, "not-a-date")).toBe(false);
+  });
+});
+
+describe("isEdgeShellRequest", () => {
+  it("accepts browser navigations but excludes APIs, internals, and assets", () => {
+    expect(isEdgeShellRequest("GET", "/", "text/html")).toBe(true);
+    expect(isEdgeShellRequest("GET", "/objects/people", "text/html")).toBe(true);
+    expect(isEdgeShellRequest("POST", "/", "text/html")).toBe(false);
+    expect(isEdgeShellRequest("GET", "/graphql", "text/html")).toBe(false);
+    expect(isEdgeShellRequest("GET", "/_status", "text/html")).toBe(false);
+    expect(isEdgeShellRequest("GET", "/assets/app.js", "text/html")).toBe(false);
+    expect(isEdgeShellRequest("GET", "/", "application/json")).toBe(false);
   });
 });
 

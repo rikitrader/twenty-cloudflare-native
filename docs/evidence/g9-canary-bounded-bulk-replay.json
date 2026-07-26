@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-25T03:48:31Z",
+  "scope": "isolated-canary",
+  "result": "passed",
+  "productionChanged": false,
+  "resources": {
+    "operationsWorker": {
+      "name": "twenty-crm-redis-free-canary",
+      "versionId": "fa9a306e-d4d8-4164-a22b-b316838b7c6f"
+    },
+    "accessProbeWorker": {
+      "name": "twenty-g9-access-probe",
+      "versionId": "784485f5-043f-4304-83be-9f3bc89fafa9"
+    },
+    "database": "twenty-ops-canary",
+    "queue": "twenty-redis-canary-probe"
+  },
+  "controls": {
+    "maximumItemsPerRequest": 10,
+    "uniqueFailureIdsRequired": true,
+    "requestIdRequired": true,
+    "operatorNoteRequired": true,
+    "explicitBulkConfirmationRequired": true,
+    "expectedVersionRequiredPerItem": true,
+    "uncertainOutcomeConfirmationRequiredPerAmbiguousItem": true,
+    "allItemsPreflightedBeforeFirstEnqueue": true,
+    "stopOnFirstRuntimeConflict": true,
+    "individualDurableExecutionReceiptsPreserved": true,
+    "bulkRequestIdRecordedInPerCaseAuditMetadata": true
+  },
+  "liveVerification": {
+    "selected": 2,
+    "preflightPassed": 2,
+    "attempted": 2,
+    "completed": 2,
+    "postReplayJobsCompleted": 2,
+    "sharedAuditRequestIdObserved": 2,
+    "accessServiceAuthentication": "passed"
+  },
+  "localVerification": {
+    "totalTests": 105,
+    "bulkPreflightNoMutationTest": "passed",
+    "duplicateSelectionTest": "passed",
+    "maximumSelectionTest": "passed",
+    "sharedAuditRequestIdTest": "passed",
+    "typecheck": "passed",
+    "gitDiffCheck": "passed"
+  },
+  "documentationBasis": [
+    "https://developers.cloudflare.com/d1/worker-api/d1-database/",
+    "https://developers.cloudflare.com/queues/configuration/javascript-apis/"
+  ],
+  "privacy": {
+    "failureIdsPersisted": false,
+    "replayJobIdsPersisted": false,
+    "bulkRequestIdPersisted": false,
+    "credentialsPersisted": false
+  },
+  "remainingForG9Pass": []
+}

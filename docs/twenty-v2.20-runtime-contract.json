@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "targetImage": "twentycrm/twenty@sha256:d3dd949725e6196c57dab66ebe83ba9cdd2561885c35f94ef20f9ae38cd6d333",
+  "captureImage": "twentycrm/twenty-app-dev@sha256:9932df2e4db0db12cbf51d0ed5fa4f6c6849cb320e6fa94fe78cf315a7162ad2",
+  "captureProfile": "boot-and-anonymous-http-v1",
+  "scenarios": [
+    {
+      "name": "anonymous-graphql",
+      "method": "POST",
+      "path": "/graphql",
+      "status": 200
+    },
+    {
+      "name": "health",
+      "method": "GET",
+      "path": "/healthz",
+      "status": 200
+    },
+    {
+      "name": "root",
+      "method": "GET",
+      "path": "/",
+      "status": 200
+    }
+  ],
+  "observations": {
+    "bullmqClientCommands": [
+      "bzpopmin",
+      "evalsha"
+    ],
+    "bullmqLuaEffectCommands": [
+      "del",
+      "exists",
+      "get",
+      "hget",
+      "hgetall",
+      "hincrby",
+      "hmget",
+      "hmset",
+      "hset",
+      "incr",
+      "lpush",
+      "lrange",
+      "lrem",
+      "ltrim",
+      "rpoplpush",
+      "scard",
+      "set",
+      "smembers",
+      "srem",
+      "xadd",
+      "xtrim",
+      "zadd",
+      "zcard",
+      "zpopmin",
+      "zrange",
+      "zrangebyscore",
+      "zrem",
+      "zremrangebyrank",
+      "zrevrange",
+      "zrevrangebyscore",
+      "zscore"
+    ],
+    "directOrPlatformCommands": [
+      "get",
+      "hvals",
+      "mget",
+      "ping",
+      "set"
+    ],
+    "evalshaDigests": [
+      "11d69c87800ed307165e6eeba9c2e94d9fb95fcd",
+      "6c4c6de2bece2ad87657691d945d902df2198f5e",
+      "8dfbaeb5663437cb0917f2122d686f8c1805c9c5",
+      "c8e735ef3e7de0bb179e138c6b69a0bd83f6c755"
+    ],
+    "queueNames": [
+      "ai-queue",
+      "ai-stream-queue",
+      "billing-queue",
+      "calendar-queue",
+      "contact-creation-queue",
+      "cron-queue",
+      "delayed-jobs-queue",
+      "delete-cascade-queue",
+      "email-queue",
+      "entity-events-to-db-queue",
+      "logic-function-queue",
+      "messaging-queue",
+      "trigger-queue",
+      "webhook-queue",
+      "workflow-queue",
+      "workspace-queue"
+    ]
+  },
+  "privacy": {
+    "rawTracePersisted": false,
+    "retainedFields": [
+      "command-families",
+      "evalsha-digests",
+      "queue-names",
+      "scenario-status-codes"
+    ]
+  },
+  "coverage": {
+    "status": "partial",
+    "unexercisedScenarios": [
+      "ai-cancel-and-heartbeat",
+      "authenticated-cache-invalidation",
+      "authenticated-login-logout",
+      "delayed-job-delivery",
+      "failed-job-retry-and-dlq",
+      "graphql-subscription-reconnect",
+      "job-crash-and-stall-recovery",
+      "workflow-crud-and-execution"
+    ],
+    "note": "This runtime baseline proves boot, health, anonymous GraphQL, and observed BullMQ command families only. G1 remains partial until authenticated and failure-path scenarios are captured and replayed."
+  }
+}

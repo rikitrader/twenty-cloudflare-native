@@ -54,20 +54,13 @@ has_schema=$(psql "$PG_DATABASE_URL" -tAc \
   "SELECT EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name='core')" \
   2>/dev/null || echo "error")
 
-if [ "$has_schema" = "t" ] && [ "${RUN_NEON_INIT:-}" != "true" ]; then
-  # Steady state: Neon already initialized. Skip init entirely so twenty-server
-  # starts immediately. No per-boot remote seed, no per-boot upgrade.
+if [ "$has_schema" = "t" ]; then
+  # Database upgrades are exclusively owned by the Cloudflare release
+  # Workflow. Normal starts only verify that the external schema exists.
   step "Neon already initialized — skipping init, starting server"
   exit 0
 fi
 
-# First init (has_schema=f) or explicit RUN_NEON_INIT=true (version upgrade).
-step "initializing Neon (this runs once)"
-if [ "$has_schema" != "t" ]; then
-  yarn database:init:prod
-fi
-yarn command:prod cache:flush || echo "warn: cache flush failed, continuing"
-yarn command:prod upgrade || echo "warn: upgrade had errors, continuing"
-yarn command:prod cache:flush || echo "warn: cache flush failed, continuing"
-step "Neon init complete"
-exit 0
+echo "ERROR: external PostgreSQL schema is absent or unreachable"
+echo "Run the Cloudflare-controlled release Workflow; normal startup will not initialize Neon."
+exit 1

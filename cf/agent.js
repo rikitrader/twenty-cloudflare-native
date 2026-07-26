@@ -3,17 +3,75 @@
 // Endpoints: /ping /state /mark-settled /dump /restore
 const http = require("http");
 const fs = require("fs");
+const crypto = require("crypto");
 const { spawn, execFile } = require("child_process");
 
 const PORT = 2021;
-const TOKEN = process.env.BACKUP_TOKEN || "";
+const BACKUP_ONLY = process.env.BACKUP_ONLY === "true";
 const MARKER = "/tmp/cf-restore-settled"; // tmpfs: resets on every boot
 const PG_URL =
   process.env.PG_DATABASE_URL || "postgres://twenty:twenty@localhost:5432/default";
 
-const authed = (req) =>
-  TOKEN !== "" && req.headers.authorization === `Bearer ${TOKEN}`;
-const settled = () => fs.existsSync(MARKER);
+// Port 2021 is never exposed by a Container application. Authorization is
+// enforced at the Worker route before it opens the Durable Object tunnel; the
+// backup Workflow reaches this private port through its binding directly.
+const authed = () => true;
+const settled = () => BACKUP_ONLY || fs.existsSync(MARKER);
+
+const dumpToFile = (res) => {
+  const dumpPath = `/tmp/twenty-backup-${crypto.randomUUID()}.sql`;
+  const dump = spawn("pg_dump", [
+    PG_URL,
+    "--no-owner",
+    "--no-privileges",
+    "--format=plain",
+    "--file",
+    dumpPath,
+  ]);
+  let err = "";
+  dump.stderr.on("data", (data) => {
+    if (err.length < 16_384) err += data;
+  });
+  dump.on("error", (error) => {
+    fs.rm(dumpPath, { force: true }, () => {});
+    if (!res.headersSent) res.statusCode = 500;
+    res.end(`pg_dump failed: ${error.message.slice(0, 300)}`);
+  });
+  dump.on("close", (code) => {
+    if (code !== 0) {
+      fs.rm(dumpPath, { force: true }, () => {});
+      res.statusCode = 500;
+      return res.end(`pg_dump failed: ${err.slice(0, 300)}`);
+    }
+    fs.stat(dumpPath, (statError, stat) => {
+      if (statError || stat.size < 1024) {
+        fs.rm(dumpPath, { force: true }, () => {});
+        res.statusCode = 500;
+        return res.end(
+          `pg_dump output invalid: ${statError?.message || `${stat.size} bytes`}`,
+        );
+      }
+      const hash = crypto.createHash("sha256");
+      const input = fs.createReadStream(dumpPath);
+      input.on("data", (chunk) => hash.update(chunk));
+      input.on("error", (error) => {
+        fs.rm(dumpPath, { force: true }, () => {});
+        res.statusCode = 500;
+        res.end(`backup checksum failed: ${error.message.slice(0, 300)}`);
+      });
+      input.on("end", () => {
+        const sha256 = hash.digest("hex");
+        res.setHeader("content-type", "application/sql");
+        res.setHeader("content-length", String(stat.size));
+        res.setHeader("x-backup-sha256", sha256);
+        const body = fs.createReadStream(dumpPath);
+        body.on("close", () => fs.rm(dumpPath, { force: true }, () => {}));
+        body.on("error", (error) => res.destroy(error));
+        body.pipe(res);
+      });
+    });
+  });
+};
 
 const server = http.createServer((req, res) => {
   const path = req.url.split("?")[0];
@@ -59,7 +117,7 @@ const server = http.createServer((req, res) => {
       "sh",
       [
         "-c",
-        'ps aux | head -40; echo "=== s6 services ==="; ls /etc/s6-overlay/s6-rc.d/ 2>/dev/null | head -20; ls /run/service/ 2>/dev/null; echo "=== logs ==="; for f in $(find /var/log -name current 2>/dev/null | head -8); do echo "--- $f"; tail -n 80 "$f"; done',
+        'ps aux | head -40; echo "=== s6 services ==="; ls /etc/s6-overlay/s6-rc.d/ 2>/dev/null | head -20; ls /run/service/ 2>/dev/null; echo "=== supervisor status ==="; for s in twenty-server twenty-worker postgres redis; do echo "--- $s"; s6-svstat "/run/service/$s" 2>&1; ls -la "/run/service/$s/supervise" 2>/dev/null | head -20; done; echo "=== logs ==="; for f in $(find /var/log -name current 2>/dev/null | head -8); do echo "--- $f"; tail -n 80 "$f"; done',
       ],
       { timeout: 20_000, maxBuffer: 4_000_000 },
       (e, stdout, stderr) => {
@@ -77,27 +135,16 @@ const server = http.createServer((req, res) => {
       res.statusCode = 503;
       return res.end("restore not settled yet");
     }
-    // Provider grants (for example Neon's cloud_admin/neon_superuser roles)
-    // are not application data and make restores to plain PostgreSQL fail.
-    const dump = spawn("pg_dump", [
-      PG_URL,
-      "--no-owner",
-      "--no-privileges",
-    ]);
-    res.setHeader("content-type", "application/sql");
-    dump.stdout.pipe(res);
-    let err = "";
-    dump.stderr.on("data", (d) => (err += d));
-    dump.on("close", (code) => {
-      if (code !== 0) {
-        console.error("pg_dump failed:", code, err);
-        res.destroy(new Error(`pg_dump exit ${code}`));
-      }
-    });
-    return;
+    // Materialize on the container's ephemeral disk so the Worker can stream
+    // the body to R2 while R2 validates the precomputed SHA-256 checksum.
+    return dumpToFile(res);
   }
 
   if (path === "/restore" && req.method === "POST") {
+    if (BACKUP_ONLY) {
+      res.statusCode = 405;
+      return res.end("restore disabled on backup-only container");
+    }
     const chunks = [];
     req.on("data", (c) => chunks.push(c));
     req.on("end", () => {

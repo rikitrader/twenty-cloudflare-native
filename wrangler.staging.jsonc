@@ -1,0 +1,182 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "twenty-crm-enterprise-staging",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-08",
+  "workers_dev": true,
+  "preview_urls": false,
+  "containers": [
+    {
+      "class_name": "TwentyServer",
+      "image": "./Dockerfile.production",
+      "instance_type": "standard-1",
+      "max_instances": 3
+    },
+    {
+      "class_name": "TwentyWorker",
+      "image": "./Dockerfile.production",
+      "instance_type": "standard-1",
+      // Four named executors plus one temporary legacy-drain slot. Current
+      // routing targets only instance-0..3; the extra slot prevents an old
+      // in-flight singleton invocation from blocking a named executor.
+      "max_instances": 5
+    },
+    {
+      // pg_dump-only recovery companion: no Twenty, BullMQ, or Redis process.
+      "class_name": "TwentyBackup",
+      "image": "./Dockerfile.production",
+      "instance_type": "basic",
+      "max_instances": 1
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "TWENTY", "class_name": "TwentyServer" },
+      { "name": "TWENTY_SERVER", "class_name": "TwentyServer" },
+      { "name": "TWENTY_WORKER", "class_name": "TwentyWorker" },
+      { "name": "BACKUP_CONTAINER", "class_name": "TwentyBackup" },
+      { "name": "STATE_DO", "class_name": "TwentyState" },
+      { "name": "SCHEDULER_DO", "class_name": "TwentyScheduler" },
+      { "name": "PUBSUB_DO", "class_name": "TwentyPubSub" }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "staging-v1",
+      "new_sqlite_classes": [
+        "TwentyServer",
+        "TwentyWorker",
+        "TwentyState",
+        "TwentyScheduler",
+        "TwentyPubSub"
+      ]
+    },
+    {
+      "tag": "staging-v2",
+      "new_sqlite_classes": ["TwentyBackup"]
+    }
+  ],
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "c881ca75b80141f1a581ae6b3015ff49"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "STATUS_KV",
+      "id": "566718ed5a4842f1bd1e44272a780aae"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "STORAGE",
+      "bucket_name": "twenty-storage-enterprise-staging"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "OPS_DB",
+      "database_name": "twenty-ops-enterprise-staging",
+      "database_id": "190a4dd0-8ffd-4d23-bafd-03f18fd144c5"
+    }
+  ],
+  "ratelimits": [
+    {
+      "name": "OPS_RATE_LIMITER",
+      "namespace_id": "2003",
+      "simple": { "limit": 60, "period": 60 }
+    }
+  ],
+  "send_email": [
+    {
+      "name": "OPS_ALERT_EMAIL",
+      "destination_address": "rikitrader@gmail.com",
+      "allowed_sender_addresses": ["twenty-alerts@sismo911.com"]
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "EVENTS_QUEUE",
+        "queue": "twenty-events-enterprise-staging"
+      },
+      {
+        "binding": "JOBS_QUEUE",
+        "queue": "twenty-jobs-enterprise-staging"
+      },
+      {
+        "binding": "JOBS_DLQ",
+        "queue": "twenty-jobs-enterprise-staging-dlq"
+      },
+      {
+        "binding": "CANARY_QUEUE",
+        "queue": "twenty-enterprise-staging-probe"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "twenty-events-enterprise-staging",
+        "max_retries": 3,
+        "dead_letter_queue": "twenty-events-enterprise-staging-dlq"
+      },
+      {
+        "queue": "twenty-jobs-enterprise-staging",
+        "max_batch_size": 10,
+        "max_batch_timeout": 1,
+        "max_retries": 10,
+        "max_concurrency": 5,
+        "dead_letter_queue": "twenty-jobs-enterprise-staging-dlq"
+      },
+      {
+        "queue": "twenty-enterprise-staging-probe",
+        "max_batch_size": 10,
+        "max_batch_timeout": 1,
+        "max_retries": 10,
+        "max_concurrency": 4,
+        "dead_letter_queue": "twenty-jobs-enterprise-staging-dlq"
+      },
+      {
+        "queue": "twenty-jobs-enterprise-staging-dlq",
+        "max_batch_size": 10,
+        "max_batch_timeout": 5,
+        "max_retries": 10,
+        "max_concurrency": 1
+      }
+    ]
+  },
+  "workflows": [
+    {
+      "binding": "BACKUP_WF",
+      "name": "twenty-backup-enterprise-staging",
+      "class_name": "BackupWorkflow"
+    }
+  ],
+  "triggers": {
+    // Cost-controlled staging probe; detailed validation is workflow-driven.
+    "crons": ["*/15 * * * *"]
+  },
+  "vars": {
+    "SERVER_URL": "https://twenty-crm-enterprise-staging.rikitrader.workers.dev",
+    "REDIS_BACKEND": "cloudflare",
+    "CLOUDFLARE_PUBSUB_TRANSPORT": "poll",
+    "CLOUDFLARE_QUEUE_DRAIN": "true",
+    "CANARY_MODE": "true",
+    "ACCESS_REQUIRED": "true",
+    "ACCESS_TEAM_DOMAIN": "https://rikitrader.cloudflareaccess.com",
+    "ACCESS_AUD": "2101f1f5dee401ced71f977bded46695ce4b05325e25a223c19c9cc4786f68ad",
+    "OPS_ALERT_FROM": "twenty-alerts@sismo911.com",
+    "OPS_ALERT_TO": "rikitrader@gmail.com",
+    "STORAGE_S3_NAME": "twenty-storage-enterprise-staging",
+    "STORAGE_S3_REGION": "auto",
+    "JOB_QUEUE_NAME": "twenty-jobs-enterprise-staging",
+    "JOB_DLQ_NAME": "twenty-jobs-enterprise-staging-dlq",
+    "CANARY_QUEUE_NAME": "twenty-enterprise-staging-probe",
+    "PG_POOL_MAX_CONNECTIONS": "5",
+    "SERVER_REPLICAS": "2",
+    "WORKER_REPLICAS": "4"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

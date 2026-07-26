@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-25T06:16:07Z",
+  "scope": "production-topology-staging",
+  "result": "passed",
+  "productionChanged": false,
+  "resources": {
+    "worker": {
+      "name": "twenty-crm-enterprise-staging",
+      "uploadVersionId": "f3fb8050-01ff-457e-947d-046a5d695eb5",
+      "activeVersionIdAfterCredentialRotation": "45c97557-ddb1-446d-8a2a-7ae49e9dd5b1"
+    },
+    "containers": {
+      "serverApplicationId": "a039cb16-fc33-40ae-9cdb-08e9eef00bdd",
+      "workerApplicationId": "a03d334f-a7d9-46e6-b6a9-5bca814096eb",
+      "imageDigest": "sha256:143c99c79cdf0d52b0d4036a8555f98abbd5320264f2be71cb91eac4c749a297",
+      "workerObservedRunning": true,
+      "allInOneContainerPresent": false
+    },
+    "postgresql": {
+      "provider": "Neon",
+      "projectId": "wandering-dust-05948557",
+      "branchId": "br-raspy-grass-ah8k6x6t",
+      "branchName": "twenty-enterprise-staging",
+      "initSource": "parent-schema",
+      "productionRowsCopied": false,
+      "containerCredentialStorage": "encrypted Worker secret"
+    },
+    "hyperdrive": {
+      "id": "c881ca75b80141f1a581ae6b3015ff49",
+      "name": "twenty-pg-enterprise-staging",
+      "scope": "Worker-runtime database operations",
+      "containerCompatibility": "Worker-scoped connection strings are not passed to Containers"
+    },
+    "operationsDatabase": {
+      "id": "190a4dd0-8ffd-4d23-bafd-03f18fd144c5",
+      "name": "twenty-ops-enterprise-staging",
+      "migrationsCurrent": true
+    },
+    "kv": {
+      "id": "566718ed5a4842f1bd1e44272a780aae",
+      "name": "twenty-status-enterprise-staging"
+    },
+    "r2": {
+      "name": "twenty-storage-enterprise-staging"
+    },
+    "queues": {
+      "events": "twenty-events-enterprise-staging",
+      "eventsDlq": "twenty-events-enterprise-staging-dlq",
+      "jobs": "twenty-jobs-enterprise-staging",
+      "jobsDlq": "twenty-jobs-enterprise-staging-dlq",
+      "probe": "twenty-enterprise-staging-probe"
+    },
+    "access": {
+      "applicationId": "5c3fd842-fa1c-41ae-a5cc-bf191802de6e",
+      "audience": "2101f1f5dee401ced71f977bded46695ce4b05325e25a223c19c9cc4786f68ad",
+      "domain": "twenty-crm-enterprise-staging.rikitrader.workers.dev/*",
+      "humanPolicyId": "dd13cb07-cb77-42f5-928b-d6f7d01bb500",
+      "servicePolicyId": "e7140778-b89c-41bf-af54-059c5986eab4",
+      "serviceTokenId": "1a11474f-0f00-4c74-9251-7f01274820c3",
+      "serviceTokenExpiresAt": "2026-08-24T04:10:55Z"
+    },
+    "probeWorker": {
+      "name": "twenty-enterprise-staging-probe",
+      "activeVersionId": "3222435e-70fa-4d78-94ce-f5922b77c8b4",
+      "pathAndOriginAllowlist": true,
+      "serviceCredentialEncrypted": true
+    }
+  },
+  "checks": {
+    "wholeHostAccessEnforced": true,
+    "serviceAuthenticationPassed": true,
+    "separateServerAndWorkerContainers": true,
+    "redisUrlAbsent": true,
+    "cloudflareQueueExecutorCompleted": true,
+    "atomicFailureAndAuditIngestion": true,
+    "optimisticVersionConflictRejected": true,
+    "uncertainOutcomeRequiresConfirmation": true,
+    "operatorReplayCompleted": true,
+    "immutableReplayAuditRecorded": true,
+    "operatorDismissalAudited": true,
+    "controlledBoundedBulkReplay": true,
+    "listPayloadRedaction": true,
+    "realtimeQueueMetrics": true
+  },
+  "architectureFinding": {
+    "initialResult": "failed",
+    "failure": "Cloudflare Containers exited when given the Worker-scoped Hyperdrive connection string",
+    "evidence": "Container exit code 2 in Workers observability; identical image remained running against the direct isolated Neon origin",
+    "resolution": "Containers use an encrypted branch-specific PostgreSQL origin secret; Hyperdrive remains bound for Worker-runtime operations",
+    "productionImpact": false
+  },
+  "privacy": {
+    "productionRowsCopied": false,
+    "databaseCredentialPersistedInRepository": false,
+    "serviceCredentialPersistedInRepository": false,
+    "bearerTokensPersistedInEvidence": false,
+    "jobIdentifiersPersistedInEvidence": false
+  },
+  "productionWorker": {
+    "name": "twenty-crm",
+    "unchangedVersionId": "5b42c895-ed4a-4a31-93df-1a14c43acbef"
+  },
+  "remainingForG9Pass": []
+}

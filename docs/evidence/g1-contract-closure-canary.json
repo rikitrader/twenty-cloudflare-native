@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "gate": "G1",
+  "capturedAt": "2026-07-25T16:12:00Z",
+  "scope": "isolated-redis-free-canary",
+  "workerVersion": "dd39fe8c-adf0-4bbc-ae9b-2c5485eb37c6",
+  "productionChanged": false,
+  "scenarioCoverage": {
+    "authenticated-login-logout": "docs/evidence/g3-canary-session-state.json and docs/evidence/g3-auth-revocation-canary.json",
+    "authenticated-cache-invalidation": "docs/evidence/g3-auth-revocation-canary.json",
+    "workflow-crud-and-execution": "docs/evidence/g1-authenticated-contract-canary.json",
+    "delayed-job-delivery": "docs/evidence/g5-canary-scheduler-correctness.json",
+    "failed-job-retry-and-dlq": "docs/evidence/g9-canary-dlq-operations.json",
+    "job-crash-and-stall-recovery": "fresh run of scripts/run-job-fault-canary.mjs; all 8 scenarios passed",
+    "graphql-subscription-reconnect": "not applicable to Twenty v2.20 schema: authenticated introspection returned subscriptionType=null; equivalent authenticated edge realtime is covered by G6",
+    "ai-cancel-and-heartbeat": "test/cloudflare-adapters.test.ts; 10 adapter tests passed with websocket transport enabled"
+  },
+  "freshRuntimeRuns": {
+    "jobFaults": {
+      "passed": true,
+      "scenarios": 8,
+      "fullContainerCrash": "quarantined",
+      "postCrashPing": "completed"
+    },
+    "realtime": {
+      "passed": true,
+      "eventIds": [187, 188, 189, 190],
+      "reconnect": true,
+      "fanout": true,
+      "retentionGap": true
+    },
+    "adapterTests": { "passed": 14 }
+  },
+  "result": "passed"
+}

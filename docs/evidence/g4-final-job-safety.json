@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "gate": "G4",
+  "status": "passed",
+  "capturedAt": "2026-07-25T03:24:40.976Z",
+  "environment": {
+    "worker": "twenty-crm-redis-free-canary",
+    "isolatedCanary": true,
+    "workerVersionId": "4e6c7e58-8085-4d0d-b93b-1b06c404c1ae",
+    "imageDigest": "sha256:86fc238565431b9c9e43905c7f4dc3f36a54de4ec1ef8b8394eaae86ae9e8432",
+    "productionModified": false,
+    "productionVersionId": "5b42c895-ed4a-4a31-93df-1a14c43acbef"
+  },
+  "executionInvariant": {
+    "completed": "Persist the completion receipt before acknowledging the Queue message.",
+    "explicitlyNotStarted": "Abandon the receipt and apply the bounded envelope retry policy.",
+    "ambiguousOrStarted": "Quarantine and acknowledge without invoking the processor again.",
+    "expiredRunningLease": "Atomically transition the receipt to executor-outcome-ambiguous quarantine."
+  },
+  "liveScenarios": [
+    {
+      "name": "normal-completion",
+      "observed": "completed"
+    },
+    {
+      "name": "permanent-executor-response",
+      "observed": "quarantined",
+      "reason": "permanent-executor-response"
+    },
+    {
+      "name": "explicitly-not-started-transient",
+      "observed": "quarantined-after-bounded-retries",
+      "reason": "retry-limit-exceeded"
+    },
+    {
+      "name": "failure-after-side-effect",
+      "observed": "quarantined-without-replay",
+      "reason": "executor-outcome-ambiguous",
+      "sideEffectCount": 1
+    },
+    {
+      "name": "connection-loss",
+      "observed": "quarantined",
+      "reason": "executor-outcome-ambiguous"
+    },
+    {
+      "name": "worker-process-crash",
+      "observed": "quarantined",
+      "reason": "executor-outcome-ambiguous"
+    },
+    {
+      "name": "whole-container-in-flight-crash",
+      "observed": "quarantined-without-replay",
+      "reason": "executor-outcome-ambiguous",
+      "handlerStartedBeforeDestroy": true,
+      "containerDestroyed": true
+    },
+    {
+      "name": "post-crash-recovery",
+      "observed": "completed"
+    }
+  ],
+  "processorCoverage": {
+    "contractProcessors": 87,
+    "dispositionsRecorded": 87,
+    "externalOrUserCodeRisk": 64,
+    "applicationStateMutationRisk": 23,
+    "verification": "npm run processors:idempotency:check",
+    "evidence": "docs/evidence/g4-processor-idempotency.json"
+  },
+  "queueSteadyState": {
+    "historicalFailureBacklog": 156,
+    "recoverySeries": [67, 53, 48, 11, 10],
+    "documentedBound": {
+      "backlogCountMaximum": 20,
+      "oldestMessageAgeMaximumMinutes": 5
+    },
+    "latest": {
+      "jobsBacklogCount": 10,
+      "jobsOldestMessageAgeMinutes": 2.7,
+      "jobsDlqBacklogCount": 0,
+      "dedicatedCanaryBacklogCount": 0
+    }
+  },
+  "privacy": {
+    "jobIdsPersisted": false,
+    "tokensPersisted": false,
+    "payloadsPersisted": false
+  },
+  "operationsFollowUp": {
+    "gate": "G9",
+    "items": [
+      "executor-readiness alert",
+      "queue backlog and oldest-message-age alerts"
+    ]
+  }
+}

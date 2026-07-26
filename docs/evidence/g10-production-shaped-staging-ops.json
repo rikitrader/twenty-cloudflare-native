@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "gate": "G10",
+  "capturedAt": "2026-07-25T16:52:00Z",
+  "scope": "Access-protected production-shaped staging",
+  "worker": "twenty-crm-enterprise-staging",
+  "database": "twenty-ops-enterprise-staging",
+  "productionChanged": false,
+  "result": "passed",
+  "checks": {
+    "unauthenticatedDenied": true,
+    "accessServiceAuthReadiness": true,
+    "atomicIngestionAndAudit": true,
+    "optimisticVersionConflict": true,
+    "uncertainOutcomeConfirmation": true,
+    "operatorReplayCompleted": true,
+    "immutableReplayAudit": true,
+    "operatorDismissalAudited": true,
+    "controlledBoundedBulkReplay": true,
+    "listPayloadRedaction": true,
+    "realtimeQueueMetrics": true
+  },
+  "remainingProductionControls": [
+    "Production Access application with separate audience",
+    "Organization IdP and phishing-resistant MFA",
+    "Production WAF and Access/Worker Logpush",
+    "Production secret inventory and rotation approval"
+  ]
+}

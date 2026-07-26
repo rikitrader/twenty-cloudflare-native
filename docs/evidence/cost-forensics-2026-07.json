@@ -1,0 +1,72 @@
+{
+  "period": "2026-06-25/2026-07-24",
+  "invoiceTotalUsd": 285.26,
+  "finding": "The invoice is account-wide; it cannot be attributed to Twenty without per-database analytics.",
+  "invoiceLineItemsUsd": {
+    "d1RowsRead": 97.97,
+    "d1RowsWritten": 51.0,
+    "containerMemory": 109.52,
+    "containerDisk": 6.1,
+    "containerCpu": 2.43,
+    "durableObjectsCompute": 12.5,
+    "otherUsage": 0.74,
+    "workersPaid": 5.0
+  },
+  "liveAggregateChecks": {
+    "twentyOps": {
+      "databaseSizeBytes": 45056,
+      "eventsRows": 1,
+      "backupsRows": 77,
+      "jobFailureTablesPresent": false,
+      "note": "Production D1 does not currently have the job-failure migrations applied."
+    },
+    "twentyOpsCanary": {
+      "eventsRows": 0,
+      "databaseSizeBytes": 323584
+    },
+    "twentyOpsEnterpriseStaging": {
+      "eventsRows": 0,
+      "databaseSizeBytes": 401408,
+      "jobFailureTablesPresent": true
+    },
+    "accountDatabases": 16,
+    "largestAccountDatabases": [
+      { "name": "sismo911", "databaseSizeBytes": 351346688, "eventsRows": 11151, "auditRows": 1020 },
+      { "name": "hailintel-db", "databaseSizeBytes": 239759360, "ingestLogRows": 692 }
+    ]
+  },
+  "conclusion": "The large D1 invoice is account-level and is materially driven by sismo911's unindexed hospital_patients normalization query and repeated full scans. Twenty's current production D1 row counts are not sufficient to explain 148.97 USD of D1 usage.",
+  "d1InsightsLast7Days": {
+    "sismo911": {
+      "topReadQueryTotalRowsRead": 40797939556,
+      "topReadQueryRuns": 262,
+      "topReadQuery": "hospital_patients status normalization UPDATE with GROUP BY and correlated subquery",
+      "secondQueryTotalRowsRead": 1411997290,
+      "secondQueryRuns": 4939,
+      "secondQuery": "COUNT over personas with moderation/protected filters"
+    },
+    "hailintelDb": {
+      "topReadQueryTotalRowsRead": 122829,
+      "topReadQueryRuns": 55,
+      "topReadQuery": "hail_warnings active and unsuperseded lookup"
+    },
+    "twentyOps": {
+      "topReadQueryTotalRowsRead": 118,
+      "topReadQueryRuns": 59,
+      "topReadQuery": "INSERT INTO backups"
+    }
+  },
+  "nextRequiredEvidence": "Cloudflare D1 Billable Usage or GraphQL analytics split by database and day before changing Twenty persistence semantics."
+  ,"sismo911Remediation": {
+    "worktree": "/Users/ricardoprieto/.claude/worktrees/sismo911/cost-d1-hospital-marker",
+    "commits": ["f843ae3", "cc7e02f"],
+    "changes": [
+      "skip unchanged hospital feed snapshots using a KV source marker",
+      "cool down duplicate-collapse scans to six hours",
+      "support explicit force=true operator runs",
+      "clear the source marker during an explicit registry reset"
+      ,"add covering indexes for public registry counters and unmatched hospital status queries"
+    ],
+    "verification": "1730 tests passed; typecheck passed"
+  }
+}

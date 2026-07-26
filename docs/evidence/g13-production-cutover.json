@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "gate": "G13",
+  "operation": "controlled-production-cutover",
+  "startedAt": "2026-07-25T19:21:30.657Z",
+  "productionChanged": false,
+  "dryRun": true,
+  "beforeVersion": "5b42c895-ed4a-4a31-93df-1a14c43acbef",
+  "beforeStatus": {
+    "httpStatus": 200,
+    "body": {
+      "status": "ok",
+      "mode": "hybrid-neon",
+      "checked": "2026-07-25T19:20:29.913Z",
+      "source": "cron",
+      "lastBackupAttempt": "2026-07-25T19:00:30.732Z",
+      "lastBackup": "2026-07-25T19:00:52.536Z",
+      "lastBackupError": null,
+      "productionReady": false,
+      "durableRedis": false,
+      "reasons": []
+    }
+  },
+  "preflight": {
+    "readinessExitCode": 1,
+    "securityExitCode": 1,
+    "passed": false
+  },
+  "result": "blocked"
+}

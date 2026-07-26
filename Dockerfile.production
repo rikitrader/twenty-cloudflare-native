@@ -2,8 +2,29 @@
 # manifest. Both Cloudflare Container classes use this same immutable build.
 FROM twentycrm/twenty@sha256:d3dd949725e6196c57dab66ebe83ba9cdd2561885c35f94ef20f9ae38cd6d333
 
+# Fixable OS and Node findings are patched to exact versions so the immutable
+# upstream digest does not become a permanent vulnerability ceiling.
+USER root
+RUN apk add --no-cache \
+  c-ares=1.34.8-r0 \
+  curl=8.20.0-r0 \
+  libcurl=8.20.0-r0 && \
+  rm -f /var/log/apk.log
+COPY cf/patch-vulnerable-node-packages.sh /cf/patch-vulnerable-node-packages.sh
+COPY cf/agent.js /cf/agent.js
+COPY cf/release-agent.js /cf/release-agent.js
+RUN chmod +x /cf/patch-vulnerable-node-packages.sh && \
+  /cf/patch-vulnerable-node-packages.sh
+USER 1000
+
 COPY cf/patch-workflow-run-delete.cjs /cf/patch-workflow-run-delete.cjs
 RUN node /cf/patch-workflow-run-delete.cjs
+
+COPY cf/cloudflare-adapters/ /cf/cloudflare-adapters/
+COPY cf/patch-cloudflare-state-adapters.cjs /cf/patch-cloudflare-state-adapters.cjs
+RUN node /cf/patch-cloudflare-state-adapters.cjs
+COPY cf/patch-frontend-auth-revocation.cjs /cf/patch-frontend-auth-revocation.cjs
+RUN echo "frontend-auth-revocation-patch-v1" && node /cf/patch-frontend-auth-revocation.cjs
 
 # Logic-function source lives on Twenty's local storage driver. Cloudflare
 # Container disks are ephemeral, so bake this single workspace's trusted

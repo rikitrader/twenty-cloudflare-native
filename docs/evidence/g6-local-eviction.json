@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "gate": "G6",
+  "capturedAt": "2026-07-25T16:48:00Z",
+  "scope": "isolated Wrangler Worker test harness",
+  "productionChanged": false,
+  "worker": "realtime-eviction-fixture",
+  "result": "passed",
+  "checks": {
+    "eventPublishedBeforeEviction": true,
+    "forcedDurableObjectEviction": true,
+    "webSocketsMode": "hibernate",
+    "eventLogRetainedAfterEviction": true,
+    "replayAfterReconstruction": true
+  },
+  "eventsBefore": 1,
+  "eventsAfter": 1,
+  "runner": "scripts/run-realtime-eviction.mjs"
+}

@@ -1,0 +1,2850 @@
+{
+  "schemaVersion": 1,
+  "image": "twentycrm/twenty@sha256:d3dd949725e6196c57dab66ebe83ba9cdd2561885c35f94ef20f9ae38cd6d333",
+  "dependencies": {
+    "bullmq": "5.78.0",
+    "ioredis": "5.10.1"
+  },
+  "assumptions": {
+    "cloudflareQueuesDelivery": "retryable-at-least-once",
+    "acknowledgeAfterHandlerAndReceipt": true,
+    "durableExecutionReceipts": true,
+    "externalSideEffectsRequireIdempotency": true,
+    "unknownContractFailsClosed": true
+  },
+  "source": {
+    "compiledJavaScriptFiles": 7669,
+    "relevantRuntimeFiles": [
+      {
+        "file": "engine/core-modules/admin-panel/admin-panel-health.service.js",
+        "sha256": "83e78486a6ae5c810ddbdd79cfbde092ac6addcde46e99097f9767ba211060f5"
+      },
+      {
+        "file": "engine/core-modules/admin-panel/admin-panel-queue.service.js",
+        "sha256": "5444a661a9e827695d9299bd9dc0af157325f7f88928cb4a6220c2763dd76043"
+      },
+      {
+        "file": "engine/core-modules/admin-panel/indicators/redis.health.js",
+        "sha256": "359bfd24afa0f05940f0a8052f0bb9457f3bfc2e7de442dcfef838900f0f1306"
+      },
+      {
+        "file": "engine/core-modules/admin-panel/indicators/worker.health.js",
+        "sha256": "5007c01284a1dba6976c27936be9ae3a9080ac4ac45aac55577432d8bd341841"
+      },
+      {
+        "file": "engine/core-modules/application/application-install/application-install.service.js",
+        "sha256": "1c7e029b25aad75ec8bb5119777ebda48134d73ae0250f2e22dc4ae234c1d31d"
+      },
+      {
+        "file": "engine/core-modules/application/application-marketplace/crons/commands/marketplace-catalog-sync.cron.command.js",
+        "sha256": "a9628cc9824c1dc3b042a47265030e5d567256a87245385d577093ef4448e14e"
+      },
+      {
+        "file": "engine/core-modules/application/application-marketplace/crons/marketplace-catalog-sync.cron.job.js",
+        "sha256": "51225a933a3cf30fdf22b2cf3c6c6684b1e3b0c89e9ce5bdd21ce03e60a78f26"
+      },
+      {
+        "file": "engine/core-modules/application/application-marketplace/marketplace.resolver.js",
+        "sha256": "2ab1bcad4b67e6fa5f137dbb76498939ce4431dbe435534d42c7af6f5f08d200"
+      },
+      {
+        "file": "engine/core-modules/application/application-oauth/stale-registration-cleanup/commands/stale-registration-cleanup.cron.command.js",
+        "sha256": "112d94f212ba380d7ef057fe2767d6fe3bc5d5cd689b47876d8fe6ae33d5c71e"
+      },
+      {
+        "file": "engine/core-modules/application/application-oauth/stale-registration-cleanup/crons/stale-registration-cleanup.cron.job.js",
+        "sha256": "2c20a54cd0655072e55c9761b733fdbefc458dfe80043a334205449ba41eef6e"
+      },
+      {
+        "file": "engine/core-modules/application/application-upgrade/crons/application-version-check.cron.job.js",
+        "sha256": "4bcc8110840de840c895a5e7e366319655cd6d30f170d23f5fe5c96867baec65"
+      },
+      {
+        "file": "engine/core-modules/application/application-upgrade/crons/commands/application-version-check.cron.command.js",
+        "sha256": "75da54efd9a6cd4b6ce3783416b2f967b4384611941635c9e2ed340a573521df"
+      },
+      {
+        "file": "engine/core-modules/application/jobs/backfill-application-installation.job.js",
+        "sha256": "4e7cea6d05070d84f53cdd87f15a8db0ba687a7d2ce63b34d5d778b07565ee52"
+      },
+      {
+        "file": "engine/core-modules/auth/services/google-apis.service.js",
+        "sha256": "8102aa08947b3f5a33924f4fe2da4c0e23950195e5069838e278d2cb60bb1cbe"
+      },
+      {
+        "file": "engine/core-modules/auth/services/microsoft-apis.service.js",
+        "sha256": "e22aa09ad4f213c2075731f28eb67300bf8f4fb2b760f273db05f6e82af348ac"
+      },
+      {
+        "file": "engine/core-modules/billing-webhook/services/billing-webhook-subscription.service.js",
+        "sha256": "52edce9e6182578e9567af24b8363fc1a5f22e33b995604d13798a68d7e70916"
+      },
+      {
+        "file": "engine/core-modules/billing/jobs/update-subscription-quantity.job.js",
+        "sha256": "c9f444c65d2d196c29bacab742f94d2576b1995b04ec104bf8e0c31eef4891fb"
+      },
+      {
+        "file": "engine/core-modules/billing/listeners/billing-workspace-member.listener.js",
+        "sha256": "0017b5d4aa1b9971e27a1f67e31287278c3c99ae93d154f94ad4e0396c34109b"
+      },
+      {
+        "file": "engine/core-modules/billing/reminders/crons/billing-reminder.cron.job.js",
+        "sha256": "6c1692ccd4f52829f38454dd36b8981201cae8e34629546e44467fc0f0f68007"
+      },
+      {
+        "file": "engine/core-modules/billing/reminders/crons/commands/billing-reminder.cron.command.js",
+        "sha256": "7abc3f47bc8591a3a4298ebc0c9c817cdb6e4ec853a9a0f8a66030cee16d638c"
+      },
+      {
+        "file": "engine/core-modules/cache-storage/cache-storage.module-factory.js",
+        "sha256": "94d569cb28e4063634e5010d3a96c3fb530f2af35e40a1b2adb34d178d3f028b"
+      },
+      {
+        "file": "engine/core-modules/cache-storage/cache-storage.module.js",
+        "sha256": "d584f7aa1e43d9373241f9f9a254d473472d44d1f807a77af4f25859669f705b"
+      },
+      {
+        "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+        "sha256": "d7bacc92053c4a8c958ceb72503bbf25b7b5c33b8ea73bb3340b76b05ea458da"
+      },
+      {
+        "file": "engine/core-modules/code-interpreter/crons/commands/code-interpreter-session-cleanup.cron.command.js",
+        "sha256": "b2e01f73da781f838ac1879a269a5dc72ce8a75c6d317a2cca2eac7a33f67249"
+      },
+      {
+        "file": "engine/core-modules/code-interpreter/crons/jobs/code-interpreter-session-cleanup.cron.job.js",
+        "sha256": "9da031e404de23edac30c676975b7f080055f225c512ecf05078dfc1fe6215ef"
+      },
+      {
+        "file": "engine/core-modules/email/email-sender.job.js",
+        "sha256": "6223c458d5e5bb83971f3b657f5cf29335b718192b6914555c67b30718d162ff"
+      },
+      {
+        "file": "engine/core-modules/email/email.service.js",
+        "sha256": "582dce7ce764525e73f05007eff13d87e388cccfdec2a98b2586dfccccc92c52"
+      },
+      {
+        "file": "engine/core-modules/emailing-domain/jobs/emailing-domain-workspace-cleanup.job.js",
+        "sha256": "e9522c7197da87f9e3e294c0c1ccb7106c07be06ec47581074eb17090859ffce"
+      },
+      {
+        "file": "engine/core-modules/enterprise/cron/command/enterprise-key-validation.cron.command.js",
+        "sha256": "f11c7146b017627f0215ae498c7732d48e912418fd26f7552776d2b61cc65b68"
+      },
+      {
+        "file": "engine/core-modules/enterprise/cron/jobs/enterprise-key-validation.cron.job.js",
+        "sha256": "493ccba89ec875c4d784c9123ec49a95603ffc8c2e0dbd3e75038cd0acf0477d"
+      },
+      {
+        "file": "engine/core-modules/event-logs/cleanup/commands/event-log-cleanup.cron.command.js",
+        "sha256": "de5963dff1d89da9564e202ef2c9c07be90c7c1bc0940cc7413b07e3ba831c45"
+      },
+      {
+        "file": "engine/core-modules/event-logs/cleanup/crons/event-log-cleanup.cron.job.js",
+        "sha256": "8c52a201ae62fecb89ba23b11f50ce49b01d0ff9e20f170b7236ceaa3c3df789"
+      },
+      {
+        "file": "engine/core-modules/event-logs/cleanup/jobs/event-log-cleanup.job.js",
+        "sha256": "4a4d536c05945cd627a590a04f0031857dcbdb150c92fa4db699d2679c3714d1"
+      },
+      {
+        "file": "engine/core-modules/event-logs/ingest/create-event-log-from-internal-event.js",
+        "sha256": "4077356f1aa0e2c701065e359a309a98d70018b98250d3d48cc119180dfb44a5"
+      },
+      {
+        "file": "engine/core-modules/file/file-upload/crons/commands/pending-file-cleanup.cron.command.js",
+        "sha256": "0dc6434bcaeda9625b5dd911c824183b7e9f3c77c86be60ed6702920a01c10d4"
+      },
+      {
+        "file": "engine/core-modules/file/file-upload/crons/jobs/pending-file-cleanup.cron.job.js",
+        "sha256": "424d7d7081b22d3ff888af17b526b39535cd6080451f7d1d138c5be8f897ca76"
+      },
+      {
+        "file": "engine/core-modules/file/files-field/jobs/files-field-deletion.job.js",
+        "sha256": "516df7e495a7705a1c631a420dc8845f7cc439ced1f52c5160091d56690ab59e"
+      },
+      {
+        "file": "engine/core-modules/file/files-field/listeners/files-field-deletion.listener.js",
+        "sha256": "aec5001b3d6a0aa5f880f7a1f5cf6c5d3e7e2272a2cb341cd5edee0cfa71e3c7"
+      },
+      {
+        "file": "engine/core-modules/file/jobs/file-deletion.job.js",
+        "sha256": "21aba66fa7b197e094f71fdbcfafd2a5f307fe2db5ebd9db6644fe73f9f5b3d0"
+      },
+      {
+        "file": "engine/core-modules/file/jobs/file-workspace-folder-deletion.job.js",
+        "sha256": "77f94bae0dd0d8b168c8a3bf06d046cc6f1b09d205890fc8ed4137b856dcfd51"
+      },
+      {
+        "file": "engine/core-modules/jwt/crons/commands/rotate-signing-keys.cron.command.js",
+        "sha256": "d29bb4a56736552037010ea3ed2984f98a50a1b01aa1e7d65c1f036d520f9911"
+      },
+      {
+        "file": "engine/core-modules/jwt/crons/jobs/rotate-signing-keys.cron.job.js",
+        "sha256": "49c9c52ca5285435cc713caae4a6f2be190ddab93d92f65e5ddce5ba979dd5ae"
+      },
+      {
+        "file": "engine/core-modules/logic-function/logic-function-trigger/jobs/logic-function-trigger.job.js",
+        "sha256": "e4c056c6611713fee71dac2bab43fabb3a6fd168e31cab1ef2a5225f007f0807"
+      },
+      {
+        "file": "engine/core-modules/logic-function/logic-function-trigger/triggers/cron/cron-trigger.cron.command.js",
+        "sha256": "f55eda21ef8a53cbfbc53296851e426392eb4dd23de1491439468ffb39dd405f"
+      },
+      {
+        "file": "engine/core-modules/logic-function/logic-function-trigger/triggers/cron/cron-trigger.cron.job.js",
+        "sha256": "2b3f77dc6622418f1cc7eca25ca221d4b09815d5d55b98c8f07c50d7676a0eca"
+      },
+      {
+        "file": "engine/core-modules/logic-function/logic-function-trigger/triggers/database-event/call-database-event-trigger-jobs.job.js",
+        "sha256": "aacf22423b14abcfc7cdccc946db1d17340fc96962bff34add7b707dae20c045"
+      },
+      {
+        "file": "engine/core-modules/message-queue/drivers/bullmq.driver.js",
+        "sha256": "e5b9604067a34b829c6df65d0623a3acf4f3356b11fc059d2114ebaa614a3ee2"
+      },
+      {
+        "file": "engine/core-modules/onboarding/jobs/install-onboarding-apps.job.js",
+        "sha256": "2818ed8ac4f546f855d4c13980413fc8fd5f1eaa35d502e6b58a2607beaaa6ed"
+      },
+      {
+        "file": "engine/core-modules/onboarding/onboarding.service.js",
+        "sha256": "22b0da7e001be44a46eba8364108bf081fb3b36018a9c4bb180ffc9892a6c7aa"
+      },
+      {
+        "file": "engine/core-modules/public-domain/crons/commands/check-public-domains-valid-records.cron.command.js",
+        "sha256": "91d62c6738f70c570dfcfcf7de611164403df4694de61a9877f72f1a99be060d"
+      },
+      {
+        "file": "engine/core-modules/public-domain/crons/jobs/check-public-domains-valid-records.cron.job.js",
+        "sha256": "d2edb865298f012f27cd4059ca7f33f11827dff35d9126f8d8abbaf03d17ec76"
+      },
+      {
+        "file": "engine/core-modules/redis-client/redis-client.service.js",
+        "sha256": "3cf4faa89a87307ba8ead2879188ab964697c13e66a4bf9ee4fdc2cc78023ccb"
+      },
+      {
+        "file": "engine/core-modules/sdk-client/jobs/generate-sdk-client.job.js",
+        "sha256": "daebc13ea5898a35c029a3a0f7492e4de1c94fd52a9afc3b564eca85bd6e79da"
+      },
+      {
+        "file": "engine/core-modules/sdk-client/sdk-client-generation.service.js",
+        "sha256": "04059f67fc39c40a912d0f1535cca0b783f77c05a84829f6542c91cec7758c25"
+      },
+      {
+        "file": "engine/core-modules/session-storage/session-storage.module-factory.js",
+        "sha256": "05d3b55c33acf789bcc5ca529a5a60361348a96c56630767163d291cad8a814d"
+      },
+      {
+        "file": "engine/core-modules/user/jobs/update-workspace-member-email.job.js",
+        "sha256": "b948fd573316ed6a94d32b49ff4817ae6913e620a63e34c47520a58ea6941ab2"
+      },
+      {
+        "file": "engine/core-modules/workspace/crons/commands/check-custom-domain-valid-records.cron.command.js",
+        "sha256": "54126338f32d33b4bd8f033ed5fda9d26eaa519271696b9059292edf668f1479"
+      },
+      {
+        "file": "engine/core-modules/workspace/crons/jobs/check-custom-domain-valid-records.cron.job.js",
+        "sha256": "72ecfbc51ebd5ba2addc7064d3df8c75752b487b45629dff30753fd8f8b30692"
+      },
+      {
+        "file": "engine/core-modules/workspace/handle-workspace-member-deleted.job.js",
+        "sha256": "f87e7997633807f6c3d2ca498a585a9ad77a397a45ea552ce6716871e6677b94"
+      },
+      {
+        "file": "engine/core-modules/workspace/services/workspace.service.js",
+        "sha256": "3ec1c2d167125e4fb895ada55a650c17dd6015d501e0862b887fbe489c4a442f"
+      },
+      {
+        "file": "engine/metadata-modules/ai/ai-agent-monitor/jobs/evaluate-agent-turn.job.js",
+        "sha256": "a623b841e9703f852c0f9de3960950c97b8dbf863250edfab83213f48cfe3dc4"
+      },
+      {
+        "file": "engine/metadata-modules/ai/ai-agent-monitor/jobs/run-evaluation-input.job.js",
+        "sha256": "6a8f67c3e47340ff74cbdf9bf87838163c0a3e07381e961de7dfa114e5bfb293"
+      },
+      {
+        "file": "engine/metadata-modules/ai/ai-agent-monitor/resolvers/agent-turn.resolver.js",
+        "sha256": "3b43f3873009166767d03d79915582abf43d95277e353266b63cd8399de1e0dc"
+      },
+      {
+        "file": "engine/metadata-modules/ai/ai-chat/jobs/stream-agent-chat.job.js",
+        "sha256": "42d0936b99fc5f3f2dd73b0d5f6c3feda33f33ece27ec5be953dd4692592fd5c"
+      },
+      {
+        "file": "engine/metadata-modules/ai/ai-chat/resolvers/agent-chat.resolver.js",
+        "sha256": "d91624e5c8535d4d935a1e925dddef9d5417bf6f577762c08abcdcab32a64342"
+      },
+      {
+        "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-cancel-subscriber.service.js",
+        "sha256": "d01f6849b58b86ba5336e36b67ce5fe46d4d71d29e4ee6aaa4cc1160ee8c0d08"
+      },
+      {
+        "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-event-publisher.service.js",
+        "sha256": "fd150b09b51dc6cfd894424f916a50e383eab8b49df29d25400d29522d60e7dd"
+      },
+      {
+        "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-stream-heartbeat.service.js",
+        "sha256": "60f3b9dc71a081e9b485c7140b2f9c217c1677663a944cc535e80f05979bd7f9"
+      },
+      {
+        "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-streaming.service.js",
+        "sha256": "984554496118004cb332356912d475df98460d6d608dd6ed114d84120227feac"
+      },
+      {
+        "file": "engine/metadata-modules/navigation-menu-item/jobs/navigation-menu-item-deletion.job.js",
+        "sha256": "cd6362ce4a36a7674c5b9d6013e76ada69f08bea59863f0a4cca7d2566ef3541"
+      },
+      {
+        "file": "engine/metadata-modules/navigation-menu-item/listeners/navigation-menu-item-deletion.listener.js",
+        "sha256": "a8c8251fe6e84238507f3279f8b8735daff54c7242a89e82f8dd06fed5a979f6"
+      },
+      {
+        "file": "engine/metadata-modules/webhook/jobs/call-webhook-jobs-for-metadata.job.js",
+        "sha256": "6a06cb59fb5fc4339987bcee20c9d8a281124b6e164662dcf612ab8fadeb99fa"
+      },
+      {
+        "file": "engine/metadata-modules/webhook/jobs/call-webhook-jobs.job.js",
+        "sha256": "7e6892c6053d5bfb11e2db1aa833a6549cf06e2a79a300c627d59d73829750da"
+      },
+      {
+        "file": "engine/metadata-modules/webhook/jobs/call-webhook.job.js",
+        "sha256": "7eeedd633f8fff6d59ff913471b9d5e4a7e47a897a04b974a9b76eff698b043d"
+      },
+      {
+        "file": "engine/subscriptions/subscription.service.js",
+        "sha256": "12030af8a8b7f82414da1fa7f8931d205898a8e8f7ae20e9013bb5928f8be05b"
+      },
+      {
+        "file": "engine/trash-cleanup/commands/trash-cleanup.cron.command.js",
+        "sha256": "3288476f5ed819ec56249337e7bfb7c3f0f45e6ff5f8aae09a69b89ca3bd3509"
+      },
+      {
+        "file": "engine/trash-cleanup/crons/trash-cleanup.cron.job.js",
+        "sha256": "e63644563c6ad12f62278b3dca34d4dbc5782d8248d67c6d1a226d1a0f63f1e4"
+      },
+      {
+        "file": "engine/trash-cleanup/jobs/trash-cleanup.job.js",
+        "sha256": "debd344ea3dc4aca40ecdcf58b813ffa9b9e77f9ae939d34ff3608902257067e"
+      },
+      {
+        "file": "engine/workspace-manager/workspace-cleaner/commands/clean-onboarding-workspaces.cron.command.js",
+        "sha256": "ac7d74026a05d72a1900b05842336a89887cd97ea962db0ff1e9649cea25d378"
+      },
+      {
+        "file": "engine/workspace-manager/workspace-cleaner/commands/clean-suspended-workspaces.cron.command.js",
+        "sha256": "1eb490f522e99a318843cdaf9d1ace506f915c24e41c5562f73bbf898238f33c"
+      },
+      {
+        "file": "engine/workspace-manager/workspace-cleaner/crons/clean-onboarding-workspaces.job.js",
+        "sha256": "66ac5f80a111bb42937ec722968c1aec46f7e37cc0a49b510af0b4ff98a085ab"
+      },
+      {
+        "file": "engine/workspace-manager/workspace-cleaner/crons/clean-suspended-workspaces.job.js",
+        "sha256": "068bc88481edcde0466e4861e7e4c29b9078afe7a23897aa091f48984a3fe674"
+      },
+      {
+        "file": "engine/workspace-manager/workspace-cleaner/jobs/clean-workspace-deletion-warning-user-vars.job.js",
+        "sha256": "cb2375f454bb36b6dcd87223ccde6b550d554850cd116d6a5261dadf86b9f100"
+      },
+      {
+        "file": "modules/calendar/blocklist-manager/jobs/blocklist-item-delete-calendar-events.job.js",
+        "sha256": "c5ebbefb3f661ad4c2376d385f43a058fc5f9d9c578d04739c9a31bc96506167"
+      },
+      {
+        "file": "modules/calendar/blocklist-manager/jobs/blocklist-reimport-calendar-events.job.js",
+        "sha256": "bc4dc848e1c91a3c1584c3f998349d734596c48af61488abd29ad308a9a18db0"
+      },
+      {
+        "file": "modules/calendar/blocklist-manager/listeners/calendar-blocklist.listener.js",
+        "sha256": "4598b5dee90377343850ac77180e7d254f2b4c16444bc9c42ee306b3f533a3ce"
+      },
+      {
+        "file": "modules/calendar/calendar-event-cleaner/jobs/calendar-channel-deletion-cleanup.job.js",
+        "sha256": "a92cf61a6e0db98abce3de1c86461acf7f089051468777a6983abbb44474ebec"
+      },
+      {
+        "file": "modules/calendar/calendar-event-cleaner/jobs/delete-connected-account-associated-calendar-data.job.js",
+        "sha256": "8f5d8f6f5dfd4f20254dee36c70cd5e36d1f151dc386c3035add9c7640c9578a"
+      },
+      {
+        "file": "modules/calendar/calendar-event-import-manager/commands/calendar-trigger-event-list-fetch.command.js",
+        "sha256": "8bcbaba76997cffa204153d8a85505c9e1dc3db473f26e4fc9818fe459cc3603"
+      },
+      {
+        "file": "modules/calendar/calendar-event-import-manager/crons/commands/calendar-event-list-fetch.cron.command.js",
+        "sha256": "e7bec98b6b6735495dd1ec355978f885f06260906c3d9efb5143eaf03a6e0da0"
+      },
+      {
+        "file": "modules/calendar/calendar-event-import-manager/crons/commands/calendar-import.cron.command.js",
+        "sha256": "1fdc7e13d611022d7792de14a5f4f23e3ec11a890c093459334705363342d30a"
+      },
+      {
+        "file": "modules/calendar/calendar-event-import-manager/crons/commands/calendar-ongoing-stale.cron.command.js",
+        "sha256": "d4101b1a2f9b324b9254168a3b071c991d428e77805671bd0bd5c1450d93774e"
+      },
+      {
+        "file": "modules/calendar/calendar-event-import-manager/crons/commands/calendar-relaunch-failed-calendar-channels.cron.command.js",
+        "sha256": "3ae52050fd928b735c67d37535a4188ebef842d0c69b9e735a1057fa0cb605d4"
+      },
+      {
+        "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-event-list-fetch.cron.job.js",
+        "sha256": "c469a91ce12cb8244e5208468775c3cb62135f44dda473244e9ee23870177e4d"
+      },
+      {
+        "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-events-import.cron.job.js",
+        "sha256": "46b9fea75420cf77bb7283cd8eef50673e01df97a6870aee70f74e61ea76ef34"
+      },
+      {
+        "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-ongoing-stale.cron.job.js",
+        "sha256": "81ced0f7e505efa33b10e35bb40ab38f85afaa6e99bca8ddfb6bb78a9e17bb32"
+      },
+      {
+        "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-relaunch-failed-calendar-channels.cron.job.js",
+        "sha256": "192a07d8650189c53a954607f26ca449ef20059ee28c2a13770c60f59173e290"
+      },
+      {
+        "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-event-list-fetch.job.js",
+        "sha256": "a0e73eee7b455ecc9231ea9c3470055d6b39fa98edfa5c56f89c162ce70217bf"
+      },
+      {
+        "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-events-import.job.js",
+        "sha256": "63cdb4cbce896c3b635c37f2f81d74fd4c8cd37003ab74a2923f1a6dbe49e37b"
+      },
+      {
+        "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-ongoing-stale.job.js",
+        "sha256": "0b0a4b7bf6736d1565ac057a3e2d342f8719f0ab74e34e2812d76c144466bc08"
+      },
+      {
+        "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-relaunch-failed-calendar-channel.job.js",
+        "sha256": "a480c8cb110a367bececb14a477e4b4c860256583f7382774532981de971eab2"
+      },
+      {
+        "file": "modules/calendar/calendar-event-participant-manager/jobs/calendar-event-participant-match-participant.job.js",
+        "sha256": "3360a3649ac7ef26978c96d731117a41261f77bb360d27c1d3041b15261abb1d"
+      },
+      {
+        "file": "modules/calendar/calendar-event-participant-manager/listeners/calendar-event-participant-person.listener.js",
+        "sha256": "a83256b94b5957d3cbb0b4d0d5ae1388a6058c59741434680f759694f955934a"
+      },
+      {
+        "file": "modules/calendar/calendar-event-participant-manager/listeners/calendar-event-participant-workspace-member.listener.js",
+        "sha256": "370a0f6e293cbe7d4c3868d344a30ef1292bb7dfa69a2a76983f11ed87e210b1"
+      },
+      {
+        "file": "modules/calendar/calendar-event-participant-manager/services/calendar-event-participant.service.js",
+        "sha256": "eb7bbf3525d83f403fbf6a7d3565ee0904a68e1d92462ae8eaf6a9df656e840b"
+      },
+      {
+        "file": "modules/connected-account/channel-sync/services/channel-sync.service.js",
+        "sha256": "cae082ac398db7b704bac7190ba8ec8476f3cef8905b7fb70abe0b9e1de92f03"
+      },
+      {
+        "file": "modules/connected-account/services/imap-smtp-caldav-apis.service.js",
+        "sha256": "8c5b06d699368512bd956efbadd639da73ce22c4fa7f1ec2b9e81b6cb0f69772"
+      },
+      {
+        "file": "modules/connected-account/webhook-subscription-manager/crons/commands/webhook-subscription-renewal.cron.command.js",
+        "sha256": "38ffb2e7d34ed3cc70debdfd9fa70155b43344d2b6d461b6fa1493ee8040a5f0"
+      },
+      {
+        "file": "modules/connected-account/webhook-subscription-manager/crons/jobs/webhook-subscription-renewal.cron.job.js",
+        "sha256": "fd81877a6b0e9c36ba2b502925964022c639db7c30cd1074d38627e4902c9ac9"
+      },
+      {
+        "file": "modules/connected-account/webhook-subscription-manager/jobs/create-webhook-subscription.job.js",
+        "sha256": "f1f8fd41b12aee6ee2fb924224ac67787e272914470543a40e3c1718dad5636a"
+      },
+      {
+        "file": "modules/contact-creation-manager/jobs/create-company-and-contact.job.js",
+        "sha256": "d9bdc0a8ff1b274d28f5251e999c2d8e4f262d0db6e3e328eb8b0f053f56263f"
+      },
+      {
+        "file": "modules/emailing/jobs/materialize-campaign.job.js",
+        "sha256": "ad8d1bfdd6d2d02083176cba1a80692c331fadaf012c27722b7a5868c9e2acb7"
+      },
+      {
+        "file": "modules/emailing/jobs/refresh-campaign-stats.job.js",
+        "sha256": "b6b5526664be7217ae657bf89652e9abe17502a92a321b4b429a6244f7e497d4"
+      },
+      {
+        "file": "modules/emailing/jobs/send-campaign-email.job.js",
+        "sha256": "3d4de40b3067328c7c1ca1b12388ddb58cace2502cf3ca3935e5b14d003e10b0"
+      },
+      {
+        "file": "modules/emailing/services/message-campaign.service.js",
+        "sha256": "e6ff7eb8a9cd421454a295567ddb6e1d871d82cdb9a1c6503d2471ba3f9cb696"
+      },
+      {
+        "file": "modules/messaging-webhooks/services/ses-inbound-mail-handler.service.js",
+        "sha256": "08c5f9d5bd9d284cf9005efc44891872b3472f90af6a190f6e268f49fdd18323"
+      },
+      {
+        "file": "modules/messaging/blocklist-manager/jobs/messaging-blocklist-item-delete-messages.job.js",
+        "sha256": "6e54296435bf06bff628a451fb766b1bd8d1706fbdaa33f5c550786caee9fbb1"
+      },
+      {
+        "file": "modules/messaging/blocklist-manager/jobs/messaging-blocklist-reimport-messages.job.js",
+        "sha256": "4ead2da6fda85e78a6eb62349879559280c6335275d62d6a2e2945ce23c2dce0"
+      },
+      {
+        "file": "modules/messaging/blocklist-manager/listeners/messaging-blocklist.listener.js",
+        "sha256": "4b76fac1c0ee9e0380b97aee9aeed5286853bc1e3ddf2acc3f1ea0c31180f76b"
+      },
+      {
+        "file": "modules/messaging/message-cleaner/jobs/messaging-connected-account-deletion-cleanup.job.js",
+        "sha256": "b927dfd9f3f5d6e2e09bc78014e064e8f617b10cd68c821b5d11a8088805a19f"
+      },
+      {
+        "file": "modules/messaging/message-cleaner/jobs/messaging-message-channel-deletion-cleanup.job.js",
+        "sha256": "fb49c22614bf98fec2910ef456e9ed79072c4a1afe8f5f5559757c5e693c1c08"
+      },
+      {
+        "file": "modules/messaging/message-cleaner/listeners/messaging-message-cleaner-connected-account.listener.js",
+        "sha256": "7f9eec83bfcb991a0bae190706b4f1a4df3531ce09fc2612d26fbbf9355a627d"
+      },
+      {
+        "file": "modules/messaging/message-cleaner/listeners/messaging-message-cleaner-message-channel.listener.js",
+        "sha256": "ea6667309250ab65a33faeb97c9f542a57b6fc2a99e3b3a24600ca4d370e9929"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/commands/messaging-single-message-import.command.js",
+        "sha256": "458e5ffd1a833f8c1559e2c574550d5c693da738e159780cb375fa515f3f2dd1"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/commands/messaging-trigger-message-list-fetch.command.js",
+        "sha256": "691e5594d6d03e256231c218e512232039f7b4255b16a755223a8da8400222d6"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/crons/commands/messaging-message-list-fetch.cron.command.js",
+        "sha256": "7be64d94edf2f9804183b21bd0333981857bb852ae92bca562edca8bc02cf052"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/crons/commands/messaging-messages-import.cron.command.js",
+        "sha256": "27eee3631863d7cd4a04e17334ff4a8fdf0d85a232c96387f0e9818ddd93c222"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/crons/commands/messaging-ongoing-stale.cron.command.js",
+        "sha256": "a6465dc9c5905f98ae02d0b98d81f6ad199dafee9e0b37a0d63b8adc3731437c"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/crons/commands/messaging-relaunch-failed-message-channels.cron.command.js",
+        "sha256": "ff6c576eee2af41feabc08ebcc4f022509b5364e08d8b618412fb095ef5c5537"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/crons/jobs/messaging-message-list-fetch.cron.job.js",
+        "sha256": "98a8cbbe0d7812f14d844c483cf932ae21bb79e2b700105d5bc18c24ef923eb8"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/crons/jobs/messaging-messages-import.cron.job.js",
+        "sha256": "bbe525e1d0af7bd86a7cfb8eb20b263539267df764822c750216fab26d44733a"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/crons/jobs/messaging-ongoing-stale.cron.job.js",
+        "sha256": "f52a037ba0870357c568a9c6815efbd7b34cc276128f9956879fe60f40d6461e"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/crons/jobs/messaging-relaunch-failed-message-channels.cron.job.js",
+        "sha256": "933a4a26ed9e7a9dc261b6194d4212de64071606e340d57da4faa70597deb3f9"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/jobs/messaging-add-single-message-to-cache-for-import.job.js",
+        "sha256": "6a9f7a196a2e92ba73bc94721f77b2c4cabe2d8905fa4ff2d3db4c0f66cd1fdb"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/jobs/messaging-clean-cache.js",
+        "sha256": "233534969bbbc6925724ed7f93057263bdd0c3d5513ad92cbafdc9799b4a96a6"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/jobs/messaging-inbound-email-import.job.js",
+        "sha256": "ff52b74bde437b76ce5a58ce614d4ba2eb91ce54807fef2130aa62263ddcc6ac"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/jobs/messaging-message-list-fetch.job.js",
+        "sha256": "3703529f2a833d550bfbb88a0a6b65efd15f2bd0a75959800ce69045b17d5d3e"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/jobs/messaging-messages-import.job.js",
+        "sha256": "5958c5b1e0cc9bf6a993d09fbce103bd3a0d7685cbd55032a477c624cf3e3a07"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/jobs/messaging-ongoing-stale.job.js",
+        "sha256": "54227ef5a835a4496b4cfb786713bba67b1322b6aa693d47f3b5be084457fac3"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/jobs/messaging-relaunch-failed-message-channel.job.js",
+        "sha256": "72ec3f3cf431d74fbc9a02665aee41f71bae55cc7d61bcf556b56ceb30555254"
+      },
+      {
+        "file": "modules/messaging/message-import-manager/services/messaging-save-messages-and-enqueue-contact-creation.service.js",
+        "sha256": "94e2b21477175f223f8f249ead90554200ba99972c132bf75e21b16235d6672f"
+      },
+      {
+        "file": "modules/messaging/message-participant-manager/jobs/message-participant-match-participant.job.js",
+        "sha256": "ab1b33691042eb40dc02c009e9e1847fe012debf7f98c92ecf3975d7eb60923f"
+      },
+      {
+        "file": "modules/messaging/message-participant-manager/listeners/message-participant-person.listener.js",
+        "sha256": "cb7338f2a79f4ca82692b0cd86cc2cebfc55922ce2c9f5f914bb9e01786ab773"
+      },
+      {
+        "file": "modules/messaging/message-participant-manager/listeners/message-participant-workspace-member.listener.js",
+        "sha256": "8309866d89dabae8623f760af708a5ab3c734cd48e3100698c9fa7e975ed5594"
+      },
+      {
+        "file": "modules/messaging/monitoring/crons/commands/messaging-message-channel-sync-status-monitoring.cron.command.js",
+        "sha256": "ab976bbc3268453ebfa67831b0e2309c734f161fd335b8ffc36f144aeb7f46b7"
+      },
+      {
+        "file": "modules/messaging/monitoring/crons/jobs/messaging-message-channel-sync-status-monitoring.cron.job.js",
+        "sha256": "8243e92ce1369bd567e840f97a1e8068d0735568558582cc8a571077347ddd14"
+      },
+      {
+        "file": "modules/timeline/jobs/upsert-timeline-activity-from-internal-event.job.js",
+        "sha256": "60833f8297c4eddaf1e954825b3cb0e3d9b4bf14d9da4165faf43fe7dfbde955"
+      },
+      {
+        "file": "modules/workflow/workflow-executor/workflow-actions/delay/delay.workflow-action.js",
+        "sha256": "9d118e53dd9d7c3344ce02f3c08860093c5089d3e12fe724bade7f99d56c4dc7"
+      },
+      {
+        "file": "modules/workflow/workflow-executor/workflow-actions/delay/jobs/resume-delayed-workflow.job.js",
+        "sha256": "09904354b5f6749c979406639d3416391e4bafb8e489e9479253dd3527066658"
+      },
+      {
+        "file": "modules/workflow/workflow-executor/workspace-services/workflow-executor.workspace-service.js",
+        "sha256": "7ec8c42728907be46c112eb8a81e01950614570c89c8dd5106e3f25c43fa98a6"
+      },
+      {
+        "file": "modules/workflow/workflow-runner/jobs/run-workflow.job.js",
+        "sha256": "87eb92ac6c505cab5a081ab00bf7710bc7b19ceccc7e750b5ea5ff0308619464"
+      },
+      {
+        "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/command/workflow-clean-workflow-runs.cron.command.js",
+        "sha256": "56be6793178777ef082eb79f4b1a504a5ff10b095e452f32c237cdb2038a394a"
+      },
+      {
+        "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/command/workflow-handle-staled-runs.cron.command.js",
+        "sha256": "4fe46d51c7db8cf235bffe20c83d08dc6264eba7c20ed70823582617969220d9"
+      },
+      {
+        "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/command/workflow-run-enqueue.cron.command.js",
+        "sha256": "ee9a962d63ce8683240fc8877865ac73b44e59da3cd0acb92ab4f5a558285793"
+      },
+      {
+        "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/jobs/workflow-clean-workflow-runs.cron.job.js",
+        "sha256": "033bc7437d5ff44632f6570e7a0e85b4cf1269ddb7403e196e69e69db164e57d"
+      },
+      {
+        "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/jobs/workflow-handle-staled-runs.cron.job.js",
+        "sha256": "477d2cea46cd6ae42744a1f77ea52635081413e0aa2706af9a5e33a5c97c4f2b"
+      },
+      {
+        "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/jobs/workflow-run-enqueue.cron.job.js",
+        "sha256": "2467f6fe396a8497ffc11da2ed3d2d3c1cf0773ea6a00752b6821c1f36ef30a7"
+      },
+      {
+        "file": "modules/workflow/workflow-runner/workflow-run-queue/jobs/workflow-clean-workflow-runs.job.js",
+        "sha256": "3fefb078930fc84ea536ffc6d1b1d8fa10a9849d77a1f58cfaed670496b936b5"
+      },
+      {
+        "file": "modules/workflow/workflow-runner/workflow-run-queue/jobs/workflow-handle-staled-runs.job.js",
+        "sha256": "a9bb3de91a3afc23d53577f99a594433062f78e0ba12f673823c9eab6df20997"
+      },
+      {
+        "file": "modules/workflow/workflow-runner/workflow-run-queue/jobs/workflow-run-enqueue.job.js",
+        "sha256": "c41187696ce64fc91da30f9d158d8de9d0550ff78bf46c3884278866efeeb406"
+      },
+      {
+        "file": "modules/workflow/workflow-runner/workflow-run-queue/workspace-services/workflow-run-enqueue.workspace-service.js",
+        "sha256": "155b22e515a00d0ffd2e3a64000c01886f12da304e53d427ec3ed519db19e48c"
+      },
+      {
+        "file": "modules/workflow/workflow-runner/workspace-services/workflow-runner.workspace-service.js",
+        "sha256": "dbd63015867c9ac4c84462f66e6215a033305995b095835af1734f98ece11e6d"
+      },
+      {
+        "file": "modules/workflow/workflow-status/jobs/workflow-statuses-update.job.js",
+        "sha256": "dc549e73b7e9db3c00d7365ba12049e8dc2f7b02d178d4ee7653ecd20d19efaa"
+      },
+      {
+        "file": "modules/workflow/workflow-status/listeners/workflow-version-status.listener.js",
+        "sha256": "e72ebaf1d9c91409c66443d48709e12bbc7114b6f17309d2f1260d962df22853"
+      },
+      {
+        "file": "modules/workflow/workflow-trigger/automated-trigger/crons/commands/workflow-cron-trigger.cron.command.js",
+        "sha256": "3f77b47a2088547009b52443b336202f8724b6e8a12285ffb0533df76639e54b"
+      },
+      {
+        "file": "modules/workflow/workflow-trigger/automated-trigger/crons/jobs/workflow-cron-trigger-cron.job.js",
+        "sha256": "8c95f3ce9d13a1502b9d14c9df479f354e9a79172b63995a255d06a3faaf9af6"
+      },
+      {
+        "file": "modules/workflow/workflow-trigger/automated-trigger/listeners/workflow-database-event-trigger.listener.js",
+        "sha256": "a98335344450aa754423742d3d4179b6fa8570af989ae73230de03f0aa055d48"
+      },
+      {
+        "file": "modules/workflow/workflow-trigger/jobs/workflow-trigger.job.js",
+        "sha256": "6275a56345106834f8a3c8a913e98500d8c1817d500333235cc66f98c5d801b1"
+      }
+    ]
+  },
+  "patchTargets": [
+    {
+      "file": "engine/core-modules/cache-storage/cache-storage.module-factory.js",
+      "sha256": "94d569cb28e4063634e5010d3a96c3fb530f2af35e40a1b2adb34d178d3f028b"
+    },
+    {
+      "file": "engine/core-modules/session-storage/session-storage.module-factory.js",
+      "sha256": "05d3b55c33acf789bcc5ca529a5a60361348a96c56630767163d291cad8a814d"
+    },
+    {
+      "file": "engine/core-modules/message-queue/message-queue.module-factory.js",
+      "sha256": "6b763b2a8f1ab713da4179ce575871778f8a4755338fa2ff66810abcf5b29020"
+    },
+    {
+      "file": "engine/core-modules/message-queue/message-queue-core.module.js",
+      "sha256": "b3d64582c534596a37142e7867bd0ecd4bbedad1f598056635ad14c1de7f62b9"
+    },
+    {
+      "file": "engine/core-modules/redis-client/redis-client.service.js",
+      "sha256": "3cf4faa89a87307ba8ead2879188ab964697c13e66a4bf9ee4fdc2cc78023ccb"
+    },
+    {
+      "file": "engine/core-modules/admin-panel/indicators/worker.health.js",
+      "sha256": "5007c01284a1dba6976c27936be9ae3a9080ac4ac45aac55577432d8bd341841"
+    },
+    {
+      "file": "engine/core-modules/admin-panel/admin-panel-health.service.js",
+      "sha256": "83e78486a6ae5c810ddbdd79cfbde092ac6addcde46e99097f9767ba211060f5"
+    },
+    {
+      "file": "engine/core-modules/admin-panel/admin-panel-queue.service.js",
+      "sha256": "5444a661a9e827695d9299bd9dc0af157325f7f88928cb4a6220c2763dd76043"
+    }
+  ],
+  "adapterContract": {
+    "direct": [
+      "del",
+      "duplicate",
+      "exists",
+      "expire",
+      "info",
+      "lrange",
+      "publish",
+      "quit",
+      "rpush",
+      "set"
+    ],
+    "pubsub": [
+      "asyncIterator",
+      "close",
+      "publish"
+    ],
+    "subscriber": [
+      "on",
+      "quit",
+      "subscribe",
+      "unsubscribe"
+    ],
+    "cacheClient": [
+      "del",
+      "eval",
+      "expire",
+      "hDel",
+      "hSet",
+      "hVals",
+      "incrBy",
+      "mGet",
+      "multi",
+      "pExpire",
+      "quit",
+      "sAdd",
+      "sCard",
+      "sMembers",
+      "sPop",
+      "sRem",
+      "scan",
+      "set"
+    ],
+    "cachePipeline": [
+      "exec",
+      "hSet",
+      "pExpire",
+      "sCard"
+    ],
+    "queueDriver": [
+      "add",
+      "addCron",
+      "onModuleDestroy",
+      "register",
+      "removeCron",
+      "work"
+    ]
+  },
+  "redisCalls": [
+    {
+      "file": "engine/core-modules/admin-panel/indicators/redis.health.js",
+      "line": 32,
+      "snippet": "this.redisClient.getClient().info(),",
+      "accessor": "direct",
+      "method": "info"
+    },
+    {
+      "file": "engine/core-modules/admin-panel/indicators/redis.health.js",
+      "line": 33,
+      "snippet": "this.redisClient.getClient().info('memory'),",
+      "accessor": "direct",
+      "method": "info"
+    },
+    {
+      "file": "engine/core-modules/admin-panel/indicators/redis.health.js",
+      "line": 34,
+      "snippet": "this.redisClient.getClient().info('clients'),",
+      "accessor": "direct",
+      "method": "info"
+    },
+    {
+      "file": "engine/core-modules/admin-panel/indicators/redis.health.js",
+      "line": 35,
+      "snippet": "this.redisClient.getClient().info('stats')",
+      "accessor": "direct",
+      "method": "info"
+    },
+    {
+      "file": "engine/core-modules/redis-client/redis-client.service.js",
+      "line": 67,
+      "snippet": "await this.redisQueueClient.quit();",
+      "accessor": "queue",
+      "method": "quit"
+    },
+    {
+      "file": "engine/core-modules/redis-client/redis-client.service.js",
+      "line": 71,
+      "snippet": "await this.redisClient.quit();",
+      "accessor": "direct",
+      "method": "quit"
+    },
+    {
+      "file": "engine/core-modules/redis-client/redis-client.service.js",
+      "line": 75,
+      "snippet": "await this.redisPubSubClient.close();",
+      "accessor": "pubsub",
+      "method": "close"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/resolvers/agent-chat.resolver.js",
+      "line": 301,
+      "snippet": "await redis.publish((0, _getcancelchannelutil.getCancelChannel)(threadId, thread.activeStreamId), 'cancel');",
+      "accessor": "direct",
+      "method": "publish"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/resolvers/agent-chat.resolver.js",
+      "line": 354,
+      "snippet": "await redis.publish((0, _getcancelchannelutil.getCancelChannel)(threadId, thread.activeStreamId), 'cancel');",
+      "accessor": "direct",
+      "method": "publish"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-cancel-subscriber.service.js",
+      "line": 25,
+      "snippet": "this.subscriber = this.redisClientService.getClient().duplicate();",
+      "accessor": "direct",
+      "method": "duplicate"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-event-publisher.service.js",
+      "line": 34,
+      "snippet": "const seq = await redis.rpush(key, JSON.stringify(event.chunk));",
+      "accessor": "direct",
+      "method": "rpush"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-event-publisher.service.js",
+      "line": 35,
+      "snippet": "await redis.expire(key, STREAM_CHUNKS_TTL_SECONDS);",
+      "accessor": "direct",
+      "method": "expire"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-event-publisher.service.js",
+      "line": 42,
+      "snippet": "await redis.del(this.getStreamChunksKey(threadId));",
+      "accessor": "direct",
+      "method": "del"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-event-publisher.service.js",
+      "line": 57,
+      "snippet": "await redis.del(this.getStreamChunksKey(threadId));",
+      "accessor": "direct",
+      "method": "del"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-event-publisher.service.js",
+      "line": 61,
+      "snippet": "const rawChunks = await redis.lrange(this.getStreamChunksKey(threadId), 0, -1);",
+      "accessor": "direct",
+      "method": "lrange"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-stream-heartbeat.service.js",
+      "line": 30,
+      "snippet": "await this.redisClientService.getClient().set(this.getKey(streamId), '1', 'EX', CLAIM_TTL_SECONDS);",
+      "accessor": "direct",
+      "method": "set"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-stream-heartbeat.service.js",
+      "line": 34,
+      "snippet": "this.redisClientService.getClient().set(this.getKey(streamId), '1', 'EX', RUNNING_TTL_SECONDS).catch(()=>{});",
+      "accessor": "direct",
+      "method": "set"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-stream-heartbeat.service.js",
+      "line": 42,
+      "snippet": "const exists = await this.redisClientService.getClient().exists(this.getKey(streamId));",
+      "accessor": "direct",
+      "method": "exists"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-stream-heartbeat.service.js",
+      "line": 49,
+      "snippet": "await this.redisClientService.getClient().del(this.getKey(streamId)).catch(()=>{});",
+      "accessor": "direct",
+      "method": "del"
+    },
+    {
+      "file": "engine/subscriptions/subscription.service.js",
+      "line": 32,
+      "snippet": "return client.asyncIterator(this.getSubscriptionChannel({",
+      "accessor": "pubsub",
+      "method": "asyncIterator"
+    },
+    {
+      "file": "engine/subscriptions/subscription.service.js",
+      "line": 39,
+      "snippet": "return client.asyncIterator(this.getEventStreamChannel({",
+      "accessor": "pubsub",
+      "method": "asyncIterator"
+    },
+    {
+      "file": "engine/subscriptions/subscription.service.js",
+      "line": 46,
+      "snippet": "await client.publish(this.getSubscriptionChannel({",
+      "accessor": "pubsub",
+      "method": "publish"
+    },
+    {
+      "file": "engine/subscriptions/subscription.service.js",
+      "line": 53,
+      "snippet": "await client.publish(this.getEventStreamChannel({",
+      "accessor": "pubsub",
+      "method": "publish"
+    },
+    {
+      "file": "engine/subscriptions/subscription.service.js",
+      "line": 63,
+      "snippet": "return client.asyncIterator(this.getAgentChatChannel({",
+      "accessor": "pubsub",
+      "method": "asyncIterator"
+    },
+    {
+      "file": "engine/subscriptions/subscription.service.js",
+      "line": 70,
+      "snippet": "await client.publish(this.getAgentChatChannel({",
+      "accessor": "pubsub",
+      "method": "publish"
+    }
+  ],
+  "cacheClientCalls": [
+    {
+      "file": "engine/core-modules/cache-storage/cache-storage.module.js",
+      "line": 38,
+      "snippet": "await this.cacheManager.store.client.quit();",
+      "method": "quit"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 113,
+      "snippet": "return this.cache.store.client.sPop(this.getKey(key), size);",
+      "method": "sPop"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 124,
+      "snippet": "return await this.cache.store.client.sCard(this.getKey(key));",
+      "method": "sCard"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 131,
+      "snippet": "return this.cache.store.client.sMembers(this.getKey(key));",
+      "method": "sMembers"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 145,
+      "snippet": "const result = await redisClient.scan(cursor, {",
+      "method": "scan"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 152,
+      "snippet": "await redisClient.del(keys);",
+      "method": "del"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 165,
+      "snippet": "const result = await redisClient.scan(cursor, {",
+      "method": "scan"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 172,
+      "snippet": "const pipeline = redisClient.multi();",
+      "method": "multi"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 192,
+      "snippet": "const result = await redisClient.set(this.getKey(key), 'lock', {",
+      "method": "set"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 206,
+      "snippet": "return this.cache.store.client.incrBy(this.getKey(key), increment);",
+      "method": "incrBy"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 218,
+      "snippet": "return redisClient.hVals(this.getKey(key));",
+      "method": "hVals"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 225,
+      "snippet": "return redisClient.hSet(this.getKey(key), field, value);",
+      "method": "hSet"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 238,
+      "snippet": "return redisClient.eval(script, {",
+      "method": "eval"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 254,
+      "snippet": "await redisClient.multi().hSet(prefixedKey, field, value).pExpire(prefixedKey, ttlMs).exec();",
+      "method": "multi"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 261,
+      "snippet": "return redisClient.hDel(this.getKey(key), field);",
+      "method": "hDel"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 265,
+      "snippet": "return this.cache.store.client.expire(this.getKey(key), ttlMs / 1000);",
+      "method": "expire"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 45,
+      "snippet": "await this.cache.store.client.del(prefixedKeys);",
+      "method": "del"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 53,
+      "snippet": "const values = await this.cache.store.client.mGet(prefixedKeys);",
+      "method": "mGet"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 76,
+      "snippet": "await this.cache.store.client.sAdd(this.getKey(key), value);",
+      "method": "sAdd"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 78,
+      "snippet": "await this.cache.store.client.expire(this.getKey(key), ttl / 1000);",
+      "method": "expire"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 97,
+      "snippet": "return this.cache.store.client.sRem(this.getKey(key), values);",
+      "method": "sRem"
+    }
+  ],
+  "cachePipelineCalls": [
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 174,
+      "snippet": "pipeline.sCard(key);",
+      "method": "sCard"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 176,
+      "snippet": "const results = await pipeline.exec();",
+      "method": "exec"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 254,
+      "snippet": "await redisClient.multi().hSet(prefixedKey, field, value).pExpire(prefixedKey, ttlMs).exec();",
+      "method": "exec"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 254,
+      "snippet": "await redisClient.multi().hSet(prefixedKey, field, value).pExpire(prefixedKey, ttlMs).exec();",
+      "method": "hSet"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/services/cache-storage.service.js",
+      "line": 254,
+      "snippet": "await redisClient.multi().hSet(prefixedKey, field, value).pExpire(prefixedKey, ttlMs).exec();",
+      "method": "pExpire"
+    }
+  ],
+  "subscriberCalls": [
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-cancel-subscriber.service.js",
+      "line": 26,
+      "snippet": "this.subscriber.on('message', (channel)=>{",
+      "method": "on"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-cancel-subscriber.service.js",
+      "line": 31,
+      "snippet": "this.subscriber?.unsubscribe(channel).catch(()=>{});",
+      "method": "unsubscribe"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-cancel-subscriber.service.js",
+      "line": 39,
+      "snippet": "await this.ensureSubscriber().subscribe(channel);",
+      "method": "subscribe"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-cancel-subscriber.service.js",
+      "line": 43,
+      "snippet": "await this.subscriber?.unsubscribe(channel).catch(()=>{});",
+      "method": "unsubscribe"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-cancel-subscriber.service.js",
+      "line": 47,
+      "snippet": "await this.subscriber.quit().catch(()=>{});",
+      "method": "quit"
+    }
+  ],
+  "queueAdds": [
+    {
+      "file": "engine/core-modules/application/application-install/application-install.service.js",
+      "line": 280,
+      "snippet": "await this.messageQueueService.add(_logicfunctiontriggerjob.LogicFunctionTriggerJob.name, ["
+    },
+    {
+      "file": "engine/core-modules/application/application-marketplace/crons/commands/marketplace-catalog-sync.cron.command.js",
+      "line": 33,
+      "snippet": "await this.messageQueueService.add(_marketplacecatalogsynccronjob.MarketplaceCatalogSyncCronJob.name, {});"
+    },
+    {
+      "file": "engine/core-modules/application/application-marketplace/marketplace.resolver.js",
+      "line": 51,
+      "snippet": "await this.messageQueueService.add(_marketplacecatalogsynccronjob.MarketplaceCatalogSyncCronJob.name, {}, {"
+    },
+    {
+      "file": "engine/core-modules/auth/services/google-apis.service.js",
+      "line": 190,
+      "snippet": "await this.messageQueueService.add(_messagingmessagelistfetchjob.MessagingMessageListFetchJob.name, {"
+    },
+    {
+      "file": "engine/core-modules/auth/services/microsoft-apis.service.js",
+      "line": 179,
+      "snippet": "await this.messageQueueService.add(_messagingmessagelistfetchjob.MessagingMessageListFetchJob.name, {"
+    },
+    {
+      "file": "engine/core-modules/billing-webhook/services/billing-webhook-subscription.service.js",
+      "line": 117,
+      "snippet": "await this.messageQueueService.add(_cleanworkspacedeletionwarninguservarsjob.CleanWorkspaceDeletionWarningUserVarsJob.name, {"
+    },
+    {
+      "file": "engine/core-modules/billing/listeners/billing-workspace-member.listener.js",
+      "line": 43,
+      "snippet": "await this.messageQueueService.add(_updatesubscriptionquantityjob.UpdateSubscriptionQuantityJob.name, {"
+    },
+    {
+      "file": "engine/core-modules/email/email.service.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.add(_emailsenderjob.EmailSenderJob.name, sendMailOptions, {"
+    },
+    {
+      "file": "engine/core-modules/event-logs/cleanup/crons/event-log-cleanup.cron.job.js",
+      "line": 49,
+      "snippet": "await this.messageQueueService.add(_eventlogcleanupjob.EventLogCleanupJob.name, {"
+    },
+    {
+      "file": "engine/core-modules/file/files-field/listeners/files-field-deletion.listener.js",
+      "line": 85,
+      "snippet": "await this.messageQueueService.add(_filesfielddeletionjob.FilesFieldDeletionJob.name, {"
+    },
+    {
+      "file": "engine/core-modules/logic-function/logic-function-trigger/triggers/cron/cron-trigger.cron.job.js",
+      "line": 82,
+      "snippet": "await this.messageQueueService.add(_logicfunctiontriggerjob.LogicFunctionTriggerJob.name, ["
+    },
+    {
+      "file": "engine/core-modules/logic-function/logic-function-trigger/triggers/database-event/call-database-event-trigger-jobs.job.js",
+      "line": 61,
+      "snippet": "await this.messageQueueService.add(_logicfunctiontriggerjob.LogicFunctionTriggerJob.name, logicFunctionPayloadsChunk, {"
+    },
+    {
+      "file": "engine/core-modules/onboarding/onboarding.service.js",
+      "line": 181,
+      "snippet": "await this.messageQueueService.add(_installonboardingappsjobconstants.INSTALL_ONBOARDING_APPS_JOB_NAME, {"
+    },
+    {
+      "file": "engine/core-modules/sdk-client/sdk-client-generation.service.js",
+      "line": 99,
+      "snippet": "].map((application)=>this.messageQueueService.add(_generatesdkclientjobconstants.GENERATE_SDK_CLIENT_JOB_NAME, {"
+    },
+    {
+      "file": "engine/core-modules/workspace/services/workspace.service.js",
+      "line": 334,
+      "snippet": "await this.messageQueueService.add(_fileworkspacefolderdeletionjob.FileWorkspaceFolderDeletionJob.name, {"
+    },
+    {
+      "file": "engine/core-modules/workspace/services/workspace.service.js",
+      "line": 342,
+      "snippet": "await this.messageQueueService.add(_emailingdomainworkspacecleanupjob.EmailingDomainWorkspaceCleanupJob.name, {"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-agent-monitor/jobs/run-evaluation-input.job.js",
+      "line": 82,
+      "snippet": "await this.messageQueueService.add(_evaluateagentturnjob.EvaluateAgentTurnJob.name, {"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-agent-monitor/resolvers/agent-turn.resolver.js",
+      "line": 85,
+      "snippet": "await this.messageQueueService.add(_runevaluationinputjob.RunEvaluationInputJob.name, {"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-streaming.service.js",
+      "line": 171,
+      "snippet": "await this.messageQueueService.add(_streamagentchatjobnameconstant.STREAM_AGENT_CHAT_JOB_NAME, {"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-streaming.service.js",
+      "line": 249,
+      "snippet": "await this.messageQueueService.add(_streamagentchatjobnameconstant.STREAM_AGENT_CHAT_JOB_NAME, {"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-streaming.service.js",
+      "line": 293,
+      "snippet": "await this.messageQueueService.add(_streamagentchatjobnameconstant.STREAM_AGENT_CHAT_JOB_NAME, {"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/services/agent-chat-streaming.service.js",
+      "line": 404,
+      "snippet": "await this.messageQueueService.add(_streamagentchatjobnameconstant.STREAM_AGENT_CHAT_JOB_NAME, {"
+    },
+    {
+      "file": "engine/metadata-modules/navigation-menu-item/listeners/navigation-menu-item-deletion.listener.js",
+      "line": 39,
+      "snippet": "await this.messageQueueService.add(_navigationmenuitemdeletionjob.NavigationMenuItemDeletionJob.name, {"
+    },
+    {
+      "file": "engine/metadata-modules/webhook/jobs/call-webhook-jobs-for-metadata.job.js",
+      "line": 65,
+      "snippet": "await this.messageQueueService.add(_callwebhookjob.CallWebhookJob.name, webhookEventsChunk, {"
+    },
+    {
+      "file": "engine/metadata-modules/webhook/jobs/call-webhook-jobs.job.js",
+      "line": 66,
+      "snippet": "await this.messageQueueService.add(_callwebhookjob.CallWebhookJob.name, webhookEventsChunk, {"
+    },
+    {
+      "file": "engine/trash-cleanup/crons/trash-cleanup.cron.job.js",
+      "line": 49,
+      "snippet": "await this.messageQueueService.add(_trashcleanupjob.TrashCleanupJob.name, {"
+    },
+    {
+      "file": "modules/calendar/blocklist-manager/listeners/calendar-blocklist.listener.js",
+      "line": 36,
+      "snippet": "await this.messageQueueService.add(_blocklistitemdeletecalendareventsjob.BlocklistItemDeleteCalendarEventsJob.name, payload);"
+    },
+    {
+      "file": "modules/calendar/blocklist-manager/listeners/calendar-blocklist.listener.js",
+      "line": 39,
+      "snippet": "await this.messageQueueService.add(_blocklistreimportcalendareventsjob.BlocklistReimportCalendarEventsJob.name, payload);"
+    },
+    {
+      "file": "modules/calendar/blocklist-manager/listeners/calendar-blocklist.listener.js",
+      "line": 42,
+      "snippet": "await this.messageQueueService.add(_blocklistitemdeletecalendareventsjob.BlocklistItemDeleteCalendarEventsJob.name, payload);"
+    },
+    {
+      "file": "modules/calendar/blocklist-manager/listeners/calendar-blocklist.listener.js",
+      "line": 43,
+      "snippet": "await this.messageQueueService.add(_blocklistreimportcalendareventsjob.BlocklistReimportCalendarEventsJob.name, payload);"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/commands/calendar-trigger-event-list-fetch.command.js",
+      "line": 66,
+      "snippet": "await this.messageQueueService.add(_calendareventlistfetchjob.CalendarEventListFetchJob.name, {"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-event-list-fetch.cron.job.js",
+      "line": 88,
+      "snippet": "await this.messageQueueService.add(_calendareventlistfetchjob.CalendarEventListFetchJob.name, {"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-events-import.cron.job.js",
+      "line": 87,
+      "snippet": "await this.messageQueueService.add(_calendareventsimportjob.CalendarEventsImportJob.name, {"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-ongoing-stale.cron.job.js",
+      "line": 55,
+      "snippet": "await this.messageQueueService.add(_calendarongoingstalejob.CalendarOngoingStaleJob.name, {"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-relaunch-failed-calendar-channels.cron.job.js",
+      "line": 73,
+      "snippet": "await this.messageQueueService.add(_calendarrelaunchfailedcalendarchanneljob.CalendarRelaunchFailedCalendarChannelJob.name, {"
+    },
+    {
+      "file": "modules/calendar/calendar-event-participant-manager/listeners/calendar-event-participant-person.listener.js",
+      "line": 43,
+      "snippet": "await this.messageQueueService.add(_calendareventparticipantmatchparticipantjob.CalendarEventParticipantMatchParticipantJob.name, {"
+    },
+    {
+      "file": "modules/calendar/calendar-event-participant-manager/listeners/calendar-event-participant-person.listener.js",
+      "line": 59,
+      "snippet": "await this.messageQueueService.add(_calendareventparticipantmatchparticipantjob.CalendarEventParticipantMatchParticipantJob.name, {"
+    },
+    {
+      "file": "modules/calendar/calendar-event-participant-manager/listeners/calendar-event-participant-person.listener.js",
+      "line": 74,
+      "snippet": "await this.messageQueueService.add(_calendareventparticipantmatchparticipantjob.CalendarEventParticipantMatchParticipantJob.name, {"
+    },
+    {
+      "file": "modules/calendar/calendar-event-participant-manager/listeners/calendar-event-participant-workspace-member.listener.js",
+      "line": 40,
+      "snippet": "await this.messageQueueService.add(_calendareventparticipantmatchparticipantjob.CalendarEventParticipantMatchParticipantJob.name, {"
+    },
+    {
+      "file": "modules/calendar/calendar-event-participant-manager/listeners/calendar-event-participant-workspace-member.listener.js",
+      "line": 55,
+      "snippet": "await this.messageQueueService.add(_calendareventparticipantmatchparticipantjob.CalendarEventParticipantMatchParticipantJob.name, {"
+    },
+    {
+      "file": "modules/calendar/calendar-event-participant-manager/services/calendar-event-participant.service.js",
+      "line": 87,
+      "snippet": "await this.messageQueueService.add(_createcompanyandcontactjob.CreateCompanyAndContactJob.name, {"
+    },
+    {
+      "file": "modules/connected-account/channel-sync/services/channel-sync.service.js",
+      "line": 62,
+      "snippet": "await this.messageQueueService.add(_messagingmessagelistfetchjob.MessagingMessageListFetchJob.name, {"
+    },
+    {
+      "file": "modules/connected-account/services/imap-smtp-caldav-apis.service.js",
+      "line": 142,
+      "snippet": "await this.messageQueueService.add(_messagingmessagelistfetchjob.MessagingMessageListFetchJob.name, {"
+    },
+    {
+      "file": "modules/emailing/services/message-campaign.service.js",
+      "line": 117,
+      "snippet": "await this.messageQueueService.add(_campaignconstant.MATERIALIZE_CAMPAIGN_JOB, {"
+    },
+    {
+      "file": "modules/emailing/services/message-campaign.service.js",
+      "line": 180,
+      "snippet": "await this.messageQueueService.add(_campaignconstant.SEND_CAMPAIGN_EMAIL_JOB, {"
+    },
+    {
+      "file": "modules/emailing/services/message-campaign.service.js",
+      "line": 423,
+      "snippet": "await this.messageQueueService.add(_campaignconstant.REFRESH_CAMPAIGN_STATS_JOB, {"
+    },
+    {
+      "file": "modules/messaging-webhooks/services/ses-inbound-mail-handler.service.js",
+      "line": 49,
+      "snippet": "await this.messageQueueService.add(_messaginginboundemailimportjob.MessagingInboundEmailImportJob.name, {"
+    },
+    {
+      "file": "modules/messaging/blocklist-manager/listeners/messaging-blocklist.listener.js",
+      "line": 36,
+      "snippet": "await this.messageQueueService.add(_messagingblocklistitemdeletemessagesjob.BlocklistItemDeleteMessagesJob.name, payload);"
+    },
+    {
+      "file": "modules/messaging/blocklist-manager/listeners/messaging-blocklist.listener.js",
+      "line": 39,
+      "snippet": "await this.messageQueueService.add(_messagingblocklistreimportmessagesjob.BlocklistReimportMessagesJob.name, payload);"
+    },
+    {
+      "file": "modules/messaging/blocklist-manager/listeners/messaging-blocklist.listener.js",
+      "line": 42,
+      "snippet": "await this.messageQueueService.add(_messagingblocklistitemdeletemessagesjob.BlocklistItemDeleteMessagesJob.name, payload);"
+    },
+    {
+      "file": "modules/messaging/blocklist-manager/listeners/messaging-blocklist.listener.js",
+      "line": 43,
+      "snippet": "await this.messageQueueService.add(_messagingblocklistreimportmessagesjob.BlocklistReimportMessagesJob.name, payload);"
+    },
+    {
+      "file": "modules/messaging/message-cleaner/listeners/messaging-message-cleaner-connected-account.listener.js",
+      "line": 40,
+      "snippet": "await Promise.all(batchEvent.events.map((event)=>this.messageQueueService.add(_messagingconnectedaccountdeletioncleanupjob.MessagingConnectedAccountDeletionCleanupJob.name, {"
+    },
+    {
+      "file": "modules/messaging/message-cleaner/listeners/messaging-message-cleaner-message-channel.listener.js",
+      "line": 40,
+      "snippet": "await Promise.all(batchEvent.events.map((event)=>this.messageQueueService.add(_messagingmessagechanneldeletioncleanupjob.MessagingMessageChannelDeletionCleanupJob.name, {"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/commands/messaging-single-message-import.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.add(_messagingaddsinglemessagetocacheforimportjob.MessagingAddSingleMessageToCacheForImportJob.name, {"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/commands/messaging-trigger-message-list-fetch.command.js",
+      "line": 66,
+      "snippet": "await this.messageQueueService.add(_messagingmessagelistfetchjob.MessagingMessageListFetchJob.name, {"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-message-list-fetch.cron.job.js",
+      "line": 89,
+      "snippet": "await this.messageQueueService.add(_messagingmessagelistfetchjob.MessagingMessageListFetchJob.name, {"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-messages-import.cron.job.js",
+      "line": 89,
+      "snippet": "await this.messageQueueService.add(_messagingmessagesimportjob.MessagingMessagesImportJob.name, {"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-ongoing-stale.cron.job.js",
+      "line": 55,
+      "snippet": "await this.messageQueueService.add(_messagingongoingstalejob.MessagingOngoingStaleJob.name, {"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-relaunch-failed-message-channels.cron.job.js",
+      "line": 74,
+      "snippet": "await this.messageQueueService.add(_messagingrelaunchfailedmessagechanneljob.MessagingRelaunchFailedMessageChannelJob.name, {"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/services/messaging-save-messages-and-enqueue-contact-creation.service.js",
+      "line": 92,
+      "snippet": "await this.messageQueueService.add(_createcompanyandcontactjob.CreateCompanyAndContactJob.name, {"
+    },
+    {
+      "file": "modules/messaging/message-participant-manager/listeners/message-participant-person.listener.js",
+      "line": 43,
+      "snippet": "await this.messageQueueService.add(_messageparticipantmatchparticipantjob.MessageParticipantMatchParticipantJob.name, {"
+    },
+    {
+      "file": "modules/messaging/message-participant-manager/listeners/message-participant-person.listener.js",
+      "line": 59,
+      "snippet": "await this.messageQueueService.add(_messageparticipantmatchparticipantjob.MessageParticipantMatchParticipantJob.name, {"
+    },
+    {
+      "file": "modules/messaging/message-participant-manager/listeners/message-participant-person.listener.js",
+      "line": 70,
+      "snippet": "await this.messageQueueService.add(_messageparticipantmatchparticipantjob.MessageParticipantMatchParticipantJob.name, {"
+    },
+    {
+      "file": "modules/messaging/message-participant-manager/listeners/message-participant-workspace-member.listener.js",
+      "line": 50,
+      "snippet": "await this.messageQueueService.add(_messageparticipantmatchparticipantjob.MessageParticipantMatchParticipantJob.name, {"
+    },
+    {
+      "file": "modules/messaging/message-participant-manager/listeners/message-participant-workspace-member.listener.js",
+      "line": 65,
+      "snippet": "await this.messageQueueService.add(_messageparticipantmatchparticipantjob.MessageParticipantMatchParticipantJob.name, {"
+    },
+    {
+      "file": "modules/workflow/workflow-executor/workflow-actions/delay/delay.workflow-action.js",
+      "line": 64,
+      "snippet": "await this.messageQueueService.add(_resumedelayedworkflowjobname.RESUME_DELAYED_WORKFLOW_JOB_NAME, {"
+    },
+    {
+      "file": "modules/workflow/workflow-executor/workflow-actions/delay/jobs/resume-delayed-workflow.job.js",
+      "line": 72,
+      "snippet": "await this.messageQueueService.add(_runworkflowjob.RunWorkflowJob.name, {"
+    },
+    {
+      "file": "modules/workflow/workflow-executor/workspace-services/workflow-executor.workspace-service.js",
+      "line": 447,
+      "snippet": "await this.messageQueueService.add(_runworkflowjobname.RUN_WORKFLOW_JOB_NAME, {"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/jobs/workflow-clean-workflow-runs.cron.job.js",
+      "line": 98,
+      "snippet": "await this.messageQueueService.add(_workflowcleanworkflowrunsjob.WorkflowCleanWorkflowRunsJob.name, {"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/jobs/workflow-handle-staled-runs.cron.job.js",
+      "line": 96,
+      "snippet": "await this.messageQueueService.add(_workflowhandlestaledrunsjob.WorkflowHandleStaledRunsJob.name, {"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/jobs/workflow-run-enqueue.cron.job.js",
+      "line": 95,
+      "snippet": "await this.messageQueueService.add(_workflowrunenqueuejob.WorkflowRunEnqueueJob.name, {"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/workspace-services/workflow-run-enqueue.workspace-service.js",
+      "line": 78,
+      "snippet": "await this.messageQueueService.add(_runworkflowjob.RunWorkflowJob.name, {"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workspace-services/workflow-runner.workspace-service.js",
+      "line": 254,
+      "snippet": "await this.messageQueueService.add(_runworkflowjob.RunWorkflowJob.name, {"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workspace-services/workflow-runner.workspace-service.js",
+      "line": 313,
+      "snippet": "await this.messageQueueService.add(_runworkflowjob.RunWorkflowJob.name, {"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workspace-services/workflow-runner.workspace-service.js",
+      "line": 331,
+      "snippet": "await this.messageQueueService.add(_workflowrunenqueuejob.WorkflowRunEnqueueJob.name, {"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workspace-services/workflow-runner.workspace-service.js",
+      "line": 89,
+      "snippet": "await this.messageQueueService.add(_runworkflowjob.RunWorkflowJob.name, {"
+    },
+    {
+      "file": "modules/workflow/workflow-status/listeners/workflow-version-status.listener.js",
+      "line": 46,
+      "snippet": "await this.messageQueueService.add(_workflowstatusesupdatejob.WorkflowStatusesUpdateJob.name, {"
+    },
+    {
+      "file": "modules/workflow/workflow-status/listeners/workflow-version-status.listener.js",
+      "line": 56,
+      "snippet": "await this.messageQueueService.add(_workflowstatusesupdatejob.WorkflowStatusesUpdateJob.name, {"
+    },
+    {
+      "file": "modules/workflow/workflow-status/listeners/workflow-version-status.listener.js",
+      "line": 70,
+      "snippet": "await this.messageQueueService.add(_workflowstatusesupdatejob.WorkflowStatusesUpdateJob.name, {"
+    },
+    {
+      "file": "modules/workflow/workflow-trigger/automated-trigger/crons/jobs/workflow-cron-trigger-cron.job.js",
+      "line": 146,
+      "snippet": "await this.messageQueueService.add(_workflowtriggerjob.WorkflowTriggerJob.name, {"
+    },
+    {
+      "file": "modules/workflow/workflow-trigger/automated-trigger/crons/jobs/workflow-cron-trigger-cron.job.js",
+      "line": 82,
+      "snippet": "await this.messageQueueService.add(_workflowtriggerjob.WorkflowTriggerJob.name, {"
+    },
+    {
+      "file": "modules/workflow/workflow-trigger/automated-trigger/listeners/workflow-database-event-trigger.listener.js",
+      "line": 221,
+      "snippet": "await this.messageQueueService.add(_workflowtriggerjob.WorkflowTriggerJob.name, {"
+    }
+  ],
+  "scheduleCalls": [
+    {
+      "file": "engine/core-modules/application/application-marketplace/crons/commands/marketplace-catalog-sync.cron.command.js",
+      "line": 34,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "engine/core-modules/application/application-oauth/stale-registration-cleanup/commands/stale-registration-cleanup.cron.command.js",
+      "line": 33,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "engine/core-modules/application/application-upgrade/crons/commands/application-version-check.cron.command.js",
+      "line": 33,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "engine/core-modules/billing/reminders/crons/commands/billing-reminder.cron.command.js",
+      "line": 33,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "engine/core-modules/code-interpreter/crons/commands/code-interpreter-session-cleanup.cron.command.js",
+      "line": 33,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "engine/core-modules/enterprise/cron/command/enterprise-key-validation.cron.command.js",
+      "line": 33,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "engine/core-modules/event-logs/cleanup/commands/event-log-cleanup.cron.command.js",
+      "line": 33,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "engine/core-modules/file/file-upload/crons/commands/pending-file-cleanup.cron.command.js",
+      "line": 33,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "engine/core-modules/jwt/crons/commands/rotate-signing-keys.cron.command.js",
+      "line": 33,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "engine/core-modules/logic-function/logic-function-trigger/triggers/cron/cron-trigger.cron.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "engine/core-modules/public-domain/crons/commands/check-public-domains-valid-records.cron.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "engine/core-modules/workspace/crons/commands/check-custom-domain-valid-records.cron.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "engine/trash-cleanup/commands/trash-cleanup.cron.command.js",
+      "line": 33,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "engine/workspace-manager/workspace-cleaner/commands/clean-onboarding-workspaces.cron.command.js",
+      "line": 33,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "engine/workspace-manager/workspace-cleaner/commands/clean-suspended-workspaces.cron.command.js",
+      "line": 33,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/commands/calendar-event-list-fetch.cron.command.js",
+      "line": 33,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/commands/calendar-import.cron.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/commands/calendar-ongoing-stale.cron.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/commands/calendar-relaunch-failed-calendar-channels.cron.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "modules/connected-account/webhook-subscription-manager/crons/commands/webhook-subscription-renewal.cron.command.js",
+      "line": 33,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/commands/messaging-message-list-fetch.cron.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/commands/messaging-messages-import.cron.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/commands/messaging-ongoing-stale.cron.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/commands/messaging-relaunch-failed-message-channels.cron.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "modules/messaging/monitoring/crons/commands/messaging-message-channel-sync-status-monitoring.cron.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/command/workflow-clean-workflow-runs.cron.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/command/workflow-handle-staled-runs.cron.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/command/workflow-run-enqueue.cron.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    },
+    {
+      "file": "modules/workflow/workflow-trigger/automated-trigger/crons/commands/workflow-cron-trigger.cron.command.js",
+      "line": 32,
+      "snippet": "await this.messageQueueService.addCron({",
+      "method": "addCron"
+    }
+  ],
+  "processors": [
+    {
+      "file": "engine/core-modules/application/application-marketplace/crons/marketplace-catalog-sync.cron.job.js",
+      "line": 52,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "engine/core-modules/application/application-oauth/stale-registration-cleanup/crons/stale-registration-cleanup.cron.job.js",
+      "line": 56,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "engine/core-modules/application/application-upgrade/crons/application-version-check.cron.job.js",
+      "line": 52,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "engine/core-modules/application/jobs/backfill-application-installation.job.js",
+      "line": 42,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.workspaceQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.workspaceQueue"
+    },
+    {
+      "file": "engine/core-modules/billing/jobs/update-subscription-quantity.job.js",
+      "line": 61,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.billingQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "engine/core-modules/billing/reminders/crons/billing-reminder.cron.job.js",
+      "line": 42,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "engine/core-modules/code-interpreter/crons/jobs/code-interpreter-session-cleanup.cron.job.js",
+      "line": 48,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "engine/core-modules/email/email-sender.job.js",
+      "line": 42,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.emailQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.emailQueue"
+    },
+    {
+      "file": "engine/core-modules/emailing-domain/jobs/emailing-domain-workspace-cleanup.job.js",
+      "line": 46,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.deleteCascadeQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.deleteCascadeQueue"
+    },
+    {
+      "file": "engine/core-modules/enterprise/cron/jobs/enterprise-key-validation.cron.job.js",
+      "line": 83,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "engine/core-modules/event-logs/cleanup/crons/event-log-cleanup.cron.job.js",
+      "line": 102,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "engine/core-modules/event-logs/cleanup/jobs/event-log-cleanup.job.js",
+      "line": 53,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.workspaceQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.workspaceQueue"
+    },
+    {
+      "file": "engine/core-modules/event-logs/ingest/create-event-log-from-internal-event.js",
+      "line": 79,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.entityEventsToDbQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.entityEventsToDbQueue"
+    },
+    {
+      "file": "engine/core-modules/file/file-upload/crons/jobs/pending-file-cleanup.cron.job.js",
+      "line": 57,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "engine/core-modules/file/files-field/jobs/files-field-deletion.job.js",
+      "line": 57,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.deleteCascadeQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.deleteCascadeQueue"
+    },
+    {
+      "file": "engine/core-modules/file/jobs/file-deletion.job.js",
+      "line": 49,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.deleteCascadeQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.deleteCascadeQueue"
+    },
+    {
+      "file": "engine/core-modules/file/jobs/file-workspace-folder-deletion.job.js",
+      "line": 46,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.deleteCascadeQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.deleteCascadeQueue"
+    },
+    {
+      "file": "engine/core-modules/jwt/crons/jobs/rotate-signing-keys.cron.job.js",
+      "line": 59,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "engine/core-modules/logic-function/logic-function-trigger/jobs/logic-function-trigger.job.js",
+      "line": 48,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.logicFunctionQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "engine/core-modules/logic-function/logic-function-trigger/triggers/cron/cron-trigger.cron.job.js",
+      "line": 121,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "engine/core-modules/logic-function/logic-function-trigger/triggers/database-event/call-database-event-trigger-jobs.job.js",
+      "line": 90,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.triggerQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.triggerQueue"
+    },
+    {
+      "file": "engine/core-modules/onboarding/jobs/install-onboarding-apps.job.js",
+      "line": 73,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.workspaceQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.workspaceQueue"
+    },
+    {
+      "file": "engine/core-modules/public-domain/crons/jobs/check-public-domains-valid-records.cron.job.js",
+      "line": 73,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "engine/core-modules/sdk-client/jobs/generate-sdk-client.job.js",
+      "line": 46,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.workspaceQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.workspaceQueue"
+    },
+    {
+      "file": "engine/core-modules/user/jobs/update-workspace-member-email.job.js",
+      "line": 57,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.workspaceQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "engine/core-modules/workspace/crons/jobs/check-custom-domain-valid-records.cron.job.js",
+      "line": 78,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "engine/core-modules/workspace/handle-workspace-member-deleted.job.js",
+      "line": 42,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.workspaceQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.workspaceQueue"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-agent-monitor/jobs/evaluate-agent-turn.job.js",
+      "line": 53,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.aiQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.aiQueue"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-agent-monitor/jobs/run-evaluation-input.job.js",
+      "line": 104,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.aiQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.aiQueue"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/jobs/stream-agent-chat.job.js",
+      "line": 599,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.aiStreamQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "engine/metadata-modules/navigation-menu-item/jobs/navigation-menu-item-deletion.job.js",
+      "line": 42,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.deleteCascadeQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "engine/metadata-modules/webhook/jobs/call-webhook-jobs-for-metadata.job.js",
+      "line": 103,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.webhookQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.webhookQueue"
+    },
+    {
+      "file": "engine/metadata-modules/webhook/jobs/call-webhook-jobs.job.js",
+      "line": 86,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.webhookQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.webhookQueue"
+    },
+    {
+      "file": "engine/metadata-modules/webhook/jobs/call-webhook.job.js",
+      "line": 109,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.webhookQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.webhookQueue"
+    },
+    {
+      "file": "engine/trash-cleanup/crons/trash-cleanup.cron.job.js",
+      "line": 102,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "engine/trash-cleanup/jobs/trash-cleanup.job.js",
+      "line": 53,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.workspaceQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.workspaceQueue"
+    },
+    {
+      "file": "engine/workspace-manager/workspace-cleaner/crons/clean-onboarding-workspaces.job.js",
+      "line": 67,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "engine/workspace-manager/workspace-cleaner/crons/clean-suspended-workspaces.job.js",
+      "line": 63,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "engine/workspace-manager/workspace-cleaner/jobs/clean-workspace-deletion-warning-user-vars.job.js",
+      "line": 84,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.workspaceQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/calendar/blocklist-manager/jobs/blocklist-item-delete-calendar-events.job.js",
+      "line": 159,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.calendarQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/calendar/blocklist-manager/jobs/blocklist-reimport-calendar-events.job.js",
+      "line": 102,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.calendarQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/calendar/calendar-event-cleaner/jobs/calendar-channel-deletion-cleanup.job.js",
+      "line": 48,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.calendarQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/calendar/calendar-event-cleaner/jobs/delete-connected-account-associated-calendar-data.job.js",
+      "line": 41,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.calendarQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.calendarQueue"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-event-list-fetch.cron.job.js",
+      "line": 120,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.cronQueue }"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-events-import.cron.job.js",
+      "line": 119,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.cronQueue }"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-ongoing-stale.cron.job.js",
+      "line": 83,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-relaunch-failed-calendar-channels.cron.job.js",
+      "line": 103,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-event-list-fetch.job.js",
+      "line": 77,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.calendarQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-events-import.job.js",
+      "line": 77,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.calendarQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-ongoing-stale.job.js",
+      "line": 99,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.calendarQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-relaunch-failed-calendar-channel.job.js",
+      "line": 76,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.calendarQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/calendar/calendar-event-participant-manager/jobs/calendar-event-participant-match-participant.job.js",
+      "line": 73,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.calendarQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/connected-account/webhook-subscription-manager/crons/jobs/webhook-subscription-renewal.cron.job.js",
+      "line": 90,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "modules/connected-account/webhook-subscription-manager/jobs/create-webhook-subscription.job.js",
+      "line": 52,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.webhookQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.webhookQueue"
+    },
+    {
+      "file": "modules/contact-creation-manager/jobs/create-company-and-contact.job.js",
+      "line": 45,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.contactCreationQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.contactCreationQueue"
+    },
+    {
+      "file": "modules/emailing/jobs/materialize-campaign.job.js",
+      "line": 42,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.emailQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.emailQueue"
+    },
+    {
+      "file": "modules/emailing/jobs/refresh-campaign-stats.job.js",
+      "line": 45,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.emailQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.emailQueue"
+    },
+    {
+      "file": "modules/emailing/jobs/send-campaign-email.job.js",
+      "line": 42,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.emailQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.emailQueue"
+    },
+    {
+      "file": "modules/messaging/blocklist-manager/jobs/messaging-blocklist-item-delete-messages.job.js",
+      "line": 173,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.messagingQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/messaging/blocklist-manager/jobs/messaging-blocklist-reimport-messages.job.js",
+      "line": 105,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.messagingQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/messaging/message-cleaner/jobs/messaging-connected-account-deletion-cleanup.job.js",
+      "line": 42,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.messagingQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/messaging/message-cleaner/jobs/messaging-message-channel-deletion-cleanup.job.js",
+      "line": 48,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.messagingQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-message-list-fetch.cron.job.js",
+      "line": 121,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-messages-import.cron.job.js",
+      "line": 137,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-ongoing-stale.cron.job.js",
+      "line": 83,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-relaunch-failed-message-channels.cron.job.js",
+      "line": 104,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-add-single-message-to-cache-for-import.job.js",
+      "line": 51,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.messagingQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.messagingQueue"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-clean-cache.js",
+      "line": 48,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.messagingQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.messagingQueue"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-inbound-email-import.job.js",
+      "line": 48,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.messagingQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-message-list-fetch.job.js",
+      "line": 107,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.messagingQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-messages-import.job.js",
+      "line": 92,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.messagingQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-ongoing-stale.job.js",
+      "line": 99,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.messagingQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-relaunch-failed-message-channel.job.js",
+      "line": 77,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.messagingQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/messaging/message-participant-manager/jobs/message-participant-match-participant.job.js",
+      "line": 56,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.messagingQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/messaging/monitoring/crons/jobs/messaging-message-channel-sync-status-monitoring.cron.job.js",
+      "line": 120,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "modules/timeline/jobs/upsert-timeline-activity-from-internal-event.job.js",
+      "line": 71,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.entityEventsToDbQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.entityEventsToDbQueue"
+    },
+    {
+      "file": "modules/workflow/workflow-executor/workflow-actions/delay/jobs/resume-delayed-workflow.job.js",
+      "line": 104,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.delayedJobsQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/jobs/run-workflow.job.js",
+      "line": 209,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.workflowQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/jobs/workflow-clean-workflow-runs.cron.job.js",
+      "line": 153,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/jobs/workflow-handle-staled-runs.cron.job.js",
+      "line": 135,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/jobs/workflow-run-enqueue.cron.job.js",
+      "line": 133,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/jobs/workflow-clean-workflow-runs.job.js",
+      "line": 132,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.workflowQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/jobs/workflow-handle-staled-runs.job.js",
+      "line": 42,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.workflowQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/jobs/workflow-run-enqueue.job.js",
+      "line": 45,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.workflowQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/workflow/workflow-status/jobs/workflow-statuses-update.job.js",
+      "line": 163,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.workflowQueue, scope: _common.Scope.REQUEST }"
+    },
+    {
+      "file": "modules/workflow/workflow-trigger/automated-trigger/crons/jobs/workflow-cron-trigger-cron.job.js",
+      "line": 186,
+      "snippet": "(0, _processordecorator.Processor)(_messagequeueconstants.MessageQueue.cronQueue),",
+      "expression": "_messagequeueconstants.MessageQueue.cronQueue"
+    },
+    {
+      "file": "modules/workflow/workflow-trigger/jobs/workflow-trigger.job.js",
+      "line": 94,
+      "snippet": "(0, _processordecorator.Processor)({",
+      "expression": "{ queueName: _messagequeueconstants.MessageQueue.workflowQueue, scope: _common.Scope.REQUEST }"
+    }
+  ],
+  "processMethods": [
+    {
+      "file": "engine/core-modules/application/application-marketplace/crons/marketplace-catalog-sync.cron.job.js",
+      "line": 44,
+      "snippet": "(0, _processdecorator.Process)(MarketplaceCatalogSyncCronJob.name),",
+      "expression": "MarketplaceCatalogSyncCronJob.name"
+    },
+    {
+      "file": "engine/core-modules/application/application-oauth/stale-registration-cleanup/crons/stale-registration-cleanup.cron.job.js",
+      "line": 48,
+      "snippet": "(0, _processdecorator.Process)(StaleRegistrationCleanupCronJob.name),",
+      "expression": "StaleRegistrationCleanupCronJob.name"
+    },
+    {
+      "file": "engine/core-modules/application/application-upgrade/crons/application-version-check.cron.job.js",
+      "line": 44,
+      "snippet": "(0, _processdecorator.Process)(ApplicationVersionCheckCronJob.name),",
+      "expression": "ApplicationVersionCheckCronJob.name"
+    },
+    {
+      "file": "engine/core-modules/application/jobs/backfill-application-installation.job.js",
+      "line": 34,
+      "snippet": "(0, _processdecorator.Process)(_backfillapplicationinstallationjobconstants.BACKFILL_APPLICATION_INSTALLATION_JOB_NAME),",
+      "expression": "_backfillapplicationinstallationjobconstants.BACKFILL_APPLICATION_INSTALLATION_JOB_NAME"
+    },
+    {
+      "file": "engine/core-modules/billing/jobs/update-subscription-quantity.job.js",
+      "line": 53,
+      "snippet": "(0, _processdecorator.Process)(UpdateSubscriptionQuantityJob.name),",
+      "expression": "UpdateSubscriptionQuantityJob.name"
+    },
+    {
+      "file": "engine/core-modules/billing/reminders/crons/billing-reminder.cron.job.js",
+      "line": 35,
+      "snippet": "(0, _processdecorator.Process)(BillingReminderCronJob.name),",
+      "expression": "BillingReminderCronJob.name"
+    },
+    {
+      "file": "engine/core-modules/code-interpreter/crons/jobs/code-interpreter-session-cleanup.cron.job.js",
+      "line": 40,
+      "snippet": "(0, _processdecorator.Process)(CodeInterpreterSessionCleanupCronJob.name),",
+      "expression": "CodeInterpreterSessionCleanupCronJob.name"
+    },
+    {
+      "file": "engine/core-modules/email/email-sender.job.js",
+      "line": 34,
+      "snippet": "(0, _processdecorator.Process)(EmailSenderJob.name),",
+      "expression": "EmailSenderJob.name"
+    },
+    {
+      "file": "engine/core-modules/emailing-domain/jobs/emailing-domain-workspace-cleanup.job.js",
+      "line": 38,
+      "snippet": "(0, _processdecorator.Process)(EmailingDomainWorkspaceCleanupJob.name),",
+      "expression": "EmailingDomainWorkspaceCleanupJob.name"
+    },
+    {
+      "file": "engine/core-modules/enterprise/cron/jobs/enterprise-key-validation.cron.job.js",
+      "line": 75,
+      "snippet": "(0, _processdecorator.Process)(EnterpriseKeyValidationCronJob.name),",
+      "expression": "EnterpriseKeyValidationCronJob.name"
+    },
+    {
+      "file": "engine/core-modules/event-logs/cleanup/crons/event-log-cleanup.cron.job.js",
+      "line": 94,
+      "snippet": "(0, _processdecorator.Process)(EventLogCleanupCronJob.name),",
+      "expression": "EventLogCleanupCronJob.name"
+    },
+    {
+      "file": "engine/core-modules/event-logs/cleanup/jobs/event-log-cleanup.job.js",
+      "line": 44,
+      "snippet": "(0, _processdecorator.Process)(EventLogCleanupJob.name),",
+      "expression": "EventLogCleanupJob.name"
+    },
+    {
+      "file": "engine/core-modules/event-logs/ingest/create-event-log-from-internal-event.js",
+      "line": 71,
+      "snippet": "(0, _processdecorator.Process)(CreateEventLogFromInternalEvent.name),",
+      "expression": "CreateEventLogFromInternalEvent.name"
+    },
+    {
+      "file": "engine/core-modules/file/file-upload/crons/jobs/pending-file-cleanup.cron.job.js",
+      "line": 49,
+      "snippet": "(0, _processdecorator.Process)(PendingFileCleanupCronJob.name),",
+      "expression": "PendingFileCleanupCronJob.name"
+    },
+    {
+      "file": "engine/core-modules/file/files-field/jobs/files-field-deletion.job.js",
+      "line": 49,
+      "snippet": "(0, _processdecorator.Process)(FilesFieldDeletionJob.name),",
+      "expression": "FilesFieldDeletionJob.name"
+    },
+    {
+      "file": "engine/core-modules/file/jobs/file-deletion.job.js",
+      "line": 41,
+      "snippet": "(0, _processdecorator.Process)(FileDeletionJob.name),",
+      "expression": "FileDeletionJob.name"
+    },
+    {
+      "file": "engine/core-modules/file/jobs/file-workspace-folder-deletion.job.js",
+      "line": 38,
+      "snippet": "(0, _processdecorator.Process)(FileWorkspaceFolderDeletionJob.name),",
+      "expression": "FileWorkspaceFolderDeletionJob.name"
+    },
+    {
+      "file": "engine/core-modules/jwt/crons/jobs/rotate-signing-keys.cron.job.js",
+      "line": 51,
+      "snippet": "(0, _processdecorator.Process)(RotateSigningKeysCronJob.name),",
+      "expression": "RotateSigningKeysCronJob.name"
+    },
+    {
+      "file": "engine/core-modules/logic-function/logic-function-trigger/jobs/logic-function-trigger.job.js",
+      "line": 40,
+      "snippet": "(0, _processdecorator.Process)(LogicFunctionTriggerJob.name),",
+      "expression": "LogicFunctionTriggerJob.name"
+    },
+    {
+      "file": "engine/core-modules/logic-function/logic-function-trigger/triggers/cron/cron-trigger.cron.job.js",
+      "line": 114,
+      "snippet": "(0, _processdecorator.Process)(CronTriggerCronJob.name),",
+      "expression": "CronTriggerCronJob.name"
+    },
+    {
+      "file": "engine/core-modules/logic-function/logic-function-trigger/triggers/database-event/call-database-event-trigger-jobs.job.js",
+      "line": 82,
+      "snippet": "(0, _processdecorator.Process)(CallDatabaseEventTriggerJobsJob.name),",
+      "expression": "CallDatabaseEventTriggerJobsJob.name"
+    },
+    {
+      "file": "engine/core-modules/onboarding/jobs/install-onboarding-apps.job.js",
+      "line": 65,
+      "snippet": "(0, _processdecorator.Process)(_installonboardingappsjobconstants.INSTALL_ONBOARDING_APPS_JOB_NAME),",
+      "expression": "_installonboardingappsjobconstants.INSTALL_ONBOARDING_APPS_JOB_NAME"
+    },
+    {
+      "file": "engine/core-modules/public-domain/crons/jobs/check-public-domains-valid-records.cron.job.js",
+      "line": 66,
+      "snippet": "(0, _processdecorator.Process)(CheckPublicDomainsValidRecordsCronJob.name),",
+      "expression": "CheckPublicDomainsValidRecordsCronJob.name"
+    },
+    {
+      "file": "engine/core-modules/sdk-client/jobs/generate-sdk-client.job.js",
+      "line": 38,
+      "snippet": "(0, _processdecorator.Process)(_generatesdkclientjobconstants.GENERATE_SDK_CLIENT_JOB_NAME),",
+      "expression": "_generatesdkclientjobconstants.GENERATE_SDK_CLIENT_JOB_NAME"
+    },
+    {
+      "file": "engine/core-modules/user/jobs/update-workspace-member-email.job.js",
+      "line": 49,
+      "snippet": "(0, _processdecorator.Process)(UpdateWorkspaceMemberEmailJob.name),",
+      "expression": "UpdateWorkspaceMemberEmailJob.name"
+    },
+    {
+      "file": "engine/core-modules/workspace/crons/jobs/check-custom-domain-valid-records.cron.job.js",
+      "line": 71,
+      "snippet": "(0, _processdecorator.Process)(CheckCustomDomainValidRecordsCronJob.name),",
+      "expression": "CheckCustomDomainValidRecordsCronJob.name"
+    },
+    {
+      "file": "engine/core-modules/workspace/handle-workspace-member-deleted.job.js",
+      "line": 34,
+      "snippet": "(0, _processdecorator.Process)(HandleWorkspaceMemberDeletedJob.name),",
+      "expression": "HandleWorkspaceMemberDeletedJob.name"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-agent-monitor/jobs/evaluate-agent-turn.job.js",
+      "line": 45,
+      "snippet": "(0, _processdecorator.Process)(EvaluateAgentTurnJob.name),",
+      "expression": "EvaluateAgentTurnJob.name"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-agent-monitor/jobs/run-evaluation-input.job.js",
+      "line": 96,
+      "snippet": "(0, _processdecorator.Process)(RunEvaluationInputJob.name),",
+      "expression": "RunEvaluationInputJob.name"
+    },
+    {
+      "file": "engine/metadata-modules/ai/ai-chat/jobs/stream-agent-chat.job.js",
+      "line": 590,
+      "snippet": "(0, _processdecorator.Process)(_streamagentchatjobnameconstant.STREAM_AGENT_CHAT_JOB_NAME),",
+      "expression": "_streamagentchatjobnameconstant.STREAM_AGENT_CHAT_JOB_NAME"
+    },
+    {
+      "file": "engine/metadata-modules/navigation-menu-item/jobs/navigation-menu-item-deletion.job.js",
+      "line": 34,
+      "snippet": "(0, _processdecorator.Process)(NavigationMenuItemDeletionJob.name),",
+      "expression": "NavigationMenuItemDeletionJob.name"
+    },
+    {
+      "file": "engine/metadata-modules/webhook/jobs/call-webhook-jobs-for-metadata.job.js",
+      "line": 95,
+      "snippet": "(0, _processdecorator.Process)(CallWebhookJobsForMetadataJob.name),",
+      "expression": "CallWebhookJobsForMetadataJob.name"
+    },
+    {
+      "file": "engine/metadata-modules/webhook/jobs/call-webhook-jobs.job.js",
+      "line": 78,
+      "snippet": "(0, _processdecorator.Process)(CallWebhookJobsJob.name),",
+      "expression": "CallWebhookJobsJob.name"
+    },
+    {
+      "file": "engine/metadata-modules/webhook/jobs/call-webhook.job.js",
+      "line": 101,
+      "snippet": "(0, _processdecorator.Process)(CallWebhookJob.name),",
+      "expression": "CallWebhookJob.name"
+    },
+    {
+      "file": "engine/trash-cleanup/crons/trash-cleanup.cron.job.js",
+      "line": 94,
+      "snippet": "(0, _processdecorator.Process)(TrashCleanupCronJob.name),",
+      "expression": "TrashCleanupCronJob.name"
+    },
+    {
+      "file": "engine/trash-cleanup/jobs/trash-cleanup.job.js",
+      "line": 44,
+      "snippet": "(0, _processdecorator.Process)(TrashCleanupJob.name),",
+      "expression": "TrashCleanupJob.name"
+    },
+    {
+      "file": "engine/workspace-manager/workspace-cleaner/crons/clean-onboarding-workspaces.job.js",
+      "line": 60,
+      "snippet": "(0, _processdecorator.Process)(CleanOnboardingWorkspacesJob.name),",
+      "expression": "CleanOnboardingWorkspacesJob.name"
+    },
+    {
+      "file": "engine/workspace-manager/workspace-cleaner/crons/clean-suspended-workspaces.job.js",
+      "line": 56,
+      "snippet": "(0, _processdecorator.Process)(CleanSuspendedWorkspacesJob.name),",
+      "expression": "CleanSuspendedWorkspacesJob.name"
+    },
+    {
+      "file": "engine/workspace-manager/workspace-cleaner/jobs/clean-workspace-deletion-warning-user-vars.job.js",
+      "line": 76,
+      "snippet": "(0, _processdecorator.Process)(CleanWorkspaceDeletionWarningUserVarsJob.name),",
+      "expression": "CleanWorkspaceDeletionWarningUserVarsJob.name"
+    },
+    {
+      "file": "modules/calendar/blocklist-manager/jobs/blocklist-item-delete-calendar-events.job.js",
+      "line": 151,
+      "snippet": "(0, _processdecorator.Process)(BlocklistItemDeleteCalendarEventsJob.name),",
+      "expression": "BlocklistItemDeleteCalendarEventsJob.name"
+    },
+    {
+      "file": "modules/calendar/blocklist-manager/jobs/blocklist-reimport-calendar-events.job.js",
+      "line": 94,
+      "snippet": "(0, _processdecorator.Process)(BlocklistReimportCalendarEventsJob.name),",
+      "expression": "BlocklistReimportCalendarEventsJob.name"
+    },
+    {
+      "file": "modules/calendar/calendar-event-cleaner/jobs/calendar-channel-deletion-cleanup.job.js",
+      "line": 40,
+      "snippet": "(0, _processdecorator.Process)(CalendarChannelDeletionCleanupJob.name),",
+      "expression": "CalendarChannelDeletionCleanupJob.name"
+    },
+    {
+      "file": "modules/calendar/calendar-event-cleaner/jobs/delete-connected-account-associated-calendar-data.job.js",
+      "line": 33,
+      "snippet": "(0, _processdecorator.Process)(DeleteConnectedAccountAssociatedCalendarDataJob.name),",
+      "expression": "DeleteConnectedAccountAssociatedCalendarDataJob.name"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-event-list-fetch.cron.job.js",
+      "line": 113,
+      "snippet": "(0, _processdecorator.Process)(CalendarEventListFetchCronJob.name),",
+      "expression": "CalendarEventListFetchCronJob.name"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-events-import.cron.job.js",
+      "line": 112,
+      "snippet": "(0, _processdecorator.Process)(CalendarEventsImportCronJob.name),",
+      "expression": "CalendarEventsImportCronJob.name"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-ongoing-stale.cron.job.js",
+      "line": 76,
+      "snippet": "(0, _processdecorator.Process)(CalendarOngoingStaleCronJob.name),",
+      "expression": "CalendarOngoingStaleCronJob.name"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/crons/jobs/calendar-relaunch-failed-calendar-channels.cron.job.js",
+      "line": 96,
+      "snippet": "(0, _processdecorator.Process)(CalendarRelaunchFailedCalendarChannelsCronJob.name),",
+      "expression": "CalendarRelaunchFailedCalendarChannelsCronJob.name"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-event-list-fetch.job.js",
+      "line": 69,
+      "snippet": "(0, _processdecorator.Process)(CalendarEventListFetchJob.name),",
+      "expression": "CalendarEventListFetchJob.name"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-events-import.job.js",
+      "line": 69,
+      "snippet": "(0, _processdecorator.Process)(CalendarEventsImportJob.name),",
+      "expression": "CalendarEventsImportJob.name"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-ongoing-stale.job.js",
+      "line": 91,
+      "snippet": "(0, _processdecorator.Process)(CalendarOngoingStaleJob.name),",
+      "expression": "CalendarOngoingStaleJob.name"
+    },
+    {
+      "file": "modules/calendar/calendar-event-import-manager/jobs/calendar-relaunch-failed-calendar-channel.job.js",
+      "line": 68,
+      "snippet": "(0, _processdecorator.Process)(CalendarRelaunchFailedCalendarChannelJob.name),",
+      "expression": "CalendarRelaunchFailedCalendarChannelJob.name"
+    },
+    {
+      "file": "modules/calendar/calendar-event-participant-manager/jobs/calendar-event-participant-match-participant.job.js",
+      "line": 65,
+      "snippet": "(0, _processdecorator.Process)(CalendarEventParticipantMatchParticipantJob.name),",
+      "expression": "CalendarEventParticipantMatchParticipantJob.name"
+    },
+    {
+      "file": "modules/connected-account/webhook-subscription-manager/crons/jobs/webhook-subscription-renewal.cron.job.js",
+      "line": 83,
+      "snippet": "(0, _processdecorator.Process)(WebhookSubscriptionRenewalCronJob.name),",
+      "expression": "WebhookSubscriptionRenewalCronJob.name"
+    },
+    {
+      "file": "modules/connected-account/webhook-subscription-manager/jobs/create-webhook-subscription.job.js",
+      "line": 44,
+      "snippet": "(0, _processdecorator.Process)(CreateWebhookSubscriptionJob.name),",
+      "expression": "CreateWebhookSubscriptionJob.name"
+    },
+    {
+      "file": "modules/contact-creation-manager/jobs/create-company-and-contact.job.js",
+      "line": 37,
+      "snippet": "(0, _processdecorator.Process)(CreateCompanyAndContactJob.name),",
+      "expression": "CreateCompanyAndContactJob.name"
+    },
+    {
+      "file": "modules/emailing/jobs/materialize-campaign.job.js",
+      "line": 34,
+      "snippet": "(0, _processdecorator.Process)(_campaignconstant.MATERIALIZE_CAMPAIGN_JOB),",
+      "expression": "_campaignconstant.MATERIALIZE_CAMPAIGN_JOB"
+    },
+    {
+      "file": "modules/emailing/jobs/refresh-campaign-stats.job.js",
+      "line": 37,
+      "snippet": "(0, _processdecorator.Process)(_campaignconstant.REFRESH_CAMPAIGN_STATS_JOB),",
+      "expression": "_campaignconstant.REFRESH_CAMPAIGN_STATS_JOB"
+    },
+    {
+      "file": "modules/emailing/jobs/send-campaign-email.job.js",
+      "line": 34,
+      "snippet": "(0, _processdecorator.Process)(_campaignconstant.SEND_CAMPAIGN_EMAIL_JOB),",
+      "expression": "_campaignconstant.SEND_CAMPAIGN_EMAIL_JOB"
+    },
+    {
+      "file": "modules/messaging/blocklist-manager/jobs/messaging-blocklist-item-delete-messages.job.js",
+      "line": 165,
+      "snippet": "(0, _processdecorator.Process)(BlocklistItemDeleteMessagesJob.name),",
+      "expression": "BlocklistItemDeleteMessagesJob.name"
+    },
+    {
+      "file": "modules/messaging/blocklist-manager/jobs/messaging-blocklist-reimport-messages.job.js",
+      "line": 97,
+      "snippet": "(0, _processdecorator.Process)(BlocklistReimportMessagesJob.name),",
+      "expression": "BlocklistReimportMessagesJob.name"
+    },
+    {
+      "file": "modules/messaging/message-cleaner/jobs/messaging-connected-account-deletion-cleanup.job.js",
+      "line": 34,
+      "snippet": "(0, _processdecorator.Process)(MessagingConnectedAccountDeletionCleanupJob.name),",
+      "expression": "MessagingConnectedAccountDeletionCleanupJob.name"
+    },
+    {
+      "file": "modules/messaging/message-cleaner/jobs/messaging-message-channel-deletion-cleanup.job.js",
+      "line": 40,
+      "snippet": "(0, _processdecorator.Process)(MessagingMessageChannelDeletionCleanupJob.name),",
+      "expression": "MessagingMessageChannelDeletionCleanupJob.name"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-message-list-fetch.cron.job.js",
+      "line": 114,
+      "snippet": "(0, _processdecorator.Process)(MessagingMessageListFetchCronJob.name),",
+      "expression": "MessagingMessageListFetchCronJob.name"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-messages-import.cron.job.js",
+      "line": 130,
+      "snippet": "(0, _processdecorator.Process)(MessagingMessagesImportCronJob.name),",
+      "expression": "MessagingMessagesImportCronJob.name"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-ongoing-stale.cron.job.js",
+      "line": 76,
+      "snippet": "(0, _processdecorator.Process)(MessagingOngoingStaleCronJob.name),",
+      "expression": "MessagingOngoingStaleCronJob.name"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/crons/jobs/messaging-relaunch-failed-message-channels.cron.job.js",
+      "line": 97,
+      "snippet": "(0, _processdecorator.Process)(MessagingRelaunchFailedMessageChannelsCronJob.name),",
+      "expression": "MessagingRelaunchFailedMessageChannelsCronJob.name"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-add-single-message-to-cache-for-import.job.js",
+      "line": 43,
+      "snippet": "(0, _processdecorator.Process)(MessagingAddSingleMessageToCacheForImportJob.name),",
+      "expression": "MessagingAddSingleMessageToCacheForImportJob.name"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-clean-cache.js",
+      "line": 40,
+      "snippet": "(0, _processdecorator.Process)(MessagingCleanCacheJob.name),",
+      "expression": "MessagingCleanCacheJob.name"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-inbound-email-import.job.js",
+      "line": 40,
+      "snippet": "(0, _processdecorator.Process)(MessagingInboundEmailImportJob.name),",
+      "expression": "MessagingInboundEmailImportJob.name"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-message-list-fetch.job.js",
+      "line": 99,
+      "snippet": "(0, _processdecorator.Process)(MessagingMessageListFetchJob.name),",
+      "expression": "MessagingMessageListFetchJob.name"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-messages-import.job.js",
+      "line": 84,
+      "snippet": "(0, _processdecorator.Process)(MessagingMessagesImportJob.name),",
+      "expression": "MessagingMessagesImportJob.name"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-ongoing-stale.job.js",
+      "line": 91,
+      "snippet": "(0, _processdecorator.Process)(MessagingOngoingStaleJob.name),",
+      "expression": "MessagingOngoingStaleJob.name"
+    },
+    {
+      "file": "modules/messaging/message-import-manager/jobs/messaging-relaunch-failed-message-channel.job.js",
+      "line": 69,
+      "snippet": "(0, _processdecorator.Process)(MessagingRelaunchFailedMessageChannelJob.name),",
+      "expression": "MessagingRelaunchFailedMessageChannelJob.name"
+    },
+    {
+      "file": "modules/messaging/message-participant-manager/jobs/message-participant-match-participant.job.js",
+      "line": 48,
+      "snippet": "(0, _processdecorator.Process)(MessageParticipantMatchParticipantJob.name),",
+      "expression": "MessageParticipantMatchParticipantJob.name"
+    },
+    {
+      "file": "modules/messaging/monitoring/crons/jobs/messaging-message-channel-sync-status-monitoring.cron.job.js",
+      "line": 113,
+      "snippet": "(0, _processdecorator.Process)(MessagingMessageChannelSyncStatusMonitoringCronJob.name),",
+      "expression": "MessagingMessageChannelSyncStatusMonitoringCronJob.name"
+    },
+    {
+      "file": "modules/timeline/jobs/upsert-timeline-activity-from-internal-event.job.js",
+      "line": 63,
+      "snippet": "(0, _processdecorator.Process)(UpsertTimelineActivityFromInternalEvent.name),",
+      "expression": "UpsertTimelineActivityFromInternalEvent.name"
+    },
+    {
+      "file": "modules/workflow/workflow-executor/workflow-actions/delay/jobs/resume-delayed-workflow.job.js",
+      "line": 96,
+      "snippet": "(0, _processdecorator.Process)(_resumedelayedworkflowjobname.RESUME_DELAYED_WORKFLOW_JOB_NAME),",
+      "expression": "_resumedelayedworkflowjobname.RESUME_DELAYED_WORKFLOW_JOB_NAME"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/jobs/run-workflow.job.js",
+      "line": 201,
+      "snippet": "(0, _processdecorator.Process)(_runworkflowjobname.RUN_WORKFLOW_JOB_NAME),",
+      "expression": "_runworkflowjobname.RUN_WORKFLOW_JOB_NAME"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/jobs/workflow-clean-workflow-runs.cron.job.js",
+      "line": 146,
+      "snippet": "(0, _processdecorator.Process)(WorkflowCleanWorkflowRunsCronJob.name),",
+      "expression": "WorkflowCleanWorkflowRunsCronJob.name"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/jobs/workflow-handle-staled-runs.cron.job.js",
+      "line": 128,
+      "snippet": "(0, _processdecorator.Process)(WorkflowHandleStaledRunsCronJob.name),",
+      "expression": "WorkflowHandleStaledRunsCronJob.name"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/cron/jobs/workflow-run-enqueue.cron.job.js",
+      "line": 126,
+      "snippet": "(0, _processdecorator.Process)(WorkflowRunEnqueueCronJob.name),",
+      "expression": "WorkflowRunEnqueueCronJob.name"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/jobs/workflow-clean-workflow-runs.job.js",
+      "line": 124,
+      "snippet": "(0, _processdecorator.Process)(WorkflowCleanWorkflowRunsJob.name),",
+      "expression": "WorkflowCleanWorkflowRunsJob.name"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/jobs/workflow-handle-staled-runs.job.js",
+      "line": 34,
+      "snippet": "(0, _processdecorator.Process)(WorkflowHandleStaledRunsJob.name),",
+      "expression": "WorkflowHandleStaledRunsJob.name"
+    },
+    {
+      "file": "modules/workflow/workflow-runner/workflow-run-queue/jobs/workflow-run-enqueue.job.js",
+      "line": 37,
+      "snippet": "(0, _processdecorator.Process)(WorkflowRunEnqueueJob.name),",
+      "expression": "WorkflowRunEnqueueJob.name"
+    },
+    {
+      "file": "modules/workflow/workflow-status/jobs/workflow-statuses-update.job.js",
+      "line": 155,
+      "snippet": "(0, _processdecorator.Process)(WorkflowStatusesUpdateJob.name),",
+      "expression": "WorkflowStatusesUpdateJob.name"
+    },
+    {
+      "file": "modules/workflow/workflow-trigger/automated-trigger/crons/jobs/workflow-cron-trigger-cron.job.js",
+      "line": 179,
+      "snippet": "(0, _processdecorator.Process)(WorkflowCronTriggerCronJob.name),",
+      "expression": "WorkflowCronTriggerCronJob.name"
+    },
+    {
+      "file": "modules/workflow/workflow-trigger/jobs/workflow-trigger.job.js",
+      "line": 86,
+      "snippet": "(0, _processdecorator.Process)(WorkflowTriggerJob.name),",
+      "expression": "WorkflowTriggerJob.name"
+    }
+  ],
+  "dependencyImports": [
+    {
+      "file": "engine/core-modules/admin-panel/admin-panel-health.service.js",
+      "line": 12,
+      "snippet": "const _bullmq = require(\"bullmq\");",
+      "package": "bullmq"
+    },
+    {
+      "file": "engine/core-modules/admin-panel/admin-panel-queue.service.js",
+      "line": 12,
+      "snippet": "const _bullmq = require(\"bullmq\");",
+      "package": "bullmq"
+    },
+    {
+      "file": "engine/core-modules/admin-panel/indicators/worker.health.js",
+      "line": 13,
+      "snippet": "const _bullmq = require(\"bullmq\");",
+      "package": "bullmq"
+    },
+    {
+      "file": "engine/core-modules/cache-storage/cache-storage.module-factory.js",
+      "line": 13,
+      "snippet": "const _redis = require(\"redis\");",
+      "package": "redis"
+    },
+    {
+      "file": "engine/core-modules/message-queue/drivers/bullmq.driver.js",
+      "line": 13,
+      "snippet": "const _bullmq = require(\"bullmq\");",
+      "package": "bullmq"
+    },
+    {
+      "file": "engine/core-modules/redis-client/redis-client.service.js",
+      "line": 12,
+      "snippet": "const _ioredis = /*#__PURE__*/ _interop_require_default(require(\"ioredis\"));",
+      "package": "ioredis"
+    },
+    {
+      "file": "engine/core-modules/session-storage/session-storage.module-factory.js",
+      "line": 12,
+      "snippet": "const _connectredis = /*#__PURE__*/ _interop_require_default(require(\"connect-redis\"));",
+      "package": "connect-redis"
+    },
+    {
+      "file": "engine/core-modules/session-storage/session-storage.module-factory.js",
+      "line": 13,
+      "snippet": "const _redis = require(\"redis\");",
+      "package": "redis"
+    }
+  ],
+  "coverage": {
+    "uncoveredRedisMethods": {
+      "direct": [],
+      "queue": [],
+      "pubsub": []
+    },
+    "uncoveredCacheClientMethods": [],
+    "uncoveredCachePipelineMethods": [],
+    "uncoveredSubscriberMethods": []
+  }
+}

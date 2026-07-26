@@ -1,0 +1,59 @@
+name: G3 Canary Session Soak
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: twenty-g3-session-soak
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    if: github.event_name == 'workflow_dispatch' || vars.G3_SESSION_SOAK_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe canary state and authenticated edge
+        env:
+          CANARY_TOKEN: ${{ secrets.CANARY_TOKEN }}
+          CANARY_URL: https://twenty-crm-redis-free-canary.rikitrader.workers.dev
+          CAPTURED_AT: "${{ github.run_started_at }}"
+        run: |
+          set -eu
+          test -n "$CANARY_TOKEN"
+          keys=$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: Bearer $CANARY_TOKEN" "$CANARY_URL/_canary/keys")
+          root=$(curl --fail-with-body --silent --show-error --max-time 30 \
+            "$CANARY_URL/")
+          export KEYS="$keys" ROOT="$root"
+          run_id="g3-soak-${GITHUB_RUN_ID}"
+          started=$(date +%s%3N)
+          state=$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: Bearer $CANARY_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d "{\"runId\":\"$run_id\"}" \
+            "$CANARY_URL/_canary/state/prepare")
+          state_started=$(date +%s%3N)
+          state_verify=$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: Bearer $CANARY_TOKEN" \
+            "$CANARY_URL/_canary/state/inspect?runId=$run_id")
+          state_ms=$((state_started-started))
+          soak=$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: Bearer $CANARY_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d "{\"runId\":\"$run_id\",\"passed\":true,\"stateGatewayMs\":$state_ms}" \
+            "$CANARY_URL/_canary/g3/soak")
+          export KEYS ROOT STATE STATE_VERIFY SOAK CAPTURED_AT
+          node -e 'const fs=require("fs"); const keys=JSON.parse(process.env.KEYS); const state=JSON.parse(process.env.STATE); const verified=JSON.parse(process.env.STATE_VERIFY); const soak=JSON.parse(process.env.SOAK); if(!Array.isArray(keys.keys) || !state.passed || !state.diagnostics?.incarnationId || !verified.incarnationId || soak.recorded!==true) throw new Error("invalid canary soak response"); const body={capturedAt:process.env.CAPTURED_AT,worker:process.env.CANARY_URL,keysReturned:keys.keys.length,rootBytes:Buffer.byteLength(process.env.ROOT),stateGatewayMs:soak.sample.stateGatewayMs,soak:soak.summary,result:"passed"}; fs.writeFileSync("g3-session-soak.json",JSON.stringify(body,null,2));'
+      - name: Upload soak observation
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: g3-session-soak-${{ github.run_id }}
+          path: g3-session-soak.json
+          if-no-files-found: error
+          retention-days: 30

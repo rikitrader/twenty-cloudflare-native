@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-25T03:57:37.724Z",
+  "scope": "isolated-canary",
+  "result": "passed",
+  "productionChanged": false,
+  "resources": {
+    "worker": {
+      "name": "twenty-crm-redis-free-canary",
+      "uploadVersionId": "830e3f0a-5470-48d2-8b23-19ddeeb7ba43",
+      "activeVersionIdAfterCredentialRotation": "a2602338-4bcb-4b03-8f94-32f7ad50a282",
+      "schedule": "*/5 * * * *"
+    },
+    "email": {
+      "binding": "OPS_ALERT_EMAIL",
+      "destination": "rikitrader@gmail.com",
+      "allowedSender": "twenty-alerts@sismo911.com",
+      "senderDomainEmailRoutingReady": true
+    }
+  },
+  "checks": {
+    "restrictedEmailBindingDeployed": true,
+    "syntheticExecutorReadinessAlertEvaluated": true,
+    "syntheticJobQueueAgeAlertEvaluated": true,
+    "syntheticDlqAgeAlertEvaluated": true,
+    "criticalAlertAcceptedByEmailService": true,
+    "stableFingerprintDeliveryDeduplicated": true,
+    "recoveryDeliveryImplemented": true,
+    "fiveMinuteScheduledEvaluationDeployed": true,
+    "executorHealthEndpointCheckedBeforeExecution": true
+  },
+  "thresholds": {
+    "jobQueueOldestAgeMs": 300000,
+    "dlqOldestAgeMs": 600000,
+    "executorReadiness": "critical when unavailable",
+    "repeatIntervalMs": 1800000
+  },
+  "testDelivery": {
+    "subject": "[TEST][CRITICAL] Twenty Cloudflare operations alert",
+    "accepted": true,
+    "alertCodes": [
+      "dlq-age",
+      "executor-not-ready",
+      "job-queue-age"
+    ]
+  },
+  "privacy": {
+    "canaryTokenPersisted": false,
+    "emailMessageBodyPersisted": false,
+    "jobIdentifiersPersisted": false
+  },
+  "productionWorker": {
+    "name": "twenty-crm",
+    "unchangedVersionId": "5b42c895-ed4a-4a31-93df-1a14c43acbef"
+  },
+  "remainingForG9Pass": []
+}

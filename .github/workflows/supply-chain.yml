@@ -1,0 +1,63 @@
+name: Supply chain
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Verify reproducible OCI image
+        run: bash scripts/verify-reproducible-image.sh Dockerfile.production
+      - name: Build exact image for SBOM and vulnerability scan
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          file: Dockerfile.production
+          load: true
+          push: false
+          provenance: false
+          sbom: false
+          tags: twenty-cf-production:${{ github.sha }}
+      - name: Generate SPDX SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          image: twenty-cf-production:${{ github.sha }}
+          format: spdx-json
+          artifact-name: twenty-production-sbom
+          output-file: twenty-production.spdx.json
+          upload-artifact: true
+          upload-artifact-retention: 90
+      - name: Scan production image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: twenty-cf-production:${{ github.sha }}
+          version: v0.72.0
+          scanners: vuln
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: json
+          output: twenty-production.trivy.json
+          exit-code: 1
+      - name: Retain vulnerability report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: twenty-production-trivy
+          path: twenty-production.trivy.json
+          if-no-files-found: error
+          retention-days: 90

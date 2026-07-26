@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "gate": "G10",
+  "capturedAt": "2026-07-25T19:29:18Z",
+  "scope": "production secret inventory",
+  "worker": "twenty-crm",
+  "productionCodeDeployed": false,
+  "change": {
+    "secret": "INTERNAL_SERVICE_TOKEN",
+    "method": "generated random 256-bit Worker secret",
+    "valueRecorded": false,
+    "secretListConfirmed": true
+  },
+  "deploymentVersionAfterSecretChange": "80823276-2c07-41f5-8c15-cd734e1c2fdd",
+  "result": "passed",
+  "remaining": [
+    "Production REDIS_BACKEND=cloudflare vars",
+    "Production Access issuer and audience",
+    "Organization IdP/MFA, WAF, Logpush, and full secret rotation review"
+  ]
+}
