@@ -1,6 +1,6 @@
-# Production server/worker image pinned to the exact Twenty v2.20 multi-arch
+# Production server/worker image pinned to the exact Twenty v2.24.1 multi-arch
 # manifest. Both Cloudflare Container classes use this same immutable build.
-FROM twentycrm/twenty@sha256:d3dd949725e6196c57dab66ebe83ba9cdd2561885c35f94ef20f9ae38cd6d333
+FROM twentycrm/twenty@sha256:cd812094cd3439e91deaf727470ecb302129447306200fff853ba0d7e9609079
 
 # Fixable OS and Node findings are patched to exact versions so the immutable
 # upstream digest does not become a permanent vulnerability ceiling.
@@ -11,6 +11,7 @@ RUN apk add --no-cache \
   libcurl=8.20.0-r0 && \
   rm -f /var/log/apk.log
 COPY cf/patch-vulnerable-node-packages.sh /cf/patch-vulnerable-node-packages.sh
+COPY cf/brace-expansion-v5-cjs-compat.cjs /cf/brace-expansion-v5-cjs-compat.cjs
 COPY cf/agent.js /cf/agent.js
 COPY cf/release-agent.js /cf/release-agent.js
 RUN chmod +x /cf/patch-vulnerable-node-packages.sh && \

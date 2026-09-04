@@ -1,7 +1,7 @@
 const TARGET_IMAGE =
-  "twentycrm/twenty@sha256:d3dd949725e6196c57dab66ebe83ba9cdd2561885c35f94ef20f9ae38cd6d333";
+  "twentycrm/twenty@sha256:cd812094cd3439e91deaf727470ecb302129447306200fff853ba0d7e9609079";
 const CAPTURE_IMAGE =
-  "twentycrm/twenty-app-dev@sha256:9932df2e4db0db12cbf51d0ed5fa4f6c6849cb320e6fa94fe78cf315a7162ad2";
+  "twentycrm/twenty-app-dev@sha256:41a5879c22d01d6fb1e5dfce2fe0cf984ccf86bc3602aa92b52dd1f84dc2612a";
 
 const UNEXERCISED_SCENARIOS = [
   "ai-cancel-and-heartbeat",

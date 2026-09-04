@@ -27,7 +27,7 @@ const container = option("--container", "twenty-contract-trace");
 const baseUrl = new URL(option("--base-url", "http://127.0.0.1:22020"));
 const durationSeconds = positiveInteger("--duration", 70);
 const output = resolve(
-  option("--output", "docs/twenty-v2.20-runtime-contract.json"),
+  option("--output", "docs/twenty-v2.24.1-runtime-contract.json"),
 );
 
 if (!/^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/.test(container)) {

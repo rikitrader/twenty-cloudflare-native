@@ -155,28 +155,48 @@ async function productionVersion() {
   return result.stdout.match(/[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}/)?.[0];
 }
 
-async function deployBackend(backend, message) {
-  const args = [
+async function deployCurrent(message) {
+  await command("./node_modules/.bin/wrangler", [
     "deploy",
     "--config",
     CONFIG,
     "--message",
     message,
-  ];
-  if (backend === "redis") args.push("--var", "REDIS_BACKEND:redis");
-  await command("./node_modules/.bin/wrangler", args);
+  ]);
+}
+
+async function rollbackWorker(message) {
+  await command("./node_modules/.bin/wrangler", [
+    "rollback",
+    "--config",
+    CONFIG,
+    "--message",
+    message,
+  ]);
+}
+
+async function ensureCanaryExists() {
+  const status = await command(
+    "./node_modules/.bin/wrangler",
+    ["deployments", "status", "--config", CONFIG],
+    { allowFailure: true },
+  );
+  if (status.code !== 0)
+    await deployCurrent("G12 bootstrap Redis-free canary");
 }
 
 const productionBefore = await productionVersion();
-let rollbackDeployed = false;
+let rollbackPerformed = false;
 let evidenceWritten = false;
 
 try {
+  await ensureCanaryExists();
   await command(
     "./node_modules/.bin/wrangler",
     ["secret", "put", "CANARY_TOKEN", "--config", CONFIG],
     { input: `${token}\n` },
   );
+  await deployCurrent("G12 Redis-free rollback drill checkpoint");
   await waitForAuth();
   await waitForBackend("cloudflare");
 
@@ -185,7 +205,12 @@ try {
     Array.from({ length: JOB_COUNT }, async () => {
       const enqueued = await request("/_canary/job", {
         method: "POST",
-        body: { scenario: "ping", delaySeconds: JOB_DELAY_SECONDS },
+        body: {
+          // Worker-native execution isolates the rollback/Queue/DO contract
+          // from database or Container availability.
+          scenario: "scheduler-ping",
+          delaySeconds: JOB_DELAY_SECONDS,
+        },
       });
       assert.equal(enqueued.response.status, 202, JSON.stringify(enqueued.body));
       assert.equal(typeof enqueued.body.jobId, "string");
@@ -194,14 +219,14 @@ try {
   );
   assert.equal(new Set(jobs.map(({ jobId }) => jobId)).size, JOB_COUNT);
 
+  // Roll back Worker code, never the coordination architecture. Wrangler
+  // reverts to the immediately preceding version while the canary remains on
+  // the Cloudflare state/queue/pub-sub backend.
   const decisionAt = Date.now();
-  await deployBackend(
-    "redis",
-    "G12 isolated backend rollback drill: Cloudflare to embedded Redis",
-  );
-  rollbackDeployed = true;
+  await rollbackWorker("G12 Redis-free Worker version rollback drill");
+  rollbackPerformed = true;
   await waitForAuth();
-  const rollbackStatus = await waitForBackend("redis");
+  const rollbackStatus = await waitForBackend("cloudflare");
   const rollbackCompletedAt = Date.now();
   const rollbackMs = rollbackCompletedAt - decisionAt;
   assert.ok(
@@ -230,9 +255,9 @@ try {
     rollbackCompletedAt: new Date(rollbackCompletedAt).toISOString(),
     reconciledAt: new Date(reconciledAt).toISOString(),
     rollback: {
-      from: "cloudflare",
-      to: "redis",
-      mechanism: "REDIS_BACKEND deployment flag",
+      from: "latest-worker-version",
+      to: "previous-worker-version",
+      mechanism: "wrangler rollback",
       statusReportedBackend: rollbackStatus.redisBackend,
       decisionToCompletionMs: rollbackMs,
       targetMs: TARGET_ROLLBACK_MS,
@@ -253,11 +278,8 @@ try {
   evidenceWritten = true;
   console.log(JSON.stringify(evidence, null, 2));
 } finally {
-  if (rollbackDeployed) {
-    await deployBackend(
-      "cloudflare",
-      "G12 drill cleanup: restore isolated canary Cloudflare backend",
-    );
+  if (rollbackPerformed) {
+    await deployCurrent("G12 drill cleanup: restore current Redis-free canary");
     await waitForAuth();
     await waitForBackend("cloudflare");
   }

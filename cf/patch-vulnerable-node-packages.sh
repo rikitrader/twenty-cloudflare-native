@@ -36,29 +36,31 @@ patch_package() {
 }
 
 patch_package \
-  tar 7.5.19 \
-  e0b7845a5f7ab709d2d90ec1cf8306aa06b32ea3be84937adc66715e822a8754f75707980fdf7b81b53522d36c41a7eaa974d7779585c8575178bb70bd104d8b \
+  tar 7.5.20 \
+  f457322b83c0ebe59bce54ccf568509babc1e56edc3fb75488fb2fd60ed80f01109d0d421a92b730694a93f213556324d3990766e061995862bfc2d9a32fcf15 \
   /app/node_modules/tar
 patch_package \
   axios 1.18.0 \
   137d8dce960aa7ef96ed745ee76ac78975767a1c66877c1b7603bb30778533ebeac4b0581f3b74125922226b4e071b4e9b2a74ca80bc0bab8449557ce18dbf87 \
   /app/node_modules/axios
 patch_package \
-  brace-expansion 2.1.2 \
-  c3925970a81d8433a03b09bc1fe2a06e8b28a4732e19c97aa9bba5c23b73dd233b23b3f7c96d5e023ccc3cbac813e350f6f8e000d28759e3079eb4f43975b5a0 \
+  brace-expansion 5.0.8 \
+  259c83caadc3e005227ca4cf381ec310b7fa5ec07759d3ee3710ada1bd6f1573ec49785d0221c1589fed27c1c073d687f3804afb924564b36424ac771bd93342 \
   /app/node_modules/brace-expansion
-# brace-expansion@2 is CommonJS and requires balanced-match@1's callable
-# export. The image also carries balanced-match@4 at the root for the modern
-# brace-expansion tree, whose ESM namespace object is not call-compatible.
-# Keep the two dependency generations isolated exactly as npm would.
-mkdir -p /app/node_modules/brace-expansion/node_modules/balanced-match
+cp /cf/brace-expansion-v5-cjs-compat.cjs \
+  /app/node_modules/brace-expansion/compat.cjs
+node -e '
+  const fs = require("node:fs");
+  const target = "/app/node_modules/brace-expansion/package.json";
+  const manifest = JSON.parse(fs.readFileSync(target, "utf8"));
+  manifest.main = "./compat.cjs";
+  manifest.exports["."].require.default = "./compat.cjs";
+  fs.writeFileSync(target, `${JSON.stringify(manifest, null, 2)}\n`);
+'
+chown -R 1000:1000 /app/node_modules/brace-expansion
 patch_package \
-  balanced-match 1.0.2 \
-  de849e50ed13315ebb84dd4099b5ec2b8c9aa94eed8e21e56f144364ea47d0a5bdf82797e1b440697d009f1b74b71d8cae94695b041a3f02252121098585393f \
-  /app/node_modules/brace-expansion/node_modules/balanced-match
-patch_package \
-  brace-expansion 5.0.7 \
-  ee8172ef4dddc5f637fcd2f10b57e1d925024341fdae6018fb91290d57d78d44d3b3e1c4c11da761aa8bbfe196713b2e9b0c4f7e2cfa0b308d9305f0054c2a08 \
+  brace-expansion 5.0.8 \
+  259c83caadc3e005227ca4cf381ec310b7fa5ec07759d3ee3710ada1bd6f1573ec49785d0221c1589fed27c1c073d687f3804afb924564b36424ac771bd93342 \
   /app/node_modules/minimatch/node_modules/brace-expansion
 patch_package \
   js-yaml 4.3.0 \

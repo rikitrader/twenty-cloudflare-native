@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "gate": "G4",
   "policyVersion": 1,
-  "sourceContract": "docs/twenty-v2.20-contract.json",
-  "processorCount": 87,
+  "sourceContract": "docs/twenty-v2.24.1-contract.json",
+  "processorCount": 90,
   "invariant": "Only an authenticated executor response explicitly marked not-started may be retried. Every started, unclassified, transport-lost, or expired-lease outcome is quarantined without invoking the processor again.",
   "processors": [
     {
@@ -39,6 +39,16 @@
     {
       "file": "engine/core-modules/application/jobs/backfill-application-installation.job.js",
       "processorExpression": "_backfillapplicationinstallationjobconstants.BACKFILL_APPLICATION_INSTALLATION_JOB_NAME",
+      "riskClass": "application-state-mutation",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
+      "file": "engine/core-modules/application/jobs/upgrade-applications.job.js",
+      "processorExpression": "_upgradeapplicationsjobconstants.UPGRADE_APPLICATIONS_JOB_NAME",
       "riskClass": "application-state-mutation",
       "disposition": {
         "completed": "ack-after-durable-completion-receipt",
@@ -547,6 +557,16 @@
       }
     },
     {
+      "file": "modules/connected-account/webhook-subscription-manager/jobs/renew-webhook-subscription.job.js",
+      "processorExpression": "RenewWebhookSubscriptionJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
       "file": "modules/contact-creation-manager/jobs/create-company-and-contact.job.js",
       "processorExpression": "CreateCompanyAndContactJob.name",
       "riskClass": "application-state-mutation",
@@ -767,6 +787,16 @@
       }
     },
     {
+      "file": "modules/workflow/workflow-core-consistency/crons/jobs/workflow-core-consistency-cron.job.js",
+      "processorExpression": "WorkflowCoreConsistencyCronJob.name",
+      "riskClass": "external-or-user-code-side-effects",
+      "disposition": {
+        "completed": "ack-after-durable-completion-receipt",
+        "explicitlyNotStarted": "bounded-retry-after-receipt-abandon",
+        "ambiguousOrStarted": "quarantine-without-processor-replay"
+      }
+    },
+    {
       "file": "modules/workflow/workflow-executor/workflow-actions/delay/jobs/resume-delayed-workflow.job.js",
       "processorExpression": "_resumedelayedworkflowjobname.RESUME_DELAYED_WORKFLOW_JOB_NAME",
       "riskClass": "external-or-user-code-side-effects",
@@ -877,5 +907,5 @@
       }
     }
   ],
-  "capturedAt": "2026-07-25T03:16:25.288Z"
+  "capturedAt": "2026-07-26T22:19:39.561Z"
 }

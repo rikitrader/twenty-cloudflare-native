@@ -2,6 +2,7 @@ import { getContainer, getRandom } from "@cloudflare/containers";
 import { WorkerEntrypoint } from "cloudflare:workers";
 import {
   TwentyBackup,
+  TwentyContainer,
   TwentyServer,
   TwentyWorker,
 } from "./containers";
@@ -61,6 +62,7 @@ import {
 
 export { ContainerProxy } from "@cloudflare/containers";
 export {
+  TwentyContainer,
   TwentyServer,
   TwentyWorker,
   TwentyBackup,
@@ -879,6 +881,7 @@ async function handleCanary(
     }
     const scenarios = new Set([
       "ping",
+      "scheduler-ping",
       "fail-permanent",
       "fail-transient",
       "fail-after-side-effect",

@@ -44,8 +44,9 @@ export interface Env {
   BACKUP_TOKEN?: string;
   WEBHOOK_TOKEN?: string;
   INTERNAL_SERVICE_TOKEN?: string;
-  // Explicit backend selection. Redis remains the default rollback path.
-  REDIS_BACKEND?: "redis" | "cloudflare";
+  // Compatibility flag consumed by the upstream adapter patch. Cloudflare is
+  // the only supported value; Redis is not a deployment or rollback option.
+  REDIS_BACKEND?: "cloudflare";
   CLOUDFLARE_PUBSUB_TRANSPORT?: "websocket" | "poll";
   CLOUDFLARE_QUEUE_DRAIN?: string;
   // Isolated validation mode: never restore production R2 backups.
@@ -66,7 +67,6 @@ export interface Env {
   // PostgreSQL plus the selected coordination backend enables external mode.
   PG_DATABASE_URL?: string; // Neon/Supabase (optionally via Hyperdrive)
   PG_POOL_MAX_CONNECTIONS?: string;
-  REDIS_URL?: string; // Upstash (rediss://)
   // R2 via Twenty's native S3 driver. Upstream names take precedence;
   // AWS_* kept as aliases for older credential chains.
   STORAGE_S3_ENDPOINT?: string; // https://<account_id>.r2.cloudflarestorage.com
@@ -115,12 +115,12 @@ export interface CloudflareJobFailure {
 export const externalMode = (env: Env): boolean =>
   Boolean(
     env.PG_DATABASE_URL &&
-      redisBackend(env) === "cloudflare" &&
+      env.REDIS_BACKEND === "cloudflare" &&
       env.INTERNAL_SERVICE_TOKEN,
   );
 
-export const redisBackend = (env: Env): "redis" | "cloudflare" =>
-  env.REDIS_BACKEND === "cloudflare" ? "cloudflare" : "redis";
+/** Compatibility status field: Cloudflare is the sole coordination backend. */
+export const redisBackend = (_env: Env): "cloudflare" => "cloudflare";
 
 /** Production has exactly one supported runtime topology. */
 export const deploymentMode = (env: Env): string =>

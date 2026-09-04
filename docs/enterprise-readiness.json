@@ -23,8 +23,8 @@
       "name": "complete-contract",
       "status": "passed",
       "evidence": [
-        "docs/twenty-v2.20-contract.json",
-        "docs/twenty-v2.20-runtime-contract.json",
+        "docs/twenty-v2.24.1-contract.json",
+        "docs/twenty-v2.24.1-runtime-contract.json",
         "scripts/inventory-twenty-contract.mjs",
         "scripts/check-twenty-contract.sh",
         "scripts/runtime-contract-lib.mjs",

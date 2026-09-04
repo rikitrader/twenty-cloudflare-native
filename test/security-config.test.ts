@@ -6,6 +6,7 @@ describe("security configuration", () => {
   const production = readFileSync(resolve("wrangler.jsonc"), "utf8");
   const canary = readFileSync(resolve("wrangler.canary.jsonc"), "utf8");
   const staging = readFileSync(resolve("wrangler.staging.jsonc"), "utf8");
+  const canaryDockerfile = readFileSync(resolve("Dockerfile"), "utf8");
   const probe = readFileSync(resolve("src/g9-access-probe.ts"), "utf8");
   const packageJson = JSON.parse(readFileSync(resolve("package.json"), "utf8"));
 
@@ -79,6 +80,12 @@ describe("security configuration", () => {
     expect(production).toContain('"deleted_classes": ["TwentyContainer"]');
   });
 
+  it("builds canary from the Redis-free production image family", () => {
+    expect(canaryDockerfile).toContain("FROM twentycrm/twenty@sha256:");
+    expect(canaryDockerfile).not.toContain("twenty-app-dev");
+    expect(canaryDockerfile).not.toContain("REDIS_URL");
+  });
+
   it("does not pass a Redis URL into production server or worker containers", () => {
     const containers = readFileSync(resolve("src/containers.ts"), "utf8");
     const sharedStart = containers.indexOf("function sharedEnv");
@@ -91,6 +98,15 @@ describe("security configuration", () => {
   it("cannot bypass enterprise gates through the local production deploy script", () => {
     expect(packageJson.scripts.deploy).toContain("readiness:check");
     expect(packageJson.scripts.deploy).toContain("security:production:check");
+  });
+
+  it("requires pre-cutover gates without circularly requiring G13", () => {
+    const cutover = readFileSync(
+      resolve("scripts/run-production-cutover.mjs"),
+      "utf8",
+    );
+    expect(cutover).toContain('"--through"');
+    expect(cutover).toContain('"G12"');
   });
 
   it("ships the starter cost guard in CI", () => {

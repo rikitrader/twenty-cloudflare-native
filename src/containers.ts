@@ -115,13 +115,12 @@ export class TwentyContainer extends Container<Env> {
   constructor(ctx: DurableObjectState<{}>, env: Env) {
     super(ctx, env);
     // Whenever Neon is configured, this all-in-one image doubles as the
-    // authenticated pg_dump companion. In full external mode, user traffic and
-    // BullMQ jobs go to TwentyServer/TwentyWorker; this instance retains its
-    // isolated in-container Redis and exists only for R2 database backups.
+    // authenticated pg_dump companion. State and queue coordination always use
+    // the Cloudflare gateways; this container never starts or selects Redis.
     const externalPg = Boolean(env.PG_DATABASE_URL);
     this.envVars = {
       SERVER_URL: env.SERVER_URL,
-      REDIS_BACKEND: env.REDIS_BACKEND ?? "redis",
+      REDIS_BACKEND: "cloudflare",
       CLOUDFLARE_PUBSUB_TRANSPORT:
         env.CLOUDFLARE_PUBSUB_TRANSPORT ?? "poll",
       CLOUDFLARE_STATE_URL: `http://${STATE_GATEWAY_HOST}`,
@@ -150,7 +149,6 @@ export class TwentyContainer extends Container<Env> {
           }
         : {}),
     };
-    if (env.REDIS_URL) this.sleepAfter = "10m";
   }
 
   private async waitForAgent(): Promise<boolean> {

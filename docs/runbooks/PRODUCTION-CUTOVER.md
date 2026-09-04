@@ -1,8 +1,8 @@
 # Controlled Redis-free production cutover
 
-The cutover is deliberately blocked until every enterprise gate and production
-security preflight passes. Do not set the approval variable to bypass a failed
-preflight.
+The cutover is deliberately blocked until enterprise gates G0–G12 and the
+production security preflight pass. G13 is the post-cutover observation gate.
+Do not set the approval variable to bypass a failed preflight.
 
 ## Dry run
 

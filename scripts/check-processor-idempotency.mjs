@@ -1,7 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 
 const contractUrl = new URL(
-  "../docs/twenty-v2.20-contract.json",
+  "../docs/twenty-v2.24.1-contract.json",
   import.meta.url,
 );
 const evidenceUrl = new URL(
@@ -35,7 +35,7 @@ const expected = {
   schemaVersion: 1,
   gate: "G4",
   policyVersion: 1,
-  sourceContract: "docs/twenty-v2.20-contract.json",
+  sourceContract: "docs/twenty-v2.24.1-contract.json",
   processorCount: processors.length,
   invariant:
     "Only an authenticated executor response explicitly marked not-started may be retried. Every started, unclassified, transport-lost, or expired-lease outcome is quarantined without invoking the processor again.",

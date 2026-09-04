@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 REPO_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
-IMAGE="twentycrm/twenty@sha256:d3dd949725e6196c57dab66ebe83ba9cdd2561885c35f94ef20f9ae38cd6d333"
+IMAGE="twentycrm/twenty@sha256:cd812094cd3439e91deaf727470ecb302129447306200fff853ba0d7e9609079"
 
 docker run --rm \
   --entrypoint node \
@@ -11,4 +11,4 @@ docker run --rm \
   /workspace/scripts/inventory-twenty-contract.mjs \
   --root /app/packages/twenty-server/dist \
   --package-root /app \
-  --check /workspace/docs/twenty-v2.20-contract.json
+  --check /workspace/docs/twenty-v2.24.1-contract.json

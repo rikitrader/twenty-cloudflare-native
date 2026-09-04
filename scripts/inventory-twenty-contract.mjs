@@ -8,7 +8,7 @@ import {
 import { relative, resolve, sep } from "node:path";
 
 const PINNED_IMAGE =
-  "twentycrm/twenty@sha256:d3dd949725e6196c57dab66ebe83ba9cdd2561885c35f94ef20f9ae38cd6d333";
+  "twentycrm/twenty@sha256:cd812094cd3439e91deaf727470ecb302129447306200fff853ba0d7e9609079";
 const PATCH_TARGETS = [
   "engine/core-modules/cache-storage/cache-storage.module-factory.js",
   "engine/core-modules/session-storage/session-storage.module-factory.js",
@@ -467,7 +467,7 @@ if (check) {
     process.exitCode = 1;
   } else if (expected !== encoded) {
     console.error(
-      "Twenty Redis/BullMQ contract drift detected. Regenerate and review docs/twenty-v2.20-contract.json.",
+      "Twenty Redis/BullMQ contract drift detected. Regenerate and review docs/twenty-v2.24.1-contract.json.",
     );
     process.exitCode = 1;
   } else {

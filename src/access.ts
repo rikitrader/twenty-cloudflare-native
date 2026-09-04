@@ -123,11 +123,12 @@ export async function accessIdentityForRequest(
   // silently fall back to the legacy bearer-only operations boundary when the
   // Access application is missing or misconfigured.
   if (env.ACCESS_REQUIRED !== "true") {
-    if (env.REDIS_BACKEND === "cloudflare") return null;
-    return {
-      actor: "legacy-ops-token",
-      subject: "legacy-ops-token",
-    };
+    return env.OPS_TOKEN
+      ? {
+          actor: "legacy-ops-token",
+          subject: "legacy-ops-token",
+        }
+      : null;
   }
   const config = accessConfig(env);
   const token = request.headers.get("cf-access-jwt-assertion");

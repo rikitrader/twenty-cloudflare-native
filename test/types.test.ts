@@ -10,7 +10,7 @@ import {
 const env = (values: Partial<Env>): Env => values as Env;
 
 describe("deployment mode", () => {
-  it("requires Neon, the Cloudflare backend, and internal service auth", () => {
+  it("requires Neon, the fixed Cloudflare backend, and internal service auth", () => {
     expect(externalMode(env({ PG_DATABASE_URL: "postgres://db" }))).toBe(false);
     expect(
       externalMode(
@@ -45,6 +45,7 @@ describe("deployment mode", () => {
       REDIS_BACKEND: "cloudflare",
     });
     expect(redisBackend(cloudflare)).toBe("cloudflare");
+    expect(redisBackend(env({}))).toBe("cloudflare");
     expect(externalMode(cloudflare)).toBe(false);
     expect(
       externalMode(

@@ -53,7 +53,14 @@ const beforeStatus = await status().catch((error) => ({ error: String(error) }))
 if (!dryRun && process.env.CUTOVER_APPROVAL !== APPROVAL)
   throw new Error(`set CUTOVER_APPROVAL=${APPROVAL} for an authorized cutover`);
 
-const readiness = await command("node", ["scripts/enterprise-readiness.mjs", "--require-ready"]);
+// G13 is the observation period that begins after cutover. Requiring it here
+// would make cutover impossible, so the production mutation gate is G0-G12.
+const readiness = await command("node", [
+  "scripts/enterprise-readiness.mjs",
+  "--through",
+  "G12",
+  "--require-ready",
+]);
 const security = await command("node", ["scripts/check-production-security.mjs"]);
 const preflightPassed = readiness.code === 0 && security.code === 0;
 const preflight = {

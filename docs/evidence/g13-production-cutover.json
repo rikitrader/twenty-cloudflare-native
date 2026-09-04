@@ -2,28 +2,33 @@
   "schemaVersion": 1,
   "gate": "G13",
   "operation": "controlled-production-cutover",
-  "startedAt": "2026-07-25T19:21:30.657Z",
+  "startedAt": "2026-07-27T00:08:40.863Z",
   "productionChanged": false,
   "dryRun": true,
-  "beforeVersion": "5b42c895-ed4a-4a31-93df-1a14c43acbef",
+  "beforeVersion": "5de997b6-6095-41d0-a9b2-15a28dacab64",
   "beforeStatus": {
     "httpStatus": 200,
     "body": {
       "status": "ok",
-      "mode": "hybrid-neon",
-      "checked": "2026-07-25T19:20:29.913Z",
-      "source": "cron",
-      "lastBackupAttempt": "2026-07-25T19:00:30.732Z",
-      "lastBackup": "2026-07-25T19:00:52.536Z",
+      "mode": "external-db",
+      "checked": "2026-07-27T00:05:05.804Z",
+      "source": "request",
+      "containerState": "active",
+      "lastBackupAttempt": "2026-07-27T00:00:44.143Z",
+      "lastBackup": "2026-07-27T00:00:49.580Z",
       "lastBackupError": null,
-      "productionReady": false,
-      "durableRedis": false,
+      "productionReady": true,
+      "durableRedis": true,
+      "redisBackend": "cloudflare",
+      "cloudflareStateReady": true,
+      "cloudflareVersionId": "5de997b6-6095-41d0-a9b2-15a28dacab64",
+      "releaseMaintenance": null,
       "reasons": []
     }
   },
   "preflight": {
     "readinessExitCode": 1,
-    "securityExitCode": 1,
+    "securityExitCode": 0,
     "passed": false
   },
   "result": "blocked"

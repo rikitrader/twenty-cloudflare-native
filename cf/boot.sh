@@ -1,4 +1,5 @@
 #!/bin/sh
-# Start the backup agent, then hand PID 1 to the image's original s6 init.
+# Start the backup agent, then hand PID 1 to the upstream image entrypoint.
 node /cf/agent.js &
-exec /init
+cd /app/packages/twenty-server
+exec /app/entrypoint.sh node dist/main

@@ -4,6 +4,12 @@ const manifestUrl = new URL("../docs/enterprise-readiness.json", import.meta.url
 const manifest = JSON.parse(await readFile(manifestUrl, "utf8"));
 const expected = Array.from({ length: 14 }, (_, index) => `G${index}`);
 const knownStatuses = new Set(["blocked", "partial", "passed"]);
+const throughIndex = process.argv.indexOf("--through");
+const through =
+  throughIndex === -1 ? "G13" : process.argv[throughIndex + 1];
+if (!expected.includes(through))
+  throw new Error(`invalid --through gate: ${through ?? "missing"}`);
+const throughNumber = Number(through.slice(1));
 
 async function evidenceJson(relativePath) {
   try {
@@ -35,10 +41,12 @@ for (const gate of manifest.gates) {
 // still partial or blocked.
 const g3Evidence = await evidenceJson("docs/evidence/g3-auth-revocation-canary.json");
 const g10Evidence = await evidenceJson("docs/evidence/g10-canary-security.json");
+const g12Evidence = await evidenceJson("docs/evidence/g12-rollback-drill.json");
 const g13Evidence = await evidenceJson("docs/evidence/g13-production-observation.json");
 const evidenceBackstops = [
   ["G3", g3Evidence?.result === "partial"],
   ["G10", g10Evidence?.result === "partial"],
+  ["G12", g12Evidence?.passed !== true],
   ["G13", g13Evidence?.result === "blocked"],
 ];
 for (const [id, evidenceIsIncomplete] of evidenceBackstops) {
@@ -47,18 +55,22 @@ for (const [id, evidenceIsIncomplete] of evidenceBackstops) {
     throw new Error(`${id} cannot be passed while its evidence is incomplete`);
 }
 
+const scopedGates = manifest.gates.filter(
+  (gate) => Number(gate.id.slice(1)) <= throughNumber,
+);
 const counts = Object.fromEntries(
   [...knownStatuses].map((status) => [
     status,
-    manifest.gates.filter((gate) => gate.status === status).length,
+    scopedGates.filter((gate) => gate.status === status).length,
   ]),
 );
-const pending = manifest.gates.filter((gate) => gate.status !== "passed");
+const pending = scopedGates.filter((gate) => gate.status !== "passed");
 
 console.log(
   JSON.stringify(
     {
       objective: manifest.objective,
+      through,
       ready: pending.length === 0,
       counts,
       pending: pending.map(({ id, name, status }) => ({ id, name, status })),

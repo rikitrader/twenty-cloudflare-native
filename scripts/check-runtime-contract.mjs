@@ -7,7 +7,7 @@ import {
 } from "./runtime-contract-lib.mjs";
 
 const contractPath = resolve(
-  process.argv[2] ?? "docs/twenty-v2.20-runtime-contract.json",
+  process.argv[2] ?? "docs/twenty-v2.24.1-runtime-contract.json",
 );
 const contract = JSON.parse(await readFile(contractPath, "utf8"));
 const failures = [];
