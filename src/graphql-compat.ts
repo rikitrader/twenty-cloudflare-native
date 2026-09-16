@@ -1,33 +1,44 @@
 import { accessIdentityForRequest } from "./access";
 import type { Env } from "./types";
 
-/** Small GraphQL compatibility surface for the upstream Twenty frontend. */
+type Vars = Record<string, unknown>;
+type Entity = { table: string; singular: string; plural: string; columns: string[] };
+const ENTITIES: Record<string, Entity> = {
+  people: { table: "contacts", singular: "person", plural: "people", columns: ["id", "first_name", "last_name", "email", "created_at", "updated_at"] },
+  person: { table: "contacts", singular: "person", plural: "people", columns: ["id", "first_name", "last_name", "email", "created_at", "updated_at"] },
+  companies: { table: "companies", singular: "company", plural: "companies", columns: ["id", "name", "domain", "created_at", "updated_at"] },
+  company: { table: "companies", singular: "company", plural: "companies", columns: ["id", "name", "domain", "created_at", "updated_at"] },
+  opportunities: { table: "opportunities", singular: "opportunity", plural: "opportunities", columns: ["id", "name", "amount_cents", "stage", "company_id", "point_of_contact_id", "pipeline_id", "created_at", "updated_at"] },
+  opportunity: { table: "opportunities", singular: "opportunity", plural: "opportunities", columns: ["id", "name", "amount_cents", "stage", "company_id", "point_of_contact_id", "pipeline_id", "created_at", "updated_at"] },
+  activities: { table: "activities", singular: "activity", plural: "activities", columns: ["id", "type", "title", "body", "contact_id", "company_id", "opportunity_id", "due_at", "completed_at", "created_at", "updated_at"] },
+  activity: { table: "activities", singular: "activity", plural: "activities", columns: ["id", "type", "title", "body", "contact_id", "company_id", "opportunity_id", "due_at", "completed_at", "created_at", "updated_at"] },
+};
+const camel = (key: string) => key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+function mapRow(row: Record<string, unknown>): Record<string, unknown> { const out: Record<string, unknown> = {}; for (const [key, value] of Object.entries(row)) out[camel(key)] = value; if ("firstName" in out || "lastName" in out) out.name = { firstName: out.firstName ?? "", lastName: out.lastName ?? "" }; if ("amountCents" in out) out.amount = out.amountCents == null ? null : Number(out.amountCents) / 100; return out; }
+function unwrapInput(vars: Vars): Record<string, unknown> { for (const key of ["input", "data", "record", "createInput", "updateInput"]) { const value = vars[key]; if (value && typeof value === "object" && !Array.isArray(value)) { const obj = value as Record<string, unknown>; return (obj.data && typeof obj.data === "object" ? obj.data : obj) as Record<string, unknown>; } } return vars; }
+function operationName(body: { query?: string; operationName?: string }): string { return body.operationName || body.query?.match(/\b(?:query|mutation|subscription)\s+([A-Za-z0-9_]+)/)?.[1] || ""; }
+function entityFor(op: string): Entity | null { const match = op.match(/(?:People|Person|Companies|Company|Opportunities|Opportunity|Activities|Activity)/i)?.[0].toLowerCase(); return match ? ENTITIES[match] ?? null : null; }
+function valueFor(input: Record<string, unknown>, field: string): unknown { const aliases: Record<string, string[]> = { amount_cents: ["amountCents", "amount"], point_of_contact_id: ["pointOfContactId"], company_id: ["companyId"], pipeline_id: ["pipelineId"], contact_id: ["contactId"], opportunity_id: ["opportunityId"], due_at: ["dueAt"], completed_at: ["completedAt"] }; const value = input[field] ?? (aliases[field] ?? []).map((x) => input[x]).find((x) => x !== undefined); return field === "amount_cents" && typeof value === "number" ? Math.round(value * 100) : value; }
+
+/** Compatibility resolver for the upstream Twenty GraphQL client, backed only by tenant-scoped D1. */
 export async function handleGraphql(request: Request, env: Env): Promise<Response | null> {
   if (new URL(request.url).pathname !== "/graphql" || request.method !== "POST") return null;
   const actor = await accessIdentityForRequest(request, env);
   if (!actor || !env.CRM_DB) return Response.json({ errors: [{ message: "unauthorized" }] }, { status: 401 });
-  const body = (await request.json().catch(() => ({}))) as { query?: string; operationName?: string; variables?: Record<string, unknown> };
-  const operation = body.operationName || body.query?.match(/\b(?:query|mutation)\s+([A-Za-z0-9_]+)/)?.[1] || "";
-  if (operation === "IntrospectionQuery") return Response.json({ data: { __schema: { queryType: { name: "Query" }, mutationType: { name: "Mutation" }, types: [] } } });
-  const workspaceId = request.headers.get("x-workspace-id") || String(body.variables?.workspaceId || "");
+  const body = (await request.json().catch(() => ({}))) as { query?: string; operationName?: string; variables?: Vars }; const op = operationName(body); const vars = body.variables ?? {};
+  if (op === "IntrospectionQuery" || /__schema|__type/.test(body.query ?? "")) return Response.json({ data: { __schema: { queryType: { name: "Query" }, mutationType: { name: "Mutation" }, types: [] } } });
+  const workspaceId = request.headers.get("x-workspace-id") || String(vars.workspaceId ?? ((vars.workspace && typeof vars.workspace === "object") ? (vars.workspace as Record<string, unknown>).id : "") ?? "");
   if (!workspaceId) return Response.json({ errors: [{ message: "x-workspace-id required" }] }, { status: 400 });
-  const member = await env.CRM_DB.prepare("SELECT role FROM workspace_members WHERE workspace_id = ? AND identity_subject = ? AND status = 'active'").bind(workspaceId, actor.subject).first<{ role: string }>();
-  if (!member) return Response.json({ errors: [{ message: "forbidden" }] }, { status: 403 });
-  const variables = body.variables ?? {};
-  const entity = operation.match(/(?:People|Person)/) ? "contacts" : operation.match(/Companies|Company/) ? "companies" : operation.match(/Opportunities|Opportunity/) ? "opportunities" : operation.match(/Activities|Activity/) ? "activities" : null;
-  if (!entity) return Response.json({ data: {} });
-  if (/^FindMany|^GetMany|^FindAll/.test(operation)) {
-    const limit = Math.min(100, Math.max(1, Number(variables.limit ?? variables.first ?? 25)));
-    const offset = Math.max(0, Number(variables.offset ?? variables.skip ?? 0));
-    const rows = await env.CRM_DB.prepare(`SELECT * FROM ${entity} WHERE workspace_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`).bind(workspaceId, limit, offset).all<Record<string, unknown>>();
-    const key = entity === "contacts" ? "people" : entity;
-    return Response.json({ data: { [key]: { edges: rows.results.map((node) => ({ node, cursor: String(node.id ?? "") })), nodes: rows.results, pageInfo: { hasNextPage: rows.results.length === limit, hasPreviousPage: offset > 0, startCursor: rows.results[0]?.id ?? null, endCursor: rows.results.at(-1)?.id ?? null }, totalCount: rows.results.length } } });
-  }
-  if (/^FindOne/.test(operation)) {
-    const id = String(variables.id ?? variables.idToFind ?? variables.recordId ?? "");
-    const row = await env.CRM_DB.prepare(`SELECT * FROM ${entity} WHERE workspace_id = ? AND id = ?`).bind(workspaceId, id).first();
-    const key = entity === "contacts" ? "person" : entity.slice(0, -1);
-    return Response.json({ data: { [key]: row } });
-  }
-  return Response.json({ data: {} });
+  const member = await env.CRM_DB.prepare("SELECT role FROM workspace_members WHERE workspace_id = ? AND identity_subject = ? AND status = 'active' LIMIT 1").bind(workspaceId, actor.subject).first<{ role: string }>(); if (!member) return Response.json({ errors: [{ message: "forbidden" }] }, { status: 403 });
+  if (/GetCurrentUser|CurrentUser|^Me/i.test(op)) return Response.json({ data: { currentUser: { id: actor.subject, userId: actor.subject, email: actor.email ?? null, name: { firstName: (actor.email ?? "").split("@")[0], lastName: "" } } } });
+  if (/ObjectMetadata/i.test(op)) { const rows = await env.CRM_DB.prepare("SELECT id, object_key as name, label, plural_label as pluralLabel, created_at as createdAt, updated_at as updatedAt FROM custom_objects WHERE workspace_id = ? ORDER BY created_at").bind(workspaceId).all(); return Response.json({ data: { objectMetadataItems: rows.results, objects: rows.results } }); }
+  if (/FieldMetadata/i.test(op)) { const rows = await env.CRM_DB.prepare("SELECT id, object_type as objectType, field_key as name, label, field_type as type, options_json as options, created_at as createdAt FROM custom_fields WHERE workspace_id = ? ORDER BY created_at").bind(workspaceId).all(); return Response.json({ data: { fieldMetadataItems: rows.results, fields: rows.results } }); }
+  if (/Workspace/i.test(op) && !entityFor(op)) { const workspace = await env.CRM_DB.prepare("SELECT id, name, created_at as createdAt FROM workspaces WHERE id = ?").bind(workspaceId).first(); return Response.json({ data: { workspace, currentWorkspace: workspace, workspaces: { edges: workspace ? [{ node: workspace }] : [], nodes: workspace ? [workspace] : [], totalCount: workspace ? 1 : 0 } } }); }
+  const entity = entityFor(op); if (!entity) return Response.json({ data: {} });
+  const input = unwrapInput(vars); const id = String(vars.id ?? vars.idToFind ?? vars.recordId ?? input.id ?? "");
+  if (/Delete|Destroy|Archive/i.test(op)) { if (!id) return Response.json({ errors: [{ message: "id required" }] }, { status: 400 }); await env.CRM_DB.prepare(`DELETE FROM ${entity.table} WHERE workspace_id = ? AND id = ?`).bind(workspaceId, id).run(); return Response.json({ data: { [entity.singular]: { id }, [`delete${entity.singular[0].toUpperCase()}${entity.singular.slice(1)}`]: { id } } }); }
+  if (/Create|Update|Upsert|Merge/i.test(op)) { const now = new Date().toISOString(); const recordId = id || crypto.randomUUID(); const fields = entity.columns.filter((column) => !["id", "created_at", "updated_at"].includes(column)).filter((column) => valueFor(input, column) !== undefined); if (/Create|Upsert/i.test(op) && !id) { const names = ["id", "workspace_id", ...fields, "created_at", "updated_at"]; const values = [recordId, workspaceId, ...fields.map((f) => valueFor(input, f)), now, now]; await env.CRM_DB.prepare(`INSERT INTO ${entity.table} (${names.join(",")}) VALUES (${names.map(() => "?").join(",")})`).bind(...values).run(); } else if (fields.length) await env.CRM_DB.prepare(`UPDATE ${entity.table} SET ${fields.map((f) => `${f} = ?`).join(",")}, updated_at = ? WHERE workspace_id = ? AND id = ?`).bind(...fields.map((f) => valueFor(input, f)), now, workspaceId, recordId).run(); const row = await env.CRM_DB.prepare(`SELECT * FROM ${entity.table} WHERE workspace_id = ? AND id = ?`).bind(workspaceId, recordId).first<Record<string, unknown>>(); return Response.json({ data: { [entity.singular]: row ? mapRow(row) : { id: recordId } } }); }
+  const limit = Math.min(100, Math.max(1, Number(vars.first ?? vars.limit ?? 25))); const offset = Math.max(0, Number(vars.offset ?? vars.skip ?? 0)); const one = /^FindOne|^GetOne|^FindDuplicate/i.test(op) || (!!id && !/^FindMany|^GetMany|^FindAll/i.test(op));
+  if (one) { const row = await env.CRM_DB.prepare(`SELECT * FROM ${entity.table} WHERE workspace_id = ? AND id = ?`).bind(workspaceId, id).first<Record<string, unknown>>(); return Response.json({ data: { [entity.singular]: row ? mapRow(row) : null } }); }
+  const rows = await env.CRM_DB.prepare(`SELECT * FROM ${entity.table} WHERE workspace_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`).bind(workspaceId, limit, offset).all<Record<string, unknown>>(); const nodes = rows.results.map(mapRow); const connection = { edges: nodes.map((node) => ({ node, cursor: String(node.id ?? "") })), nodes, pageInfo: { hasNextPage: nodes.length === limit, hasPreviousPage: offset > 0, startCursor: nodes[0]?.id ?? null, endCursor: nodes.at(-1)?.id ?? null }, totalCount: nodes.length }; return Response.json({ data: { [entity.plural]: connection, ...(entity.plural === "people" ? { contacts: connection } : {}) } });
 }
