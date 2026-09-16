@@ -13,7 +13,7 @@ export interface ReleaseEnv extends NeonReleaseEnv {
   OPS_DB: D1Database;
   STATUS_KV: KVNamespace;
   STORAGE: R2Bucket;
-  RELEASE_CONTAINER: DurableObjectNamespace<TwentyReleaseContainer>;
+  RELEASE_CONTAINER: DurableObjectNamespace;
   RELEASE_WF: Workflow;
   PRODUCTION: Service<ReleaseControlService>;
   STATE_DO: DurableObjectNamespace<TwentyState>;

@@ -3,7 +3,7 @@ import {
   type WorkflowEvent,
   type WorkflowStep,
 } from "cloudflare:workers";
-import { getContainer } from "@cloudflare/containers";
+import { getContainer } from "../container-compat";
 import {
   RELEASE_DEPLOYMENT_EVENT,
   type ReleaseDeploymentResult,

@@ -6,7 +6,7 @@ import {
 import { getRelease } from "./ledger";
 import type { ReleaseEnv } from "./types";
 
-export { ContainerProxy } from "@cloudflare/containers";
+export { ContainerProxy } from "../container-compat";
 export { TwentyReleaseContainer } from "./container";
 export { TwentyReleaseWorkflow } from "./workflow";
 

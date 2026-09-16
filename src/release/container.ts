@@ -1,4 +1,4 @@
-import { Container } from "@cloudflare/containers";
+import { Container } from "../container-compat";
 import { handleStateGateway } from "../cloudflare-state/gateway";
 import {
   STATE_GATEWAY_HOST,
