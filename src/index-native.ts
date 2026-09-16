@@ -11,6 +11,7 @@ import { TwentyScheduler } from "./schedule-do";
 import { TwentyPubSub } from "./pubsub-do";
 import { Container } from "./container-compat";
 import type { Env } from "./types";
+import { handleGraphql } from "./graphql-compat";
 
 // Retain historical Durable Object class exports so existing namespaces can
 // be upgraded safely. These classes are retired no-op shims; production
@@ -36,6 +37,8 @@ export default {
         cloudflareVersionId: env.CF_VERSION_METADATA?.id ?? null,
       });
     }
+    const graphql = await handleGraphql(request, env);
+    if (graphql) return graphql;
     const crm = await handleD1Crm(request, env);
     if (crm) return crm;
     if (env.ASSETS) {
