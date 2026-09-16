@@ -5,6 +5,7 @@ import {
   type JWTPayload,
 } from "jose";
 import type { Env } from "./types";
+import { nativeSessionIdentity } from "./native-auth";
 
 export interface AccessIdentity {
   actor: string;
@@ -132,6 +133,7 @@ export async function accessIdentityForRequest(
   }
   const config = accessConfig(env);
   const token = request.headers.get("cf-access-jwt-assertion");
-  if (!config || !token) return null;
-  return verifyAccessToken(token, config);
+  if (config && token) return verifyAccessToken(token, config);
+  const native = await nativeSessionIdentity(request, env);
+  return native ? { actor: native.email, subject: native.subject, email: native.email } : null;
 }

@@ -1,5 +1,6 @@
 import { accessIdentityForRequest } from "./access";
 import type { Env } from "./types";
+import { createNativeSession, hashPassword, verifyPassword } from "./native-auth";
 
 type Vars = Record<string, unknown>;
 type Entity = { table: string; singular: string; plural: string; columns: string[] };
@@ -29,9 +30,30 @@ function listStatement(entity: Entity, vars: Vars, workspaceId: string, limit: n
 /** Compatibility resolver for the upstream Twenty GraphQL client, backed only by tenant-scoped D1. */
 export async function handleGraphql(request: Request, env: Env): Promise<Response | null> {
   if (new URL(request.url).pathname !== "/graphql" || request.method !== "POST") return null;
-  const actor = await accessIdentityForRequest(request, env);
-  if (!actor || !env.CRM_DB) return Response.json({ errors: [{ message: "unauthorized" }] }, { status: 401 });
   const body = (await request.json().catch(() => ({}))) as { query?: string; operationName?: string; variables?: Vars }; const op = operationName(body); const vars = body.variables ?? {};
+  if (/^SignIn$/i.test(op)) {
+    if (!env.CRM_DB) return Response.json({ errors: [{ message: "CRM database unavailable" }] }, { status: 503 });
+    const email = String(vars.email ?? "").trim().toLowerCase(); const password = String(vars.password ?? "");
+    const user = await env.CRM_DB.prepare("SELECT id, email, password_hash as passwordHash, password_salt as passwordSalt FROM native_users WHERE email = ? COLLATE NOCASE LIMIT 1").bind(email).first<{ id: string; email: string; passwordHash: string; passwordSalt: string }>();
+    if (!user || !(await verifyPassword(password, user.passwordHash, user.passwordSalt))) return Response.json({ errors: [{ message: "invalid email or password" }] }, { status: 401 });
+    const workspace = await env.CRM_DB.prepare("SELECT workspace_id as workspaceId FROM workspace_members WHERE identity_subject = ? AND status = 'active' ORDER BY created_at LIMIT 1").bind(`user:${user.id}`).first<{ workspaceId: string }>();
+    if (!workspace) return Response.json({ errors: [{ message: "no active workspace" }] }, { status: 403 });
+    const session = await createNativeSession(env, user.id, workspace.workspaceId); const token = { token: session.id, expiresAt: session.expiresAt };
+    return new Response(JSON.stringify({ data: { signIn: { availableWorkspaces: { availableWorkspacesForSignIn: [{ id: workspace.workspaceId, displayName: workspace.workspaceId, loginToken: session.id }] }, tokens: { accessOrWorkspaceAgnosticToken: token, refreshToken: token } } } }), { headers: { "content-type": "application/json", "cache-control": "no-store", "set-cookie": `twenty_session=${session.id}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=28800` } });
+  }
+  if (/^SignUp$/i.test(op)) {
+    if (!env.CRM_DB) return Response.json({ errors: [{ message: "CRM database unavailable" }] }, { status: 503 });
+    const email = String(vars.email ?? "").trim().toLowerCase(); const password = String(vars.password ?? "");
+    if (!/^\S+@\S+\.\S+$/.test(email) || password.length < 10 || password.length > 256) return Response.json({ errors: [{ message: "email or password does not meet requirements" }] }, { status: 400 });
+    const existing = await env.CRM_DB.prepare("SELECT id FROM native_users WHERE email = ? COLLATE NOCASE").bind(email).first(); if (existing) return Response.json({ errors: [{ message: "account already exists" }] }, { status: 409 });
+    const userId = crypto.randomUUID(); const workspaceId = crypto.randomUUID(); const now = new Date().toISOString(); const passwordData = await hashPassword(password); const workspaceName = `${email.split("@")[0]}'s workspace`;
+    await env.CRM_DB.batch([env.CRM_DB.prepare("INSERT INTO native_users (id, email, password_hash, password_salt, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)").bind(userId, email, passwordData.hash, passwordData.salt, now, now), env.CRM_DB.prepare("INSERT INTO workspaces (id, name, created_at) VALUES (?, ?, ?)").bind(workspaceId, workspaceName, now), env.CRM_DB.prepare("INSERT INTO workspace_members (workspace_id, identity_subject, role, status, created_at) VALUES (?, ?, 'owner', 'active', ?)").bind(workspaceId, `user:${userId}`, now)]);
+    const session = await createNativeSession(env, userId, workspaceId); const token = { token: session.id, expiresAt: session.expiresAt };
+    return new Response(JSON.stringify({ data: { signUp: { availableWorkspaces: { availableWorkspacesForSignUp: [{ id: workspaceId, displayName: workspaceName, loginToken: session.id }] }, tokens: { accessOrWorkspaceAgnosticToken: token, refreshToken: token } } } }), { headers: { "content-type": "application/json", "cache-control": "no-store", "set-cookie": `twenty_session=${session.id}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=28800` } });
+  }
+  const actor = await accessIdentityForRequest(request, env);
+  if (!actor) return Response.json({ errors: [{ message: "unauthorized" }] }, { status: 401 });
+  if (!env.CRM_DB) return Response.json({ errors: [{ message: "CRM database unavailable" }] }, { status: 503 });
   if (op === "IntrospectionQuery" || /__schema|__type/.test(body.query ?? "")) return Response.json({ data: { __schema: { queryType: { name: "Query" }, mutationType: { name: "Mutation" }, types: [] } } });
   const workspaceId = request.headers.get("x-workspace-id") || String(vars.workspaceId ?? ((vars.workspace && typeof vars.workspace === "object") ? (vars.workspace as Record<string, unknown>).id : "") ?? "");
   if (!workspaceId) return Response.json({ errors: [{ message: "x-workspace-id required" }] }, { status: 400 });
