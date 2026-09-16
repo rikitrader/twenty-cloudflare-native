@@ -4,34 +4,8 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-06-08",
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
-  "containers": [
-    {
-      // Neon-backed, Redis-free production server.
-      "class_name": "TwentyServer",
-      "image": "./Dockerfile.production",
-      "instance_type": "standard-1",
-      "max_instances": 1
-    },
-    {
-      // External-DB mode: matching BullMQ worker (`yarn worker:prod`).
-      "class_name": "TwentyWorker",
-      "image": "./Dockerfile.production",
-      "instance_type": "standard-1",
-      "max_instances": 1
-    },
-    {
-      // Read-only pg_dump companion; restore is intentionally disabled.
-      "class_name": "TwentyBackup",
-      "image": "./Dockerfile.production",
-      "instance_type": "basic",
-      "max_instances": 1
-    }
-  ],
   "durable_objects": {
     "bindings": [
-      { "name": "TWENTY_SERVER", "class_name": "TwentyServer" },
-      { "name": "TWENTY_WORKER", "class_name": "TwentyWorker" },
-      { "name": "BACKUP_CONTAINER", "class_name": "TwentyBackup" },
       { "name": "STATE_DO", "class_name": "TwentyState" },
       { "name": "SCHEDULER_DO", "class_name": "TwentyScheduler" },
       { "name": "PUBSUB_DO", "class_name": "TwentyPubSub" }
