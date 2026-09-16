@@ -1,0 +1,1 @@
+import{t as i}from"./jsx-runtime-BmDUFisN.js";import{t as a}from"./dist-x6yBUqMs.js";import{t as n}from"./ProgressRing-Dc1mW5lO.js";var r=i(),o=a("div")({name:"StyledContainer",class:"snia9wf",propsAsIs:!1}),d=({value:s,label:e,barColor:t})=>(0,r.jsxs)(o,{children:[(0,r.jsx)("span",{children:e??`${s}%`}),(0,r.jsx)(n,{size:14,value:s,barColor:t})]});export{d as t};

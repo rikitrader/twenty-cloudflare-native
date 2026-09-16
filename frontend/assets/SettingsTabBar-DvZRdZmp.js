@@ -1,0 +1,1 @@
+import{t as a}from"./jsx-runtime-BmDUFisN.js";import{Jr as s}from"./index-D6X3OEUa.js";var i=a(),n=({behaveAsLinks:r,tabs:t,componentInstanceId:e})=>(0,i.jsx)(s,{behaveAsLinks:r,tabs:t,componentInstanceId:e,centerTabs:!0});export{n as t};

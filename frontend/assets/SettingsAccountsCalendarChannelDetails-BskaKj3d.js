@@ -1,0 +1,10 @@
+import{t as u}from"./jsx-runtime-BmDUFisN.js";import{t as p}from"./dist-x6yBUqMs.js";import{t as e}from"./dist-Cg5OofxW.js";import{B as v}from"./input-BtFIK2kq-CYLkBJQm.js";import{r}from"./layout-GaTEE2ty-BAr5SYLm.js";import{t as d}from"./typography-0W7dTJd5-cWdtERIZ.js";import{t as A}from"./lib-C3IpGLsk.js";import{t as b}from"./useMutation-Ds2Pb-th.js";import{t as s}from"./graphql-BChpkrr5.js";import{Lf as j}from"./index-D6X3OEUa.js";import{t as l}from"./SettingsAccountsVisibilityIcon-DyEsILdj.js";import{t as f}from"./SettingsRadioSettingsCard-BNa3232b.js";import{t as y}from"./SettingsOptionCardContentSwitch-rfNuZBH0.js";var t=u(),h=A`
+  mutation UpdateCalendarChannel($input: UpdateCalendarChannelInput!) {
+    updateCalendarChannel(input: $input) {
+      id
+      visibility
+      isContactAutoCreationEnabled
+      contactAutoCreationPolicy
+    }
+  }
+`,c=p("div")({name:"StyledCardMediaContainer",class:"s13a7ob6",propsAsIs:!1}),x=[{title:{id:"wqF3jl"},description:{id:"MHLapp"},value:s.SHARE_EVERYTHING,cardMedia:(0,t.jsx)(c,{children:(0,t.jsx)(l,{subject:"active",body:"active"})})},{title:{id:"6GBt0m"},description:{id:"zii2Qj"},value:s.METADATA,cardMedia:(0,t.jsx)(c,{children:(0,t.jsx)(l,{subject:"active",body:"inactive"})})}],_=({onChange:i,value:n=s.SHARE_EVERYTHING})=>(0,t.jsx)(f,{name:"event-visibility",options:x,value:n,onChange:i}),g=p("div")({name:"StyledDetailsContainer",class:"sxvfjl",propsAsIs:!1}),w=({calendarChannel:i})=>{const[n]=b(h),o=a=>{n({variables:{input:{id:i.id,update:a}}})},C=a=>{o({visibility:a})},m=a=>{o({isContactAutoCreationEnabled:a})};return(0,t.jsxs)(g,{children:[(0,t.jsxs)(r,{children:[(0,t.jsx)(d,{title:e._({id:"poC90w"}),description:e._({id:"bQkkFU"})}),(0,t.jsx)(_,{value:i.visibility,onChange:C})]}),(0,t.jsxs)(r,{children:[(0,t.jsx)(d,{title:e._({id:"Y2y0mC"}),description:e._({id:"YRT7ZW"})}),(0,t.jsx)(v,{rounded:!0,children:(0,t.jsx)(y,{Icon:j,title:e._({id:"2zJkmL"}),description:e._({id:"lgw3U4"}),checked:i.isContactAutoCreationEnabled,onChange:()=>{m(!i.isContactAutoCreationEnabled)}})})]})]})};export{w as t};

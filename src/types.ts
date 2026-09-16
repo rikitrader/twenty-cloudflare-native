@@ -19,6 +19,7 @@ export interface Env {
     timestamp?: string;
   };
   STATUS_KV: KVNamespace;
+  ASSETS?: Fetcher;
   STORAGE: R2Bucket;
   OPS_DB: D1Database;
   /** D1 database containing Cloudflare-native CRM records. */

@@ -26,7 +26,7 @@ export { TwentyState, TwentyScheduler, TwentyPubSub, BackupWorkflow, CrmExportWo
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    if (url.pathname === "/" || url.pathname === "/d1-dashboard") return d1Dashboard();
+    if (url.pathname === "/d1-dashboard") return d1Dashboard();
     if (url.pathname === "/profile" || url.pathname === "/settings") return profileDashboard();
     if (url.pathname === "/_status") {
       return Response.json({
@@ -38,6 +38,11 @@ export default {
     }
     const crm = await handleD1Crm(request, env);
     if (crm) return crm;
+    if (env.ASSETS) {
+      const asset = await env.ASSETS.fetch(request);
+      if (asset.status !== 404 || request.method !== "GET") return asset;
+      return env.ASSETS.fetch(new Request(new URL("/index.html", request.url), request));
+    }
     return Response.json({ error: "not found" }, { status: 404 });
   },
   async queue(batch: MessageBatch<unknown>, env: Env, ctx: ExecutionContext): Promise<void> {

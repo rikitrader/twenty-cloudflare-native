@@ -1,0 +1,1 @@
+import{o as r}from"./chunk-ChpBd9eV.js";import{t as e}from"./react-M6yZRsSc.js";import{t as o}from"./MainContextStoreInstanceId-BDmf3agh.js";var t=r(e(),1),a=(0,t.createContext)({type:"main",instanceId:o,ownsRouteLocation:!0}),i=()=>(0,t.useContext)(a);export{a as n,i as t};

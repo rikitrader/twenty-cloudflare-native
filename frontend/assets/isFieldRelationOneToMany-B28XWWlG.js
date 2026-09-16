@@ -1,0 +1,1 @@
+import{Hr as e}from"./graphql-CBCbBFnA.js";import{i as o,o as i}from"./getRecordFromRecordNode-DbeyRbcx.js";var r=a=>i(a)&&a.metadata.relationType===e.ONE_TO_MANY,l=a=>o(a)&&a.metadata.relationType===e.ONE_TO_MANY;export{r as n,l as t};

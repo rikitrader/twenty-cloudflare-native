@@ -1,0 +1,1 @@
+import{t as s}from"./jsx-runtime-BmDUFisN.js";import{t as r}from"./dist-x6yBUqMs.js";var l=s(),m=r("span")({name:"StyledSettingsNameCellSecondaryLabel",class:"szvphux",propsAsIs:!1}),i=({children:e,title:a,id:t})=>(0,l.jsx)(m,{title:a,id:t,children:e});export{i as t};

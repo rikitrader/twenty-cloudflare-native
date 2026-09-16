@@ -1,0 +1,1 @@
+import{t}from"./createAtomState-CIJqqZRg.js";import{r as e}from"./useAvailableComponentInstanceIdOrThrow-g2MLs64_.js";import{t as a}from"./PageLayoutComponentInstanceContext-K85mihqq.js";var m=t({key:"isLayoutCustomizationModeEnabledState",defaultValue:!1}),d=e({key:"pageLayoutEditingWidgetIdComponentState",defaultValue:null,componentInstanceContext:a});export{m as n,d as t};

@@ -1,0 +1,1 @@
+import{s as e}from"./routedFlowStateScopeRegistry-DGhefLBQ.js";import{n as m}from"./RoutedFlowStateScopeContext--w660x4n.js";var a=t=>{const o=m();return e(t.type==="State"?t.getAtom(o):t.atom)};export{a as t};

@@ -1,0 +1,1 @@
+import{a as s,d as c}from"./routedFlowStateScopeRegistry-DGhefLBQ.js";import{t as i}from"./isDefined-Dtu5EYqP-_d6Dqdoe.js";import{t as l}from"./buildGetHelper-COsfWD8o.js";var f=({key:e,get:a,areEqual:o})=>{const r=c(t=>a({get:l(t)})),m=i(o)?s(r,t=>t,o):r;return m.debugLabel=e,{type:"Selector",key:e,atom:m}};export{f as t};

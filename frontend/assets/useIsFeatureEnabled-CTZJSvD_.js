@@ -1,0 +1,1 @@
+import{t as a}from"./useAtomStateValue-Dh9Tkqi-.js";import{t as s}from"./currentWorkspaceState-DahEPtKG.js";var n=e=>{const r=a(s);return e?!!r?.featureFlags?.find(t=>t.key===e)?.value:!1};export{n as t};

@@ -1,0 +1,1 @@
+import{t as d}from"./jsx-runtime-BmDUFisN.js";import{a as n}from"./react-CPuWlLBr.js";import{Ss as r}from"./index-D6X3OEUa.js";var e=d(),s=({children:o,isDropDisabled:a})=>{const{ref:p}=n({id:r,disabled:a});return(0,e.jsx)(e.Fragment,{children:o({innerRef:p,droppableProps:{"data-dnd-group":r},placeholder:null})})};export{s as CommandMenuAddToNavDroppableDndKit};

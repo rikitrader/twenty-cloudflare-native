@@ -1,0 +1,1 @@
+import{O as E,R as _}from"./types-B1Nl-NC7-CP3NR7BC.js";var R=({objectOpenRecordIn:r,openRecordInPreference:A,canDisplaySidePanel:D})=>(r===_.USER_CHOICE?A:r===_.SIDE_PANEL?E.SIDE_PANEL:E.RECORD_PAGE)===E.SIDE_PANEL&&D?E.SIDE_PANEL:E.RECORD_PAGE;export{R as t};

@@ -1,0 +1,1 @@
+var i=({fieldMetadataItem:a,fieldMetadataId:d})=>a.id===d||a.relation?.sourceFieldMetadata.id===d||(a.morphRelations??[]).some(({sourceFieldMetadata:e})=>e.id===d),o=({fieldMetadataItems:a,fieldMetadataId:d})=>a?.find(e=>i({fieldMetadataItem:e,fieldMetadataId:d}));export{i as n,o as t};

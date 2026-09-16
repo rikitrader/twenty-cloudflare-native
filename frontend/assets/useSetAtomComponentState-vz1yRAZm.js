@@ -1,0 +1,1 @@
+import{l as a}from"./routedFlowStateScopeRegistry-DGhefLBQ.js";import{i as r,t as s}from"./useAvailableComponentInstanceIdOrThrow-g2MLs64_.js";var c=(t,n)=>{const e=r.get(t.key);if(!e)throw new Error(`Instance context for key "${t.key}" is not defined`);const o=s(e,n);return a(t.atomFamily({instanceId:o}))};export{c as t};

@@ -1,0 +1,1 @@
+import{o as a}from"./chunk-ChpBd9eV.js";import{t as o}from"./react-M6yZRsSc.js";import{u as e}from"./routedFlowStateScopeRegistry-DGhefLBQ.js";import{t as s}from"./isDefined-Dtu5EYqP-_d6Dqdoe.js";import{Tf as m}from"./index-D6X3OEUa.js";var p=a(o(),1),k=()=>{const t=e();return{readCaptchaToken:(0,p.useCallback)(()=>{const r=t.get(m.atom);if(s(r))return r},[t])}};export{k as t};

@@ -1,0 +1,1 @@
+import{t as e}from"./isDefined-Dtu5EYqP-_d6Dqdoe.js";import{Cr as t}from"./utils-Cz7Ljo6y-CFEmid-V.js";var o=r=>{if(!e(r))throw new Error("objectMetadataNamePlural is required");return`Aggregate${t(r)}`};export{o as t};

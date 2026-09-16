@@ -1,0 +1,1 @@
+import{t as a}from"./createAtomState-CIJqqZRg.js";var t={NAVIGATION_MENU:"home",AI_CHAT_HISTORY:"chat",SETTINGS:"settings"},A=a({key:"navigationDrawerActiveTab",defaultValue:t.NAVIGATION_MENU});export{t as n,A as t};

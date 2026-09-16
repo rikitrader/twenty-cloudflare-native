@@ -1,0 +1,1 @@
+import{t as a}from"./getToastOptionsFromError-Njp3fF-h.js";import{i as e}from"./feedback-B8qCrrXa-BQNdimoS.js";import{mr as s,ti as i}from"./graphql-CBCbBFnA.js";import{t as m}from"./useMutation-Ds2Pb-th.js";var f=()=>{const[t]=m(i),{enqueueToast:o}=e();return{sendInvitation:async n=>await t({variables:n,refetchQueries:[s],onError:r=>{o(a({error:r}))}})}};export{f as t};

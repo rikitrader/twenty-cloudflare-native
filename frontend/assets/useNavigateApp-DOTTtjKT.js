@@ -1,0 +1,1 @@
+import{o as s}from"./chunk-ChpBd9eV.js";import{t as i}from"./react-M6yZRsSc.js";import{V as m}from"./utilities-DC1jEeOr-CjLldCnA.js";import{bt as p}from"./utils-Cz7Ljo6y-CFEmid-V.js";var u=s(i(),1),n=()=>{const r=m();return(0,u.useCallback)((t,a,e,o)=>r(p(t,a,e),o),[r])};export{n as t};

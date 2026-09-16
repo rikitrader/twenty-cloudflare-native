@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-BmDUFisN.js";import{n as r,t as o}from"./SettingsDevelopersWebhookForm-CEBI9G_H.js";var t=e(),i=()=>(0,t.jsx)(o,{mode:r.Create});export{i as SettingsDevelopersWebhookNew};

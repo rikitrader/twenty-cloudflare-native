@@ -1,0 +1,1 @@
+import{t as e}from"./createAtomSelector-Dzdd3yEy.js";import{t as a}from"./objectMetadataItemsWithFieldsSelector-hb4JwHm5.js";var c=e({key:"objectMetadataItemsSelector",get:({get:t})=>t(a)});export{c as t};

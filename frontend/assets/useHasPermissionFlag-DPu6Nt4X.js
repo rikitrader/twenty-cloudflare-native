@@ -1,0 +1,1 @@
+import{t}from"./useAtomStateValue-Dh9Tkqi-.js";import{t as s}from"./currentUserWorkspaceState-DlO8q5-n.js";import{Br as o,wa as u}from"./graphql-CBCbBFnA.js";import{t as c}from"./currentWorkspaceState-DahEPtKG.js";var f=r=>{const a=t(c),e=t(s);return!r||r===o.WORKSPACE&&a?.activationStatus===u.PENDING_CREATION?!0:(e?.permissionFlags??[]).includes(r)};export{f as t};

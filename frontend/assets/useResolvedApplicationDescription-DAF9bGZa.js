@@ -1,0 +1,1 @@
+import{t as e}from"./useAtomStateValue-Dh9Tkqi-.js";import{t as r}from"./dist-Cg5OofxW.js";import{t as o}from"./currentWorkspaceState-DahEPtKG.js";import{Ji as s,Yi as a}from"./index-D6X3OEUa.js";var p=()=>r._({id:"WOXdI6"}),n=()=>r._({id:"HP7per"}),f=t=>{const i=e(o);return a(t)?n():s(t,i)?p():t?.description??""};export{f as t};
