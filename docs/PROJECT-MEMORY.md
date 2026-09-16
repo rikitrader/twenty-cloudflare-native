@@ -127,3 +127,12 @@ Redis server or Redis URL.
 - `Cloudflare state /v1/state/set failed (400): invalid body size` originates
   from the application/state integration and must be treated separately from
   extension noise.
+
+## D1-native migration (opt-in)
+
+- Baseline for the migration is commit `a200957e1a0539140949c95378b13513d62f8414`.
+- `CRM_DB` and migration `0005_crm_core.sql` provide the first tenant-scoped
+  D1 CRM slice (`/api/crm/contacts`).
+- `D1_NATIVE_MODE` defaults to `false`; Neon-backed production remains the
+  rollback path until full feature parity, data migration, and release gates
+  pass.

@@ -32,6 +32,7 @@ try {
     "release_runs",
     "release_events",
     "release_lock",
+    "crm_audit_events",
   ]) {
     if (!tables.includes(required))
       throw new Error(`missing required table after migrations: ${required}`);

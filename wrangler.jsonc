@@ -60,7 +60,8 @@
   ],
   "d1_databases": [
     // Platform ops: webhook events + backup ledger (NOT Twenty's CRM data).
-    { "binding": "OPS_DB", "database_name": "twenty-ops", "database_id": "8bb23c45-a6b4-4397-952f-4a3286c52f9a" }
+    { "binding": "OPS_DB", "database_name": "twenty-ops", "database_id": "8bb23c45-a6b4-4397-952f-4a3286c52f9a" },
+    { "binding": "CRM_DB", "database_name": "twenty-crm", "migrations_dir": "migrations" }
   ],
   "ratelimits": [
     {
@@ -110,6 +111,11 @@
       "binding": "BACKUP_WF",
       "name": "twenty-backup",
       "class_name": "BackupWorkflow"
+    },
+    {
+      "binding": "CRM_EXPORT_WF",
+      "name": "twenty-crm-export",
+      "class_name": "CrmExportWorkflow"
     }
   ],
   "triggers": {
@@ -118,6 +124,7 @@
     "crons": ["*/15 * * * *", "0 * * * *"]
   },
   "vars": {
+    "D1_NATIVE_MODE": "false",
     "SERVER_URL": "https://twenty-crm.rikitrader.workers.dev",
     "REDIS_BACKEND": "cloudflare",
     "CLOUDFLARE_PUBSUB_TRANSPORT": "poll",

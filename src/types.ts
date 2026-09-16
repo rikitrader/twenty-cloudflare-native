@@ -29,6 +29,8 @@ export interface Env {
   STATUS_KV: KVNamespace;
   STORAGE: R2Bucket;
   OPS_DB: D1Database;
+  /** D1 database containing Cloudflare-native CRM records. */
+  CRM_DB?: D1Database;
   OPS_RATE_LIMITER?: RateLimit;
   OPS_ALERT_EMAIL?: SendEmail;
   EVENTS_QUEUE: Queue<WebhookMessage>;
@@ -36,6 +38,7 @@ export interface Env {
   CANARY_QUEUE?: Queue<CloudflareTwentyJob>;
   JOBS_DLQ: Queue<CloudflareJobFailure>;
   BACKUP_WF: Workflow;
+  CRM_EXPORT_WF?: Workflow;
   SERVER_URL: string;
   // Secrets. ENCRYPTION_KEY is Twenty's primary secret; APP_SECRET is legacy.
   ENCRYPTION_KEY?: string;
@@ -66,6 +69,8 @@ export interface Env {
   WORKER_REPLICAS?: string;
   // PostgreSQL plus the selected coordination backend enables external mode.
   PG_DATABASE_URL?: string; // Neon/Supabase (optionally via Hyperdrive)
+  /** Enables the native D1 CRM vertical slice during migration. */
+  D1_NATIVE_MODE?: string;
   PG_POOL_MAX_CONNECTIONS?: string;
   // R2 via Twenty's native S3 driver. Upstream names take precedence;
   // AWS_* kept as aliases for older credential chains.
@@ -119,13 +124,16 @@ export const externalMode = (env: Env): boolean =>
       env.INTERNAL_SERVICE_TOKEN,
   );
 
+export const nativeD1Mode = (env: Env): boolean =>
+  env.D1_NATIVE_MODE === "true" && Boolean(env.CRM_DB);
+
 /** Compatibility status field: Cloudflare is the sole coordination backend. */
 export const redisBackend = (_env: Env): "cloudflare" => "cloudflare";
 
 /** Production has exactly one supported runtime topology. */
 export const deploymentMode = (env: Env): string =>
-  externalMode(env) ? "external-db" : "misconfigured";
+  nativeD1Mode(env) ? "cloudflare-d1" : externalMode(env) ? "external-db" : "misconfigured";
 
 /** Production fails closed instead of silently starting a Redis fallback. */
 export const cloudflareBackendMisconfigured = (env: Env): boolean =>
-  env.CANARY_MODE !== "true" && !externalMode(env);
+  env.CANARY_MODE !== "true" && !externalMode(env) && !nativeD1Mode(env);

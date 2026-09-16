@@ -20,6 +20,7 @@ import {
   cloudflareBackendMisconfigured,
   deploymentMode,
   externalMode,
+  nativeD1Mode,
   redisBackend,
   type Env,
   type WebhookMessage,
@@ -31,6 +32,9 @@ import type { CloudflareTwentyJob } from "./types";
 import { TwentyScheduler } from "./schedule-do";
 import { nextOccurrence } from "./schedule";
 import { TwentyPubSub, type PubSubEvent } from "./pubsub-do";
+import { handleD1Crm } from "./d1-crm";
+import { d1Dashboard } from "./d1-dashboard";
+import { CrmExportWorkflow } from "./crm-workflow";
 import {
   consumeJobFailureBatch,
   handleJobFailureOperations,
@@ -70,6 +74,7 @@ export {
   TwentyScheduler,
   TwentyPubSub,
   BackupWorkflow,
+  CrmExportWorkflow,
 };
 
 const IMMUTABLE_ASSET = /\.(js|css|woff2?|png|jpe?g|svg|ico|webp)$/;
@@ -1334,6 +1339,20 @@ async function writeStatus(
   }
 }
 
+async function replayCrmOutbox(env: Env): Promise<void> {
+  if (!env.CRM_DB) return;
+  const cutoff = new Date(Date.now() - 60_000).toISOString();
+  const rows = await env.CRM_DB.prepare("SELECT event_id as eventId, action, payload_json as payloadJson FROM crm_event_outbox WHERE status IN ('pending', 'failed') AND attempts < 10 AND updated_at < ? ORDER BY updated_at LIMIT 100").bind(cutoff).all<{eventId: string; action: string; payloadJson: string}>();
+  for (const row of rows.results) {
+    try {
+      await env.EVENTS_QUEUE.send({ type: `crm.${row.action}`, payload: row.payloadJson, receivedAt: new Date().toISOString() });
+      await env.CRM_DB.prepare("UPDATE crm_event_outbox SET status = 'queued', attempts = attempts + 1, updated_at = ? WHERE event_id = ? AND status IN ('pending', 'failed')").bind(new Date().toISOString(), row.eventId).run();
+    } catch (error) {
+      await env.CRM_DB.prepare("UPDATE crm_event_outbox SET status = 'failed', attempts = attempts + 1, last_error = ?, updated_at = ? WHERE event_id = ?").bind(String(error).slice(0, 500), new Date().toISOString(), row.eventId).run();
+    }
+  }
+}
+
 async function workerHealth(env: Env): Promise<Response> {
   const worker = await workerContainer(env);
   return worker.fetch(
@@ -1349,6 +1368,13 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const auth = request.headers.get("authorization");
+    if (env.D1_NATIVE_MODE === "true") {
+      if (url.pathname === "/" || url.pathname === "/d1-dashboard" || url.pathname === "/profile" || url.pathname === "/settings") return d1Dashboard();
+      const crm = await handleD1Crm(request, env);
+      if (crm) return crm;
+      if (url.pathname !== "/_status")
+        return Response.json({ error: "D1 native mode: route not implemented" }, { status: 404 });
+    }
     // Never let a production deployment silently fall back to the demo image
     // (which may contain Redis) when Cloudflare coordination is selected but
     // the external PostgreSQL/service-token prerequisites are missing.
@@ -1385,8 +1411,8 @@ export default {
       body.lastBackupAttempt = lastBackupAttempt;
       body.lastBackup = lastBackup;
       body.lastBackupError = lastBackupError;
-      body.productionReady = externalMode(env);
-      body.durableRedis = externalMode(env);
+      body.productionReady = externalMode(env) || nativeD1Mode(env);
+      body.durableRedis = externalMode(env) || nativeD1Mode(env);
       body.redisBackend = redisBackend(env);
       body.cloudflareStateReady = Boolean(env.INTERNAL_SERVICE_TOKEN);
       body.cloudflareVersionId = env.CF_VERSION_METADATA?.id ?? null;
@@ -1527,6 +1553,7 @@ export default {
   // Traffic-aware health probe plus hourly backup. Idle beta containers are
   // not woken merely for monitoring, so provisioned memory/disk stop billing.
   async scheduled(event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(replayCrmOutbox(env).catch((error) => console.error("CRM outbox replay failed", error)));
     if (await getReleaseMaintenance(env.STATUS_KV)) {
       ctx.waitUntil(
         runOperationsAlertCheck(env).catch((error) =>
