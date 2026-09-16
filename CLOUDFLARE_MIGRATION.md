@@ -27,11 +27,15 @@ Neon/container path has been retired.
 - [x] D1 schema for workspaces, membership, and contacts added.
 - [x] First vertical slice added: Access identity -> membership authorization ->
       D1 contact CRUD/list -> JSON API.
-- [ ] Create the production `twenty-crm` D1 database and add its ID (and an
-      isolated preview ID) to `wrangler.jsonc`.
+- [x] Create the production `twenty-crm` D1 database (`f3c134d2-7728-4844-b1bb-8dca59ea73b7`)
+      and bind it in `wrangler.jsonc`.
 - [x] Register the checked-in `migrations/` directory with the `CRM_DB`
       Wrangler binding for atomic remote migration application.
-- [ ] Add UI callers for `/api/crm/contacts` and migrate remaining CRM entities.
+- [x] Serve the upstream Twenty frontend from Workers Assets and route its
+      GraphQL client to the D1 compatibility endpoint.
+- [~] GraphQL compatibility maps core CRM CRUD, search, aggregate, workspace,
+      metadata, and view operations; admin/billing/marketplace/AI operations
+      without a D1 backing table remain explicitly non-authoritative.
 - [ ] Port Twenty authentication/session persistence and all PostgreSQL queries.
 - [ ] Port imports, exports, attachments, search, automations, and integrations.
 - [~] Build resumable PostgreSQL-to-D1/R2 migration and verification tooling
@@ -69,8 +73,8 @@ exports are exposed under `/api/auth/*` and `/api/crm/*`.
 The repeatable release procedure is documented in
 `docs/CLOUDFLARE-NATIVE-DEPLOY.md`.
 
-Twenty is a large PostgreSQL-first application. D1 is SQLite-based and does
-not provide PostgreSQL compatibility, so full parity requires an entity-by-
-entity rewrite of schema, query builders, migrations, transactions, search,
-and session persistence. The existing production containers are intentionally
-kept until that work and a resumable data migration are complete.
+The upstream frontend contains additional admin, billing, marketplace, AI,
+and enterprise GraphQL operations that have no corresponding CRM data model
+in this deployment. They return an empty compatibility payload rather than
+fabricated data; implementing them requires adding the relevant D1/R2/Queue
+models and workflows. Core voter/member CRM workflows are D1-authoritative.
