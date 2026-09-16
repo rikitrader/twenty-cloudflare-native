@@ -1,15 +1,12 @@
 # twenty-cf — Twenty CRM on Cloudflare
 
-Stock Twenty (never forked) deployed on Cloudflare: Worker front door → Durable
-Objects → Containers, with KV status, R2 backups + restore-on-boot, D1 ops store,
-Queues webhook pipeline, Workflows backup orchestration, Cron Triggers.
+Twenty CRM deployed as a Cloudflare-native Worker with D1, R2, KV, Queues,
+Durable Objects, Workflows, and Cron Triggers.
 
 - Live: https://twenty-crm.rikitrader.workers.dev · demo login `tim@apple.dev` / `tim@apple.dev`
 - Architecture + activation runbook: `docs/MIGRATION.md`
 - Criteria/verification: `ISA.md`
-- Production is permanently Neon-backed and Redis-free. It requires
-  `PG_DATABASE_URL`, `INTERNAL_SERVICE_TOKEN`, and `REDIS_BACKEND=cloudflare`.
-  R2 attachments need `STORAGE_S3_*` secrets.
+- Production requires no PostgreSQL, Redis, Docker, or external database.
 - Production container ceiling: one server, one worker, and one short-lived
   backup. Canary, staging, probes, and release containers are deploy-on-demand
   only and must not remain live after validation.

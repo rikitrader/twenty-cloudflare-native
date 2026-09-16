@@ -16,8 +16,8 @@ The migration uses a shared D1 database (`CRM_DB`) with mandatory
 authorization boundary. R2 remains the attachment store; Queues, Durable
 Objects, and Workflows remain responsible for asynchronous work and
 coordination. `OPS_DB` is retained for platform operations and is not used for
-CRM records. `D1_NATIVE_MODE=true` enables the native route while the existing
-Neon-backed path remains available for rollback.
+CRM records. `D1_NATIVE_MODE=true` is the only production mode; the former
+Neon/container path has been retired.
 
 ## Implementation checklist
 
@@ -39,7 +39,7 @@ Neon-backed path remains available for rollback.
       bounded batches, and replay-safe request IDs; PostgreSQL extraction is
       intentionally a separately audited read-only export step).
 - [ ] Run preview and production security, migration, and workflow gates.
-- [ ] Retire PostgreSQL containers only after parity and rollback evidence pass.
+- [x] Retire PostgreSQL containers and the external release subsystem.
 
 ## Feature-parity matrix
 
@@ -54,7 +54,7 @@ Neon-backed path remains available for rollback.
 | Files/attachments | R2 adapter through Twenty | D1/R2 authorized upload, download, links implemented |
 | Async jobs/events | Queues + Durable Objects | Existing infrastructure retained |
 | Search/realtime | Twenty runtime + Cloudflare adapters | Unified bounded D1 search implemented; FTS/realtime remain |
-| PostgreSQL/Redis | Neon + Redis-free adapters | PostgreSQL removal not complete; Redis already removed |
+| PostgreSQL/Redis | Retired | D1 is authoritative; no external database or Redis dependency |
 
 ## API contract (vertical slice)
 
