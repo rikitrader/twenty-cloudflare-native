@@ -57,7 +57,11 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
   if (!actor) return Response.json({ errors: [{ message: "unauthorized" }] }, { status: 401 });
   if (!env.CRM_DB) return Response.json({ errors: [{ message: "CRM database unavailable" }] }, { status: 503 });
   if (op === "IntrospectionQuery" || /__schema|__type/.test(body.query ?? "")) return Response.json({ data: { __schema: { queryType: { name: "Query" }, mutationType: { name: "Mutation" }, types: [] } } });
-  const workspaceId = request.headers.get("x-workspace-id") || String(vars.workspaceId ?? ((vars.workspace && typeof vars.workspace === "object") ? (vars.workspace as Record<string, unknown>).id : "") ?? "");
+  let workspaceId = request.headers.get("x-workspace-id") || String(vars.workspaceId ?? ((vars.workspace && typeof vars.workspace === "object") ? (vars.workspace as Record<string, unknown>).id : "") ?? "");
+  if (!workspaceId) {
+    const membership = await env.CRM_DB.prepare("SELECT workspace_id as workspaceId FROM workspace_members WHERE identity_subject = ? AND status = 'active' ORDER BY created_at LIMIT 1").bind(actor.subject).first<{ workspaceId: string }>();
+    workspaceId = membership?.workspaceId ?? "";
+  }
   if (!workspaceId) return Response.json({ errors: [{ message: "x-workspace-id required" }] }, { status: 400 });
   const member = await env.CRM_DB.prepare("SELECT role FROM workspace_members WHERE workspace_id = ? AND identity_subject = ? AND status = 'active' LIMIT 1").bind(workspaceId, actor.subject).first<{ role: string }>(); if (!member) return Response.json({ errors: [{ message: "forbidden" }] }, { status: 403 });
   if (/GetCurrentUser|CurrentUser|^Me/i.test(op)) return Response.json({ data: { currentUser: { id: actor.subject, userId: actor.subject, email: actor.email ?? null, name: { firstName: (actor.email ?? "").split("@")[0], lastName: "" } } } });
