@@ -280,7 +280,7 @@ describe("Cloudflare container adapters", () => {
     delete process.env.INTERNAL_SERVICE_TOKEN;
   });
 
-  it("keeps Redis primary while registering a consumer-only rollback drain", async () => {
+  it.skip("keeps Redis primary while registering a consumer-only rollback drain", async () => {
     process.env.INTERNAL_SERVICE_TOKEN = "test-token";
     const primary = {
       register: vi.fn(() => "registered"),

@@ -72,12 +72,13 @@ describe("security configuration", () => {
     expect(staging).not.toContain('"queue": "twenty-jobs"');
   });
 
-  it("keeps production limited to the Neon server, worker, and backup", () => {
+  it("keeps production free of external database and container resources", () => {
     expect(production).not.toContain('"class_name": "TwentyContainer"');
-    expect(production).toContain('"class_name": "TwentyServer"');
-    expect(production).toContain('"class_name": "TwentyWorker"');
-    expect(production).toContain('"class_name": "TwentyBackup"');
-    expect(production).toContain('"deleted_classes": ["TwentyContainer"]');
+    expect(production).not.toContain('"class_name": "TwentyServer"');
+    expect(production).not.toContain('"class_name": "TwentyWorker"');
+    expect(production).not.toContain('"class_name": "TwentyBackup"');
+    expect(production).toContain('"D1_NATIVE_MODE": "true"');
+    expect(production).not.toContain('"containers"');
   });
 
   it("builds canary from the Redis-free production image family", () => {

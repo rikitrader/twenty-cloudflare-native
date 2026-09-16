@@ -20,8 +20,8 @@ describe("backup integrity manifest", () => {
       key: "backups/2026-07-25T1200.sql",
       bytes: 4096,
       sha256,
-      format: "postgresql-plain-sql",
-      contentType: "application/sql",
+      format: "sqlite-json",
+      contentType: "application/json",
     });
     expect(manifest.encryption).toEqual({
       atRest: "r2-provider-managed",
