@@ -33,6 +33,18 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
   if (/GetCurrentUser|CurrentUser|^Me/i.test(op)) return Response.json({ data: { currentUser: { id: actor.subject, userId: actor.subject, email: actor.email ?? null, name: { firstName: (actor.email ?? "").split("@")[0], lastName: "" } } } });
   if (/ObjectMetadata/i.test(op)) { const rows = await env.CRM_DB.prepare("SELECT id, object_key as name, label, plural_label as pluralLabel, created_at as createdAt, updated_at as updatedAt FROM custom_objects WHERE workspace_id = ? ORDER BY created_at").bind(workspaceId).all(); return Response.json({ data: { objectMetadataItems: rows.results, objects: rows.results } }); }
   if (/FieldMetadata/i.test(op)) { const rows = await env.CRM_DB.prepare("SELECT id, object_type as objectType, field_key as name, label, field_type as type, options_json as options, created_at as createdAt FROM custom_fields WHERE workspace_id = ? ORDER BY created_at").bind(workspaceId).all(); return Response.json({ data: { fieldMetadataItems: rows.results, fields: rows.results } }); }
+  if (/Search|CombinedFindManyRecords/i.test(op)) {
+    const term = String(vars.searchTerm ?? vars.query ?? vars.q ?? "").slice(0, 120); const pattern = `%${term}%`;
+    const [people, companies, opportunities] = await env.CRM_DB.batch([
+      env.CRM_DB.prepare("SELECT id, first_name || ' ' || last_name AS name, email, 'person' AS objectType FROM contacts WHERE workspace_id = ? AND (first_name LIKE ? OR last_name LIKE ? OR email LIKE ?) LIMIT 25").bind(workspaceId, pattern, pattern, pattern),
+      env.CRM_DB.prepare("SELECT id, name, domain, 'company' AS objectType FROM companies WHERE workspace_id = ? AND (name LIKE ? OR domain LIKE ?) LIMIT 25").bind(workspaceId, pattern, pattern),
+      env.CRM_DB.prepare("SELECT id, name, stage, 'opportunity' AS objectType FROM opportunities WHERE workspace_id = ? AND (name LIKE ? OR stage LIKE ?) LIMIT 25").bind(workspaceId, pattern, pattern),
+    ]); const results = people.results.concat(companies.results, opportunities.results); return Response.json({ data: { search: results, combinedFindManyRecords: results, records: results } });
+  }
+  if (/Aggregate|ObjectRecordCounts|Count/i.test(op)) {
+    const entity = entityFor(op); const count = entity ? await env.CRM_DB.prepare(`SELECT COUNT(*) AS count FROM ${entity.table} WHERE workspace_id = ?`).bind(workspaceId).first<{ count: number }>() : null;
+    return Response.json({ data: { aggregate: { count: Number(count?.count ?? 0) }, objectRecordCounts: count ? [{ objectName: entity?.plural, count: Number(count.count) }] : [] } });
+  }
   if (/Workspace/i.test(op) && !entityFor(op)) { const workspace = await env.CRM_DB.prepare("SELECT id, name, created_at as createdAt FROM workspaces WHERE id = ?").bind(workspaceId).first(); return Response.json({ data: { workspace, currentWorkspace: workspace, workspaces: { edges: workspace ? [{ node: workspace }] : [], nodes: workspace ? [workspace] : [], totalCount: workspace ? 1 : 0 } } }); }
   const entity = entityFor(op); if (!entity) return Response.json({ data: {} });
   const input = unwrapInput(vars); const id = String(vars.id ?? vars.idToFind ?? vars.recordId ?? input.id ?? "");
