@@ -126,7 +126,7 @@
     "crons": ["*/15 * * * *", "0 * * * *"]
   },
   "vars": {
-    "D1_NATIVE_MODE": "false",
+    "D1_NATIVE_MODE": "true",
     "SERVER_URL": "https://twenty-crm.rikitrader.workers.dev",
     "REDIS_BACKEND": "cloudflare",
     "CLOUDFLARE_PUBSUB_TRANSPORT": "poll",
