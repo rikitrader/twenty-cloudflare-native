@@ -1,15 +1,11 @@
-import type {
-  TwentyBackup,
-  TwentyServer,
-  TwentyWorker,
-} from "./containers";
 import type { TwentyState } from "./cloudflare-state/state-do";
 import type { TwentyScheduler } from "./schedule-do";
 import type { TwentyPubSub } from "./pubsub-do";
 import type { JobExecutionFailureCode } from "./cloudflare-state/contracts";
 
 export interface Env {
-  // Production is permanently Neon-backed and Redis-free.
+  // Production is Cloudflare-native; historical container namespaces remain
+  // unbound and are retained only for migration compatibility.
   TWENTY_SERVER: DurableObjectNamespace;
   TWENTY_WORKER: DurableObjectNamespace;
   BACKUP_CONTAINER: DurableObjectNamespace;
@@ -17,10 +13,6 @@ export interface Env {
   STATE_DO: DurableObjectNamespace<TwentyState>;
   SCHEDULER_DO: DurableObjectNamespace<TwentyScheduler>;
   PUBSUB_DO: DurableObjectNamespace<TwentyPubSub>;
-  // Hyperdrive is available to Worker-runtime database operations. Cloudflare
-  // scopes its generated endpoint to the Worker runtime, so Containers use the
-  // separately encrypted PG_DATABASE_URL origin credential below.
-  HYPERDRIVE?: Hyperdrive;
   CF_VERSION_METADATA?: {
     id: string;
     tag?: string;
@@ -67,11 +59,8 @@ export interface Env {
   CANARY_QUEUE_NAME?: string;
   SERVER_REPLICAS?: string;
   WORKER_REPLICAS?: string;
-  // PostgreSQL plus the selected coordination backend enables external mode.
-  PG_DATABASE_URL?: string; // Neon/Supabase (optionally via Hyperdrive)
-  /** Enables the native D1 CRM vertical slice during migration. */
+  /** Enables the native D1 CRM runtime. */
   D1_NATIVE_MODE?: string;
-  PG_POOL_MAX_CONNECTIONS?: string;
   // R2 via Twenty's native S3 driver. Upstream names take precedence;
   // AWS_* kept as aliases for older credential chains.
   STORAGE_S3_ENDPOINT?: string; // https://<account_id>.r2.cloudflarestorage.com
@@ -117,12 +106,8 @@ export interface CloudflareJobFailure {
   source: "application" | "platform";
 }
 
-export const externalMode = (env: Env): boolean =>
-  Boolean(
-    env.PG_DATABASE_URL &&
-      env.REDIS_BACKEND === "cloudflare" &&
-      env.INTERNAL_SERVICE_TOKEN,
-  );
+/** Retired compatibility predicate; external databases are unsupported. */
+export const externalMode = (_env: Env): boolean => false;
 
 export const nativeD1Mode = (env: Env): boolean =>
   env.D1_NATIVE_MODE === "true" && Boolean(env.CRM_DB);
@@ -132,8 +117,8 @@ export const redisBackend = (_env: Env): "cloudflare" => "cloudflare";
 
 /** Production has exactly one supported runtime topology. */
 export const deploymentMode = (env: Env): string =>
-  nativeD1Mode(env) ? "cloudflare-d1" : externalMode(env) ? "external-db" : "misconfigured";
+  nativeD1Mode(env) ? "cloudflare-d1" : "misconfigured";
 
 /** Production fails closed instead of silently starting a Redis fallback. */
 export const cloudflareBackendMisconfigured = (env: Env): boolean =>
-  env.CANARY_MODE !== "true" && !externalMode(env) && !nativeD1Mode(env);
+  env.CANARY_MODE !== "true" && !nativeD1Mode(env);

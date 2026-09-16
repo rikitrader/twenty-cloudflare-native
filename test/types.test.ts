@@ -10,63 +10,17 @@ import {
 const env = (values: Partial<Env>): Env => values as Env;
 
 describe("deployment mode", () => {
-  it("requires Neon, the fixed Cloudflare backend, and internal service auth", () => {
-    expect(externalMode(env({ PG_DATABASE_URL: "postgres://db" }))).toBe(false);
-    expect(
-      externalMode(
-        env({
-          PG_DATABASE_URL: "postgres://db",
-          REDIS_BACKEND: "cloudflare",
-          INTERNAL_SERVICE_TOKEN: "internal-token",
-        }),
-      ),
-    ).toBe(true);
+  it("rejects all external database topologies", () => {
+    expect(externalMode(env({}))).toBe(false);
   });
 
-  it("labels only the supported production topology as external-db", () => {
+  it("labels only the supported D1 topology as cloudflare-d1", () => {
     expect(deploymentMode(env({}))).toBe("misconfigured");
-    expect(deploymentMode(env({ PG_DATABASE_URL: "postgres://db" }))).toBe(
-      "misconfigured",
-    );
-    expect(
-      deploymentMode(
-        env({
-          PG_DATABASE_URL: "postgres://db",
-          REDIS_BACKEND: "cloudflare",
-          INTERNAL_SERVICE_TOKEN: "internal-token",
-        }),
-      ),
-    ).toBe("external-db");
+    expect(deploymentMode(env({ CRM_DB: {} as D1Database, D1_NATIVE_MODE: "true" }))).toBe("cloudflare-d1");
   });
 
-  it("requires an internal token before Cloudflare mode can activate", () => {
-    const cloudflare = env({
-      PG_DATABASE_URL: "postgres://db",
-      REDIS_BACKEND: "cloudflare",
-    });
-    expect(redisBackend(cloudflare)).toBe("cloudflare");
+  it("keeps Cloudflare as the sole coordination backend", () => {
     expect(redisBackend(env({}))).toBe("cloudflare");
-    expect(externalMode(cloudflare)).toBe(false);
-    expect(
-      externalMode(
-        env({
-          ...cloudflare,
-          INTERNAL_SERVICE_TOKEN: "internal-token",
-        }),
-      ),
-    ).toBe(true);
-  });
-
-  it("does not pass Worker-scoped Hyperdrive endpoints into Containers", () => {
-    const hyperdriveOnly = env({
-      HYPERDRIVE: {
-        connectionString: "postgres://hyperdrive/staging",
-      } as Hyperdrive,
-      REDIS_BACKEND: "cloudflare",
-      INTERNAL_SERVICE_TOKEN: "internal-token",
-    });
-    expect(externalMode(hyperdriveOnly)).toBe(false);
-    expect(deploymentMode(hyperdriveOnly)).toBe("misconfigured");
   });
 
   it("fails closed when Cloudflare mode lacks external topology prerequisites", () => {
@@ -82,8 +36,8 @@ describe("deployment mode", () => {
       cloudflareBackendMisconfigured(
         env({
           REDIS_BACKEND: "cloudflare",
-          PG_DATABASE_URL: "postgres://example",
-          INTERNAL_SERVICE_TOKEN: "secret",
+          D1_NATIVE_MODE: "true",
+          CRM_DB: {} as D1Database,
         }),
       ),
     ).toBe(false);
