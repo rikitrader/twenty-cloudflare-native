@@ -160,6 +160,12 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
       env.CRM_DB.prepare("SELECT id, name, stage, 'opportunity' AS objectType FROM opportunities WHERE workspace_id = ? AND (name LIKE ? OR stage LIKE ?) LIMIT 25").bind(workspaceId, pattern, pattern),
     ]); const results = people.results.concat(companies.results, opportunities.results); return Response.json({ data: { search: results, combinedFindManyRecords: results, records: results } });
   }
+  if (/BarChartData|LineChartData|PieChartData|GroupBy|ChartData/i.test(op)) {
+    const entity = entityFor(op) ?? entityFromVars(vars) ?? entityForRoot(rootField(body.query)); const allowed: Record<string, string> = { stage: "stage", type: "type", domain: "domain", createdAt: "created_at", created_at: "created_at" }; const requestedGroup = allowed[String(vars.groupBy ?? vars.groupField ?? vars.field ?? "")]; const group = requestedGroup && entity?.columns.includes(requestedGroup) ? requestedGroup : entity?.columns.includes("stage") ? "stage" : entity?.columns.includes("type") ? "type" : "created_at";
+    if (!entity) return Response.json({ data: { barChartData: [], lineChartData: [], pieChartData: [], groupBy: [] } });
+    const rows = await env.CRM_DB.prepare(`SELECT ${group} as label, COUNT(*) as count, COALESCE(SUM(CASE WHEN amount_cents IS NULL THEN 0 ELSE amount_cents END), 0) as amount FROM ${entity.table} WHERE workspace_id = ? GROUP BY ${group} ORDER BY count DESC LIMIT 100`).bind(workspaceId).all<{ label: string | null; count: number; amount: number }>();
+    const points = rows.results.map((row) => ({ label: row.label ?? "Sin clasificar", value: Number(row.count), count: Number(row.count), amount: Number(row.amount) / 100 })); return Response.json({ data: { barChartData: points, lineChartData: points, pieChartData: points, groupBy: points, chartData: points } });
+  }
   const customKey = customObjectKey(vars);
   if (customKey) {
     const input = unwrapInput(vars); const id = String(vars.id ?? vars.recordId ?? input.id ?? "");
