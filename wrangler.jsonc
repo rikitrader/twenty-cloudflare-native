@@ -1,5 +1,6 @@
 {
   "name": "twenty-crm",
+  "account_id": "0dd0d155f8dafdca9d2bade1141986a2",
   "main": "src/index.ts",
   "compatibility_date": "2026-06-08",
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
@@ -44,15 +45,16 @@
     { "tag": "v5", "new_sqlite_classes": ["TwentyPubSub"] },
     { "tag": "v6", "new_sqlite_classes": ["TwentyBackup"] },
     {
-      // Production is permanently Neon-backed and Redis-free. The legacy
-      // all-in-one Durable Object no longer owns any production data.
-      "tag": "v7",
-      "deleted_classes": ["TwentyContainer"]
+      // Keep the legacy class migration history intact for accounts that
+      // previously deployed TwentyContainer. The class is no longer bound,
+      // but it is retained to avoid a destructive delete-class migration
+      // when deploying into an account with a different prior history.
+      "tag": "v7"
     }
   ],
   "kv_namespaces": [
     // Edge status cache — /_status is served without waking the container.
-    { "binding": "STATUS_KV", "id": "ac46e11f30d14c309665848cefd7f9ce" }
+    { "binding": "STATUS_KV", "id": "1e8c4c1690574f10aec0f270ce1255b2" }
   ],
   "r2_buckets": [
     // Backup store (backups/ prefix) + Twenty attachments once S3 keys are set.
@@ -60,8 +62,8 @@
   ],
   "d1_databases": [
     // Platform ops: webhook events + backup ledger (NOT Twenty's CRM data).
-    { "binding": "OPS_DB", "database_name": "twenty-ops", "database_id": "8bb23c45-a6b4-4397-952f-4a3286c52f9a" },
-    { "binding": "CRM_DB", "database_name": "twenty-crm", "migrations_dir": "migrations" }
+    { "binding": "OPS_DB", "database_name": "twenty-ops", "database_id": "81b71b4e-feb0-4a99-ad8c-85793af8ac2f", "migrations_dir": "migrations" },
+    { "binding": "CRM_DB", "database_name": "twenty-crm", "database_id": "f3c134d2-7728-4844-b1bb-8dca59ea73b7", "migrations_dir": "migrations" }
   ],
   "ratelimits": [
     {
@@ -132,7 +134,7 @@
     "ACCESS_REQUIRED": "true",
     "ACCESS_TEAM_DOMAIN": "https://rikitrader.cloudflareaccess.com",
     "ACCESS_AUD": "6ccb2a4887272c13bc25d6b8d634b47479622bf4da96cd009a2d65d87092c175",
-    "STORAGE_S3_ENDPOINT": "https://e9a13cb086224245b63e1e902c7afc64.r2.cloudflarestorage.com",
+    "STORAGE_S3_ENDPOINT": "https://0dd0d155f8dafdca9d2bade1141986a2.r2.cloudflarestorage.com",
     "STORAGE_S3_NAME": "twenty-storage",
     "STORAGE_S3_REGION": "auto",
     "JOB_DLQ_NAME": "twenty-jobs-dlq",
