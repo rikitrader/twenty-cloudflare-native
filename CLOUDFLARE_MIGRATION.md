@@ -33,13 +33,15 @@ Neon/container path has been retired.
       Wrangler binding for atomic remote migration application.
 - [x] Serve the upstream Twenty frontend from Workers Assets and route its
       GraphQL client to the D1 compatibility endpoint.
-- [~] GraphQL compatibility maps core CRM CRUD, search, aggregate, workspace,
-      metadata, and view operations; admin/billing/marketplace/AI operations
-      without a D1 backing table remain explicitly non-authoritative.
+- [~] GraphQL compatibility maps CRM CRUD, search, aggregates/charts, workspace,
+      metadata, views/layouts, workflows, messaging, calendar, automation,
+      settings, and auth operations; provider-dependent operations remain
+      explicitly non-authoritative.
 - [x] Port native sign-in/sign-up and session persistence to D1 (`native_users`,
       `native_sessions`); Cloudflare Access remains the preferred production
       identity provider.
-- [ ] Port imports, exports, attachments, search, automations, and integrations.
+- [x] Port imports, exports, attachments, search, automations, and integrations
+      through D1/R2/Queues; external delivery providers remain optional.
 - [~] Build resumable PostgreSQL-to-D1/R2 migration and verification tooling
       (`scripts/migrate-crm-ndjson.mjs` provides dry-run, resumable state,
       bounded batches, and replay-safe request IDs; PostgreSQL extraction is
@@ -59,7 +61,7 @@ Neon/container path has been retired.
 | Custom objects/fields/views | Twenty metadata and PostgreSQL | D1 metadata, views, custom objects/records implemented |
 | Files/attachments | R2 adapter through Twenty | D1/R2 authorized upload, download, links implemented |
 | Async jobs/events | Queues + Durable Objects | Existing infrastructure retained |
-| Search/realtime | Twenty runtime + Cloudflare adapters | Unified bounded D1 search implemented; FTS/realtime remain |
+| Search/realtime | Twenty runtime + Cloudflare adapters | Unified bounded D1 search implemented; realtime subscriptions remain adapter-backed |
 | PostgreSQL/Redis | Retired | D1 is authoritative; no external database or Redis dependency |
 
 ## API contract (vertical slice)
@@ -75,8 +77,7 @@ exports are exposed under `/api/auth/*` and `/api/crm/*`.
 The repeatable release procedure is documented in
 `docs/CLOUDFLARE-NATIVE-DEPLOY.md`.
 
-The upstream frontend contains additional admin, billing, marketplace, AI,
-and enterprise GraphQL operations that have no corresponding CRM data model
-in this deployment. They return an empty compatibility payload rather than
-fabricated data; implementing them requires adding the relevant D1/R2/Queue
-models and workflows. Core voter/member CRM workflows are D1-authoritative.
+The remaining gaps are provider-bound behavior (payment processor checkout,
+external OAuth/SMTP delivery, enterprise licensing, and execution by a real AI
+model). Those operations are intentionally explicit and non-authoritative;
+core voter/member CRM workflows are D1-authoritative.
