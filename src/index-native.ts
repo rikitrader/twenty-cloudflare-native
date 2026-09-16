@@ -9,8 +9,16 @@ import { CrmExportWorkflow } from "./crm-workflow";
 import { TwentyState } from "./cloudflare-state/state-do";
 import { TwentyScheduler } from "./schedule-do";
 import { TwentyPubSub } from "./pubsub-do";
+import { Container } from "./container-compat";
 import type { Env } from "./types";
 
+// Retain historical Durable Object class exports so existing namespaces can
+// be upgraded safely. These classes are retired no-op shims; production
+// traffic never binds to them.
+export class TwentyServer extends Container<Env> {}
+export class TwentyWorker extends Container<Env> {}
+export class TwentyBackup extends Container<Env> {}
+export class TwentyContainer extends Container<Env> {}
 export { TwentyState, TwentyScheduler, TwentyPubSub, BackupWorkflow, CrmExportWorkflow };
 
 /** Cloudflare-native production entrypoint. Legacy Twenty runtime code is not
