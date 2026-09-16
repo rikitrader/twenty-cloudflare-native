@@ -10,9 +10,9 @@ import type { JobExecutionFailureCode } from "./cloudflare-state/contracts";
 
 export interface Env {
   // Production is permanently Neon-backed and Redis-free.
-  TWENTY_SERVER: DurableObjectNamespace<TwentyServer>;
-  TWENTY_WORKER: DurableObjectNamespace<TwentyWorker>;
-  BACKUP_CONTAINER: DurableObjectNamespace<TwentyBackup>;
+  TWENTY_SERVER: DurableObjectNamespace;
+  TWENTY_WORKER: DurableObjectNamespace;
+  BACKUP_CONTAINER: DurableObjectNamespace;
   // Redis-free state, schedule, and pub/sub Durable Objects.
   STATE_DO: DurableObjectNamespace<TwentyState>;
   SCHEDULER_DO: DurableObjectNamespace<TwentyScheduler>;

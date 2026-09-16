@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@cloudflare/containers", () => ({
+vi.mock("../src/container-compat", () => ({
   getContainer: vi.fn(),
   getRandom: vi.fn(),
 }));
 
-import { getContainer, getRandom } from "@cloudflare/containers";
+import { getContainer, getRandom } from "../src/container-compat";
 import {
   consumeJobBatch,
   handleJobEnqueue,

@@ -1,4 +1,4 @@
-import { Container } from "@cloudflare/containers";
+import { Container } from "./container-compat";
 import type { Env } from "./types";
 import { pickLatest } from "./lib";
 import { handleStateGateway } from "./cloudflare-state/gateway";

@@ -1,4 +1,4 @@
-import { getContainer, getRandom } from "@cloudflare/containers";
+import { getContainer, getRandom } from "./container-compat";
 import { bearerAuthorized, boundedReplicaCount } from "./lib";
 import type { JobExecutionFailureCode } from "./cloudflare-state/contracts";
 import { deterministicFailureId, validJob } from "./job-envelope";

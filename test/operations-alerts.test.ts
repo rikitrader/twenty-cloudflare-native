@@ -1,18 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@cloudflare/containers", () => ({
-  getContainer: vi.fn(),
-}));
-
-import { getContainer } from "@cloudflare/containers";
 import {
   evaluateOperationsAlerts,
   runOperationsAlertCheck,
   sendOperationsAlertTest,
 } from "../src/operations-alerts";
 import type { Env } from "../src/types";
-
-const getContainerMock = vi.mocked(getContainer);
 
 function metrics(oldest?: string): QueueMetrics {
   return {
@@ -21,13 +14,6 @@ function metrics(oldest?: string): QueueMetrics {
     oldestMessageTimestamp: oldest ? new Date(oldest) : undefined,
   };
 }
-
-beforeEach(() => {
-  getContainerMock.mockReset();
-  getContainerMock.mockReturnValue({
-    fetch: vi.fn().mockResolvedValue(new Response(null, { status: 200 })),
-  } as never);
-});
 
 describe("operations alerting", () => {
   it("evaluates executor, job age, and DLQ age independently", () => {

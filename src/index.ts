@@ -1,4 +1,4 @@
-import { getContainer, getRandom } from "@cloudflare/containers";
+import { getContainer, getRandom, ContainerProxy } from "./container-compat";
 import { WorkerEntrypoint } from "cloudflare:workers";
 import {
   TwentyBackup,
@@ -65,7 +65,7 @@ import {
   runG3SessionCacheSample,
 } from "./g3-session-cache";
 
-export { ContainerProxy } from "@cloudflare/containers";
+export { ContainerProxy } from "./container-compat";
 export {
   TwentyContainer,
   TwentyServer,
