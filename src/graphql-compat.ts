@@ -33,6 +33,7 @@ function listStatement(entity: Entity, vars: Vars, workspaceId: string, limit: n
 export async function handleGraphql(request: Request, env: Env): Promise<Response | null> {
   if (new URL(request.url).pathname !== "/graphql" || request.method !== "POST") return null;
   const body = (await request.json().catch(() => ({}))) as { query?: string; operationName?: string; variables?: Vars }; const op = operationName(body); const vars = body.variables ?? {};
+  if (op === "IntrospectionQuery" || /__schema|__type/.test(body.query ?? "")) return Response.json({ data: { __schema: { queryType: { name: "Query" }, mutationType: { name: "Mutation" }, types: [] } } });
   if (/^SignIn$/i.test(op)) {
     if (!env.CRM_DB) return Response.json({ errors: [{ message: "CRM database unavailable" }] }, { status: 503 });
     const email = String(vars.email ?? "").trim().toLowerCase(); const password = String(vars.password ?? "");
@@ -57,7 +58,6 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
   const actor = await accessIdentityForRequest(request, env);
   if (!actor) return Response.json({ errors: [{ message: "unauthorized" }] }, { status: 401 });
   if (!env.CRM_DB) return Response.json({ errors: [{ message: "CRM database unavailable" }] }, { status: 503 });
-  if (op === "IntrospectionQuery" || /__schema|__type/.test(body.query ?? "")) return Response.json({ data: { __schema: { queryType: { name: "Query" }, mutationType: { name: "Mutation" }, types: [] } } });
   let workspaceId = request.headers.get("x-workspace-id") || String(vars.workspaceId ?? ((vars.workspace && typeof vars.workspace === "object") ? (vars.workspace as Record<string, unknown>).id : "") ?? "");
   if (!workspaceId) {
     const membership = await env.CRM_DB.prepare("SELECT workspace_id as workspaceId FROM workspace_members WHERE identity_subject = ? AND status = 'active' ORDER BY created_at LIMIT 1").bind(actor.subject).first<{ workspaceId: string }>();
