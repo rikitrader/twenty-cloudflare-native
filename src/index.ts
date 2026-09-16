@@ -34,6 +34,7 @@ import { nextOccurrence } from "./schedule";
 import { TwentyPubSub, type PubSubEvent } from "./pubsub-do";
 import { handleD1Crm } from "./d1-crm";
 import { d1Dashboard } from "./d1-dashboard";
+import { profileDashboard } from "./profile-dashboard";
 import { CrmExportWorkflow } from "./crm-workflow";
 import {
   consumeJobFailureBatch,
@@ -1369,7 +1370,8 @@ export default {
     const url = new URL(request.url);
     const auth = request.headers.get("authorization");
     if (env.D1_NATIVE_MODE === "true") {
-      if (url.pathname === "/" || url.pathname === "/d1-dashboard" || url.pathname === "/profile" || url.pathname === "/settings") return d1Dashboard();
+      if (url.pathname === "/" || url.pathname === "/d1-dashboard") return d1Dashboard();
+      if (url.pathname === "/profile" || url.pathname === "/settings") return profileDashboard();
       const crm = await handleD1Crm(request, env);
       if (crm) return crm;
       if (url.pathname !== "/_status")
