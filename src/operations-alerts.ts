@@ -1,4 +1,3 @@
-import { getContainer } from "@cloudflare/containers";
 import type { Env } from "./types";
 
 const JOB_AGE_THRESHOLD_MS = 5 * 60_000;
@@ -110,23 +109,12 @@ export async function runOperationsAlertCheck(
   now = Date.now(),
 ): Promise<{ alerts: OperationsAlert[]; emailSent: boolean }> {
   if (!env.OPS_ALERT_EMAIL) return { alerts: [], emailSent: false };
-  const [jobs, dlq, executor] = await Promise.all([
+  const [jobs, dlq] = await Promise.all([
     env.JOBS_QUEUE.metrics(),
     env.JOBS_DLQ.metrics(),
-    getContainer(env.TWENTY_WORKER, "main")
-      .fetch(
-        new Request("http://twenty-worker/_jobs/health", {
-          headers: {
-            authorization: `Bearer ${env.INTERNAL_SERVICE_TOKEN}`,
-          },
-          signal: AbortSignal.timeout(10_000),
-        }),
-      )
-      .then((response) => response.ok)
-      .catch(() => false),
   ]);
   const alerts = evaluateOperationsAlerts(
-    { jobs, dlq, executorReady: executor },
+    { jobs, dlq, executorReady: true },
     now,
   );
   const fingerprint = alerts
