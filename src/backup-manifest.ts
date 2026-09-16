@@ -4,15 +4,15 @@ export interface BackupManifest {
   schemaVersion: typeof BACKUP_MANIFEST_SCHEMA_VERSION;
   createdAt: string;
   source: {
-    engine: "postgresql";
-    logicalExporter: "pg_dump";
+    engine: "sqlite";
+    logicalExporter: "d1-snapshot";
   };
   artifact: {
     key: string;
     bytes: number;
     sha256: string;
-    format: "postgresql-plain-sql";
-    contentType: "application/sql";
+    format: "sqlite-json";
+    contentType: "application/json";
   };
   encryption: {
     atRest: "r2-provider-managed";
@@ -48,15 +48,15 @@ export function createBackupManifest(input: {
     schemaVersion: BACKUP_MANIFEST_SCHEMA_VERSION,
     createdAt: input.createdAt,
     source: {
-      engine: "postgresql",
-      logicalExporter: "pg_dump",
+      engine: "sqlite",
+      logicalExporter: "d1-snapshot",
     },
     artifact: {
       key: input.key,
       bytes: input.bytes,
       sha256: input.sha256,
-      format: "postgresql-plain-sql",
-      contentType: "application/sql",
+      format: "sqlite-json",
+      contentType: "application/json",
     },
     encryption: {
       atRest: "r2-provider-managed",

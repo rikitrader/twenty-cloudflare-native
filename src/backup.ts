@@ -1,11 +1,9 @@
 import { WorkflowEntrypoint, WorkflowStep, WorkflowEvent } from "cloudflare:workers";
-import { getContainer } from "@cloudflare/containers";
 import { backupKey, sanitizedErrorMessage, shouldSkipBackup } from "./lib";
 import {
   backupManifestKey,
   checksumHex,
   createBackupManifest,
-  isSha256Hex,
 } from "./backup-manifest";
 import type { Env } from "./types";
 
@@ -15,7 +13,7 @@ export interface BackupParams {
 
 /**
  * Durable backup pipeline (CF Workflows):
- *   check-idle → dump via DO tunnel → R2 put → verify → D1 ledger
+ *   check-idle → snapshot D1 → R2 put → verify → D1 ledger
  * Each step retries independently; a dump that races the boot-time restore
  * returns 503 from the agent and is retried by the step engine.
  */
@@ -49,35 +47,28 @@ export class BackupWorkflow extends WorkflowEntrypoint<Env, BackupParams> {
         "dump-to-r2",
         { retries: { limit: 5, delay: "30 seconds", backoff: "exponential" } },
         async () => {
-          const stub = getContainer(this.env.BACKUP_CONTAINER, "main");
-          const res = await stub.fetch(
-            new Request("https://container/_agent/dump"),
-          );
-          if (!res.ok) throw new Error(`dump failed: HTTP ${res.status}`);
-          const bytes = Number(res.headers.get("content-length"));
-          const sha256 = res.headers.get("x-backup-sha256");
-          if (!Number.isSafeInteger(bytes) || bytes < 1024)
-            throw new Error(`dump suspiciously small: ${bytes}B`);
-          if (!isSha256Hex(sha256))
-            throw new Error("dump did not provide a valid SHA-256 digest");
-          if (!res.body) throw new Error("dump response has no body");
-
           const createdAt = new Date(event.timestamp).toISOString();
           const key = backupKey(new Date(event.timestamp));
           const manifestKey = backupManifestKey(key);
-          const fixedLength = new FixedLengthStream(bytes);
-          const bodyTransfer = res.body.pipeTo(fixedLength.writable);
-          const stored = await this.env.STORAGE.put(key, fixedLength.readable, {
-            sha256,
-            httpMetadata: { contentType: "application/sql" },
+          const snapshot = await d1Snapshot(this.env);
+          const body = JSON.stringify(snapshot);
+          const bodyBytes = new TextEncoder().encode(body);
+          const digest = await crypto.subtle.digest("SHA-256", bodyBytes);
+          const sha256 = Array.from(new Uint8Array(digest), (byte) =>
+            byte.toString(16).padStart(2, "0"),
+          ).join("");
+          const bytes = bodyBytes.byteLength;
+          if (bytes < 128) throw new Error(`snapshot suspiciously small: ${bytes}B`);
+          const stored = await this.env.STORAGE.put(key, body, {
+            sha256: digest,
+            httpMetadata: { contentType: "application/json" },
             customMetadata: {
               backupSchemaVersion: "1",
               createdAt,
               sha256,
-              sourceEngine: "postgresql",
+              sourceEngine: "sqlite",
             },
           });
-          await bodyTransfer;
           if (!stored) throw new Error(`R2 put failed for ${key}`);
 
           const manifest = createBackupManifest({
@@ -151,4 +142,20 @@ export class BackupWorkflow extends WorkflowEntrypoint<Env, BackupParams> {
 
     return artifact;
   }
+}
+
+async function d1Snapshot(env: Env): Promise<Record<string, unknown>> {
+  const snapshotDb = async (db: D1Database) => {
+    const tables = await db
+      .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+      .all<{ name: string }>();
+    const result: Record<string, unknown[]> = {};
+    for (const { name } of tables.results) {
+      if (!/^[A-Za-z0-9_]+$/.test(name)) continue;
+      const rows = await db.prepare(`SELECT * FROM "${name}"`).all();
+      result[name] = rows.results;
+    }
+    return result;
+  };
+  return { schemaVersion: 1, createdAt: new Date().toISOString(), crm: await snapshotDb(env.CRM_DB!), ops: await snapshotDb(env.OPS_DB) };
 }
