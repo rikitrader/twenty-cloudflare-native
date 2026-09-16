@@ -1,8 +1,9 @@
 # Twenty GraphQL → Cloudflare D1 mapping
 
-The production `/graphql` handler is `src/graphql-compat.ts`. Every request is
-authenticated with Cloudflare Access and checked against `workspace_members`
-before a resolver is executed.
+The production `/graphql` handler is `src/graphql-compat.ts`. Requests prefer
+Cloudflare Access JWTs and fall back to native D1 sessions created by the
+upstream-compatible `SignIn`/`SignUp` mutations. Both paths are checked against
+`workspace_members` before a resolver is executed.
 
 ## D1-backed families
 
@@ -14,7 +15,7 @@ before a resolver is executed.
 | Metadata and fields | `custom_objects`, `custom_fields` |
 | Views and page layouts | `saved_views`, `workspace_settings` |
 | Workspace roles/invitations | `workspace_members`, `workspace_invitations` |
-| Sessions and API keys | `native_sessions`, `native_api_keys` |
+| Users, sessions and API keys | `native_users`, `native_sessions`, `native_api_keys` |
 | Webhooks and integrations | `native_webhooks`, `integration_accounts` |
 | Billing/resource credits | `workspace_billing` |
 | Chat threads/messages | `ai_chat_threads`, `ai_chat_messages` |

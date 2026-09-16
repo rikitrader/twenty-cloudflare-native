@@ -36,7 +36,9 @@ Neon/container path has been retired.
 - [~] GraphQL compatibility maps core CRM CRUD, search, aggregate, workspace,
       metadata, and view operations; admin/billing/marketplace/AI operations
       without a D1 backing table remain explicitly non-authoritative.
-- [ ] Port Twenty authentication/session persistence and all PostgreSQL queries.
+- [x] Port native sign-in/sign-up and session persistence to D1 (`native_users`,
+      `native_sessions`); Cloudflare Access remains the preferred production
+      identity provider.
 - [ ] Port imports, exports, attachments, search, automations, and integrations.
 - [~] Build resumable PostgreSQL-to-D1/R2 migration and verification tooling
       (`scripts/migrate-crm-ndjson.mjs` provides dry-run, resumable state,
