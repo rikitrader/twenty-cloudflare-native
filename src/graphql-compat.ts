@@ -34,6 +34,12 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
   if (new URL(request.url).pathname !== "/graphql" || request.method !== "POST") return null;
   const body = (await request.json().catch(() => ({}))) as { query?: string; operationName?: string; variables?: Vars }; const op = operationName(body); const vars = body.variables ?? {};
   if (op === "IntrospectionQuery" || /__schema|__type/.test(body.query ?? "")) return Response.json({ data: { __schema: { queryType: { name: "Query" }, mutationType: { name: "Mutation" }, types: [] } } });
+  if (/GetPublicWorkspaceDataByDomain|GetPublicWorkspaceDataById|CheckWorkspaceSubdomainAvailability|FindManyPublicDomains/i.test(op) && env.CRM_DB) {
+    const domain = String(vars.domain ?? vars.subdomain ?? "").trim().toLowerCase(); const id = String(vars.workspaceId ?? vars.id ?? "");
+    if (/CheckWorkspaceSubdomainAvailability/i.test(op)) { const exists = domain ? await env.CRM_DB.prepare("SELECT 1 FROM workspaces WHERE lower(name) = ? LIMIT 1").bind(domain).first() : null; return Response.json({ data: { checkWorkspaceSubdomainAvailability: { available: !exists, subdomain: domain } } }); }
+    if (/FindManyPublicDomains/i.test(op)) return Response.json({ data: { publicDomains: [] } });
+    const workspace = id ? await env.CRM_DB.prepare("SELECT id, name, created_at as createdAt FROM workspaces WHERE id = ? LIMIT 1").bind(id).first() : domain ? await env.CRM_DB.prepare("SELECT id, name, created_at as createdAt FROM workspaces WHERE lower(name) = ? LIMIT 1").bind(domain).first() : null; return Response.json({ data: { publicWorkspaceData: workspace, workspace: workspace, getPublicWorkspaceDataByDomain: workspace, getPublicWorkspaceDataById: workspace } });
+  }
   if (/^SignIn$/i.test(op)) {
     if (!env.CRM_DB) return Response.json({ errors: [{ message: "CRM database unavailable" }] }, { status: 503 });
     const email = String(vars.email ?? "").trim().toLowerCase(); const password = String(vars.password ?? "");
