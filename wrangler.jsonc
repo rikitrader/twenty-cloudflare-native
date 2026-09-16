@@ -1,7 +1,7 @@
 {
   "name": "twenty-crm",
   "account_id": "0dd0d155f8dafdca9d2bade1141986a2",
-  "main": "src/index.ts",
+  "main": "src/index-native.ts",
   "compatibility_date": "2026-06-08",
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
   "durable_objects": {
