@@ -36,6 +36,7 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
   if (/^SignIn$/i.test(op)) {
     if (!env.CRM_DB) return Response.json({ errors: [{ message: "CRM database unavailable" }] }, { status: 503 });
     const email = String(vars.email ?? "").trim().toLowerCase(); const password = String(vars.password ?? "");
+    if (env.OPS_RATE_LIMITER) { const limited = await env.OPS_RATE_LIMITER.limit({ key: `signin:${email || "unknown"}` }); if (!limited.success) return Response.json({ errors: [{ message: "too many sign-in attempts" }] }, { status: 429 }); }
     const user = await env.CRM_DB.prepare("SELECT id, email, password_hash as passwordHash, password_salt as passwordSalt FROM native_users WHERE email = ? COLLATE NOCASE LIMIT 1").bind(email).first<{ id: string; email: string; passwordHash: string; passwordSalt: string }>();
     if (!user || !(await verifyPassword(password, user.passwordHash, user.passwordSalt))) return Response.json({ errors: [{ message: "invalid email or password" }] }, { status: 401 });
     const workspace = await env.CRM_DB.prepare("SELECT workspace_id as workspaceId FROM workspace_members WHERE identity_subject = ? AND status = 'active' ORDER BY created_at LIMIT 1").bind(`user:${user.id}`).first<{ workspaceId: string }>();
