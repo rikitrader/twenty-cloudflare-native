@@ -120,6 +120,15 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
     if (/TrackAnalytics|^Track$/i.test(op)) await env.CRM_DB.prepare("INSERT INTO crm_audit_events (id, workspace_id, actor_subject, action, object_type, object_id, request_id, metadata_json, created_at) VALUES (?, ?, ?, 'track', 'analytics', NULL, ?, ?, ?)").bind(crypto.randomUUID(), workspaceId, actor.subject, crypto.randomUUID(), JSON.stringify(input).slice(0, 4000), now).run();
     return Response.json({ data: { addQueryToEventStream: { success: true }, removeQueryFromEventStream: { success: true }, onEventSubscription: queries, track: { success: true }, trackAnalytics: { success: true } } });
   }
+  if (/UsageQuota|UsageAnalytics|WorkspaceAiStats|ResourceCreditUsage/i.test(op)) {
+    const [contacts, companies, opportunities, activities, events] = await env.CRM_DB.batch([
+      env.CRM_DB.prepare("SELECT COUNT(*) as count FROM contacts WHERE workspace_id = ?").bind(workspaceId),
+      env.CRM_DB.prepare("SELECT COUNT(*) as count FROM companies WHERE workspace_id = ?").bind(workspaceId),
+      env.CRM_DB.prepare("SELECT COUNT(*) as count FROM opportunities WHERE workspace_id = ?").bind(workspaceId),
+      env.CRM_DB.prepare("SELECT COUNT(*) as count FROM activities WHERE workspace_id = ?").bind(workspaceId),
+      env.CRM_DB.prepare("SELECT COUNT(*) as count FROM crm_audit_events WHERE workspace_id = ?").bind(workspaceId),
+    ]); const countOf = (result: unknown) => Number((result as { results?: Array<{ count?: number }> }).results?.[0]?.count ?? 0); const quotas = [{ key: "contacts", used: countOf(contacts), limit: 100000 }, { key: "companies", used: countOf(companies), limit: 100000 }, { key: "opportunities", used: countOf(opportunities), limit: 100000 }, { key: "activities", used: countOf(activities), limit: 100000 }, { key: "events", used: countOf(events), limit: 100000 }]; return Response.json({ data: { usageQuotasWithConsumption: quotas, usageQuotaDefinitions: quotas.map((quota) => ({ key: quota.key, limit: quota.limit })), usageQuotaScopeConsumption: quotas, usageAnalytics: quotas, workspaceAiStats: { messages: 0, tokens: 0 }, resourceCreditUsage: { used: 0, limit: 0 } } });
+  }
   if (/Campaign|MessageCampaign|UnsubscribeTopic|MessageSuppression|EmailingDomain/i.test(op)) {
     const input = unwrapInput(vars); const id = String(vars.id ?? vars.campaignId ?? vars.topicId ?? input.id ?? ""); const now = new Date().toISOString();
     if (/UnsubscribeTopic/i.test(op)) {
