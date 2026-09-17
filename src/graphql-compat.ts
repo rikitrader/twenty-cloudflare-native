@@ -44,7 +44,7 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
     });
   }
   if (!["/graphql", "/metadata", "/api/graphql", "/api/metadata"].includes(pathname) || request.method !== "POST") return null;
-  const body = (await request.json().catch(() => ({}))) as { query?: string; operationName?: string; variables?: Vars }; const op = operationName(body); const vars = body.variables ?? {};
+  const body = (await request.json().catch(() => ({}))) as { query?: string; operationName?: string; variables?: Vars }; const op = operationName(body); const requestedOp = `${op} ${body.query ?? ""}`; const vars = body.variables ?? {};
   // Generated Twenty auth mutations vary between top-level variables and an
   // input/data envelope; normalize both without changing the public contract.
   if (vars.input && typeof vars.input === "object" && !Array.isArray(vars.input)) Object.assign(vars, vars.input);
@@ -71,12 +71,12 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
     const inviteHash = String(vars.inviteHash ?? vars.workspaceInviteHash ?? vars.hash ?? "").trim();
     const row = inviteHash ? await env.CRM_DB.prepare("SELECT i.id, i.email, i.role, i.status, i.expires_at as expiresAt, w.id as workspaceId, w.name as workspaceName FROM workspace_invitations i JOIN workspaces w ON w.id = i.workspace_id WHERE i.token_hash = ? AND i.status = 'pending' AND i.expires_at > ? LIMIT 1").bind(inviteHash, new Date().toISOString()).first() : null;
     const workspace = row ? { id: row.workspaceId, name: row.workspaceName, displayName: row.workspaceName } : null;
-    return Response.json({ data: { workspaceFromInviteHash: workspace, workspace, invitation: row ? { id: row.id, email: row.email, role: row.role, expiresAt: row.expiresAt } : null } });
+    return Response.json({ data: { workspaceFromInviteHash: workspace, getWorkspaceFromInviteHash: workspace, workspace, invitation: row ? { id: row.id, email: row.email, role: row.role, expiresAt: row.expiresAt } : null } });
   }
   // The upstream client preloads minimal metadata on the unauthenticated
   // welcome route. Keep that bootstrap request non-failing; full metadata is
   // returned after the membership boundary below.
-  if (/FindMinimalMetadata/i.test(op) && !request.headers.get("cf-access-jwt-assertion") && !request.headers.get("authorization") && !request.headers.get("cookie")) {
+  if (/FindMinimalMetadata/i.test(requestedOp) && !request.headers.get("cf-access-jwt-assertion") && !request.headers.get("authorization") && !request.headers.get("cookie")) {
     const minimalMetadata = { objectMetadataItems: [], views: [], collectionHashes: [], fields: [], objects: [] };
     return Response.json({ data: { minimalMetadata, findMinimalMetadata: minimalMetadata, findManyObjectMetadata: [], objectMetadataItems: [], views: [], collectionHashes: {} } });
   }
@@ -130,7 +130,7 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
     const empty = { edges: [], nodes: [], totalCount: 0, pageInfo: { hasNextPage: false, hasPreviousPage: false } };
     return Response.json({ data: { applications: empty, webhooks: empty, workspaceInvitations: [], invitations: [], roles: [{ id: "member", name: "Member", label: "Member" }, { id: "admin", name: "Admin", label: "Admin" }], approvedAccessDomains: [], ssoIdentityProviders: [], emailingDomains: [], usageAnalytics: [], aiChatUsage: { used: 0, limit: 0 }, resourceCreditUsage: { used: 0, limit: 0 } } });
   }
-  if (/FindMinimalMetadata|FindManyObjectMetadata|ObjectMetadataItems|FindManyViews|ViewMetadata|FindManyFields|FieldMetadata|FindManyIndexMetadata|FindManyViewFields/i.test(op)) {
+  if (/FindMinimalMetadata|FindManyObjectMetadata|ObjectMetadataItems|FindManyViews|ViewMetadata|FindManyFields|FieldMetadata|FindManyIndexMetadata|FindManyViewFields/i.test(requestedOp)) {
     const now = new Date().toISOString();
     const objectMetadataItems = [
       { id: `${workspaceId}:person`, nameSingular: "person", namePlural: "people", labelSingular: "Person", labelPlural: "People", icon: "IconUser", isActive: true, isSystem: true, isRemote: false, createdAt: now, updatedAt: now },
