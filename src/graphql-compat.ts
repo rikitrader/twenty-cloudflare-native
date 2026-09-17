@@ -71,7 +71,14 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
     const publicWorkspace = { ...(workspace ?? {}), displayName: workspace?.name ?? "Twenty", logo: null, authProviders, authBypassProviders: { google: false, password: false, microsoft: false }, isPublicInviteLinkEnabled: false, workspaceUrls: { subdomainUrl: null, customUrl: null } };
     return Response.json({ data: { publicWorkspaceData: publicWorkspace, workspace: publicWorkspace, getPublicWorkspaceDataByDomain: publicWorkspace, getPublicWorkspaceDataById: publicWorkspace } });
   }
-  if (/CheckUserExists/i.test(op) && env.CRM_DB) { const email = String(vars.email ?? "").trim().toLowerCase(); const row = email ? await env.CRM_DB.prepare("SELECT 1 FROM native_users WHERE email = ? COLLATE NOCASE LIMIT 1").bind(email).first() : null; return Response.json({ data: { checkUserExists: { exists: Boolean(row) } } }); }
+  if (/CheckUserExists/i.test(op) && env.CRM_DB) {
+    const email = String(vars.email ?? "").trim().toLowerCase();
+    const row = email ? await env.CRM_DB.prepare("SELECT id FROM native_users WHERE email = ? COLLATE NOCASE LIMIT 1").bind(email).first<{ id: string }>() : null;
+    const availableWorkspacesCount = row
+      ? Number((await env.CRM_DB.prepare("SELECT COUNT(*) as count FROM workspace_members WHERE identity_subject = ? AND status = 'active'").bind(`user:${row.id}`).first<{ count: number }>())?.count ?? 0)
+      : 0;
+    return Response.json({ data: { checkUserExists: { exists: Boolean(row), availableWorkspacesCount, isEmailVerified: false } } });
+  }
   // Invite links are resolved before a session exists.  Invitation hashes are
   // stored as one-way digests, so only an exact stored hash may reveal the
   // workspace; unknown/expired hashes return a valid null payload rather than
