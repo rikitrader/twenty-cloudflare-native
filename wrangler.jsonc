@@ -102,7 +102,7 @@
   },
   "vars": {
     "D1_NATIVE_MODE": "true",
-    "AUTO_PROVISION_ACCESS_MEMBERS": "false",
+    "AUTO_PROVISION_ACCESS_MEMBERS": "true",
     "SERVER_URL": "https://twenty-crm.observatorio-publico.workers.dev",
     "REDIS_BACKEND": "cloudflare",
     "CLOUDFLARE_PUBSUB_TRANSPORT": "poll",

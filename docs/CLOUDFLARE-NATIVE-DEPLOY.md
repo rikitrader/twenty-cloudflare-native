@@ -52,10 +52,10 @@ records. Post-cutover writes must be reconciled before any retry.
 
 For standard Observatorio members authenticated by Cloudflare Access, member
 provisioning is an explicit change-control step: set
-`AUTO_PROVISION_ACCESS_MEMBERS=true` only after approving the target shared
-workspace and membership policy. It is `false` in the checked-in production
-configuration. Native password users must be imported or created through the
-Twenty signup flow.
+  `AUTO_PROVISION_ACCESS_MEMBERS=true` only after approving the target shared
+  workspace and membership policy. It is enabled in the checked-in production
+  configuration following that approval. Native password users must still be
+  imported or created through the Twenty signup flow.
 
 ## Operations
 
