@@ -33,7 +33,17 @@ async function enrich(env: Env, workspaceId: string, entity: Entity, row: Record
 export async function handleGraphql(request: Request, env: Env): Promise<Response | null> {
   // Twenty uses a second same-origin GraphQL path for metadata operations.
   // Both endpoints share the D1 compatibility resolver and auth boundary.
-  if (!["/graphql", "/metadata"].includes(new URL(request.url).pathname) || request.method !== "POST") return null;
+  const pathname = new URL(request.url).pathname.replace(/\/+$/, "") || "/";
+  // Apollo's metadata client also opens a same-origin SSE stream for live
+  // metadata updates.  There is no mutable metadata event source in the D1
+  // compatibility layer yet, so keep the stream open-compatible and return a
+  // valid empty event immediately instead of falling through to SPA assets.
+  if (pathname === "/metadata" && request.method === "GET") {
+    return new Response(": twenty-metadata-ready\n\n", {
+      headers: { "content-type": "text/event-stream", "cache-control": "no-store", connection: "keep-alive" },
+    });
+  }
+  if (!["/graphql", "/metadata", "/api/graphql", "/api/metadata"].includes(pathname) || request.method !== "POST") return null;
   const body = (await request.json().catch(() => ({}))) as { query?: string; operationName?: string; variables?: Vars }; const op = operationName(body); const vars = body.variables ?? {};
   // Generated Twenty auth mutations vary between top-level variables and an
   // input/data envelope; normalize both without changing the public contract.
