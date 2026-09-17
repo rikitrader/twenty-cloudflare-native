@@ -36,6 +36,8 @@ Neon/container path has been retired.
 - [x] Make the public-workspace bootstrap null-safe for empty D1 workspaces;
       `scripts/patch-twenty-bootstrap.mjs` reapplies the generated-bundle fix
       and the live login screen has been verified in Chrome.
+- [x] Handle Twenty's metadata SSE bootstrap and `/metadata` API aliases in the
+      Worker so metadata requests never fall through to the SPA asset router.
 - [x] Verify a disposable authenticated vertical slice against production D1:
       native signup/session, `GetCurrentUser`, tenant-scoped `CreatePerson`,
       list/read, and cross-tenant denial; remove the disposable records after
