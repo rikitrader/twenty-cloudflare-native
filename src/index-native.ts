@@ -72,8 +72,23 @@ export default {
     if (crm) return crm;
     if (env.ASSETS) {
       const asset = await env.ASSETS.fetch(request);
-      if (asset.status !== 404 || request.method !== "GET") return asset;
-      return env.ASSETS.fetch(new Request(new URL("/index.html", request.url), request));
+      if (asset.status !== 404 || request.method !== "GET") {
+        // Navigation HTML must not be cached: a cached shell can keep an old
+        // auth bundle in the browser after a production deployment. Hashed JS
+        // and CSS assets remain cacheable, while index.html is always fresh.
+        if (asset.headers.get("content-type")?.includes("text/html")) {
+          const headers = new Headers(asset.headers);
+          headers.set("cache-control", "no-store, max-age=0");
+          headers.set("pragma", "no-cache");
+          return new Response(asset.body, { status: asset.status, statusText: asset.statusText, headers });
+        }
+        return asset;
+      }
+      const fallback = await env.ASSETS.fetch(new Request(new URL("/index.html", request.url), request));
+      const headers = new Headers(fallback.headers);
+      headers.set("cache-control", "no-store, max-age=0");
+      headers.set("pragma", "no-cache");
+      return new Response(fallback.body, { status: fallback.status, statusText: fallback.statusText, headers });
     }
     return Response.json({ error: "not found" }, { status: 404 });
   },
