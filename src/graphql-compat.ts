@@ -39,7 +39,16 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
   // compatibility layer yet, so keep the stream open-compatible and return a
   // valid empty event immediately instead of falling through to SPA assets.
   if (pathname === "/metadata" && request.method === "GET") {
-    return new Response(": twenty-metadata-ready\n\n", {
+    let heartbeat: ReturnType<typeof setInterval> | undefined;
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        const encoder = new TextEncoder();
+        controller.enqueue(encoder.encode(": twenty-metadata-ready\n\n"));
+        heartbeat = setInterval(() => controller.enqueue(encoder.encode(`: heartbeat ${Date.now()}\n\n`)), 15_000);
+      },
+      cancel() { if (heartbeat) clearInterval(heartbeat); },
+    });
+    return new Response(stream, {
       headers: { "content-type": "text/event-stream", "cache-control": "no-store", connection: "keep-alive" },
     });
   }

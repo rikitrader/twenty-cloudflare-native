@@ -18,7 +18,10 @@ describe("GraphQL D1 compatibility boundary", () => {
     const response = await handleGraphql(new Request("https://example.test/metadata", { method: "GET" }), {} as never);
     expect(response?.status).toBe(200);
     expect(response?.headers.get("content-type")).toContain("text/event-stream");
-    expect(await response?.text()).toContain("twenty-metadata-ready");
+    const reader = response?.body?.getReader();
+    const first = await reader?.read();
+    expect(new TextDecoder().decode(first?.value)).toContain("twenty-metadata-ready");
+    await reader?.cancel();
   });
 
   it("keeps invite resolution valid before authentication", async () => {
