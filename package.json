@@ -7,6 +7,7 @@
     "tail": "wrangler tail",
     "test": "vitest run",
     "test:browser:console": "node scripts/check-browser-console.mjs",
+    "smoke:graphql": "node scripts/smoke-graphql-surface.mjs",
     "test:workflow:e2e": "node scripts/test-crm-workflow-e2e.mjs",
     "migrate:crm": "node scripts/migrate-crm-ndjson.mjs",
     "verify:crm-export": "node scripts/verify-crm-export.mjs",
