@@ -17,12 +17,12 @@ if (!source.includes(patchedMarker)) {
 
 // Bust any browser/service-worker cache for the dynamically imported login
 // chunk without changing the upstream bundle's behavior or route structure.
-const versionedPath = new URL('../frontend/assets/SignInUp-CinvB_D3-v2.js', import.meta.url);
+const versionedPath = new URL('../frontend/assets/SignInUp-CinvB_D3-v3.js', import.meta.url);
 const mainPath = new URL('../frontend/assets/index-D6X3OEUa.js', import.meta.url);
 const mainSource = await readFile(mainPath, 'utf8');
-if (!mainSource.includes('./SignInUp-CinvB_D3-v2.js')) {
-  const references = mainSource.split('./SignInUp-CinvB_D3.js').length - 1;
+if (!mainSource.includes('./SignInUp-CinvB_D3-v3.js')) {
+  const references = mainSource.split('./SignInUp-CinvB_D3-v2.js').length - 1;
   if (references !== 2) throw new Error(`Expected two login chunk references, found ${references}`);
-  await copyFile(path, versionedPath);
-  await writeFile(mainPath, mainSource.replaceAll('./SignInUp-CinvB_D3.js', './SignInUp-CinvB_D3-v2.js'));
+  await writeFile(mainPath, mainSource.replaceAll('./SignInUp-CinvB_D3-v2.js', './SignInUp-CinvB_D3-v3.js'));
 }
+await copyFile(path, versionedPath);
