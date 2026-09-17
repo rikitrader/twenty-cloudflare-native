@@ -1,0 +1,47 @@
+{
+  "capturedAt": "2026-09-17T20:06:42Z",
+  "command": "npm run test:a11y",
+  "result": "passed",
+  "workspace": "fresh disposable workspace per browser project; isolated local D1 state removed after the run",
+  "projects": [
+    {
+      "name": "desktop-chromium",
+      "viewport": "1440x900",
+      "result": "passed"
+    },
+    {
+      "name": "tablet-chromium",
+      "emulation": "iPad Pro 11 on Chromium",
+      "result": "passed"
+    },
+    {
+      "name": "mobile-chromium",
+      "emulation": "Pixel 7",
+      "result": "passed"
+    }
+  ],
+  "surfaces": [
+    "People",
+    "Companies",
+    "Opportunities",
+    "Activities",
+    "Profile"
+  ],
+  "assertions": {
+    "authenticatedDisposableSignup": true,
+    "authorizedCrmSeedAndRendering": true,
+    "keyboardFocusHasAccessibleName": true,
+    "screenReaderAccessibleNames": true,
+    "axeWcagSeriousOrCriticalViolations": 0,
+    "documentHorizontalOverflow": false,
+    "browserPageErrors": 0,
+    "browserConsoleErrors": 0,
+    "unexpectedRequestFailures": 0,
+    "http5xxResponses": 0,
+    "screenshotsCaptured": true
+  },
+  "testFiles": [
+    "playwright.config.ts",
+    "e2e/crm-accessibility.spec.ts"
+  ]
+}

@@ -1,0 +1,28 @@
+import {readFileSync,readdirSync} from 'node:fs';
+import {DatabaseSync} from 'node:sqlite';
+import {afterEach,beforeEach,expect,it} from 'vitest';
+import {CRM_IMPORT_TYPES,processImportChunk,previewImportRecords,writeImportRecord} from '../src/crm-import';
+import type {Env} from '../src/types';
+
+let db:DatabaseSync;let env:Env;const workspace='import-workspace',run='import-run',now='2026-09-17T12:00:00.000Z';
+beforeEach(()=>{db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');for(const name of readdirSync(new URL('../migrations/',import.meta.url)).filter(name=>name.endsWith('.sql')).sort())db.exec(readFileSync(new URL(`../migrations/${name}`,import.meta.url),'utf8'));const source=new TextEncoder().encode('{"id":"contact-one","firstName":"Ada","lastName":"Lovelace","email":"ada@example.test"}\n{"id":"contact-two","firstName":"Grace","lastName":"Hopper"}\n');const prepare=(sql:string)=>({bind(...values:unknown[]){const statement=db.prepare(sql);return{first:async()=>statement.get(...values as never[])??null,all:async()=>({results:statement.all(...values as never[])}),run:async()=>({success:true,meta:statement.run(...values as never[])})};}});env={CRM_DB:{prepare},STORAGE:{get:async(_key:string,options:{range?:{offset:number;length:number}}={})=>{const offset=options.range?.offset??0,length=options.range?.length??source.byteLength;const bytes=source.slice(offset,offset+length);return{arrayBuffer:async()=>bytes.buffer,body:new Blob([bytes]).stream()};},head:async()=>({}),put:async()=>({})}} as unknown as Env;db.prepare('INSERT INTO workspaces VALUES (?,?,?)').run(workspace,'Import',now);db.prepare("INSERT INTO migration_runs (id,workspace_id,status,cursor,processed,failed,mapping_json,object_key,object_type,bytes,created_at,updated_at) VALUES (?,?,'running','0',0,0,'{}','imports/source.ndjson','contact',?,?,?)").run(run,workspace,source.byteLength,now,now);});
+afterEach(()=>db.close());
+it('imports an R2 NDJSON source with a durable byte cursor and idempotent IDs',async()=>{const result=await processImportChunk(env,{workspaceId:workspace,importId:run});expect(result).toMatchObject({done:true,processed:2,failed:0});expect(db.prepare('SELECT first_name,last_name FROM contacts ORDER BY id').all()).toEqual([{first_name:'Ada',last_name:'Lovelace'},{first_name:'Grace',last_name:'Hopper'}]);expect(db.prepare('SELECT status,processed,failed FROM migration_runs WHERE id=?').get(run)).toEqual({status:'completed',processed:2,failed:0});expect((await processImportChunk(env,{workspaceId:workspace,importId:run})).processed).toBe(0);});
+
+it('supports every exported CRM family in dependency-safe order',async()=>{
+  const records:[typeof CRM_IMPORT_TYPES[number],Record<string,unknown>][]=[
+    ['contact',{id:'person',firstName:'Ada',lastName:'Lovelace'}],['company',{id:'company',name:'Analytical Engines'}],['pipeline',{id:'pipeline',name:'Sales'}],
+    ['opportunity',{id:'deal',name:'Engine',companyId:'company',pointOfContactId:'person',pipelineId:'pipeline'}],['activity',{id:'activity',type:'call',title:'Review',contactId:'person'}],
+    ['task',{id:'task',title:'Build',createdBy:'member'}],['note',{id:'note',title:'Plan',createdBy:'member'}],['file',{id:'file',objectKey:`crm/${workspace}/file/report.pdf`,filename:'report.pdf',contentType:'application/pdf',bytes:42}],
+    ['customObject',{id:'custom-object',objectKey:'project',label:'Project',pluralLabel:'Projects'}],['customField',{id:'custom-field',objectType:'project',fieldKey:'status',label:'Status',fieldType:'text'}],
+    ['taskTarget',{id:'task-target',taskId:'task',targetType:'person',targetId:'person'}],['noteTarget',{id:'note-target',noteId:'note',targetType:'company',targetId:'company'}],
+    ['attachment',{id:'attachment',fileId:'file',name:'Report',targetType:'person',targetId:'person',createdBy:'member'}],['fileLink',{fileId:'file',recordType:'contact',recordId:'person'}],
+    ['relationship',{id:'relation',sourceType:'contact',sourceId:'person',targetType:'company',targetId:'company',relationKey:'worksAt'}],['customRecord',{id:'project-one',objectKey:'project',data:{status:'active'}}],['view',{id:'view',objectType:'contact',name:'All people',filters:[]}],
+  ];
+  for(const[type,record]of records)await writeImportRecord(env,workspace,type,record,now);
+  expect(CRM_IMPORT_TYPES).toHaveLength(17);expect(db.prepare('SELECT COUNT(*) AS count FROM custom_records').get()).toEqual({count:1});expect(db.prepare('SELECT COUNT(*) AS count FROM crm_attachments').get()).toEqual({count:1});expect(db.prepare('SELECT COUNT(*) AS count FROM record_relationships').get()).toEqual({count:1});
+});
+
+it('previews source-to-target column mappings without mutating records',async()=>{const result=await previewImportRecords(env,workspace,'contact',[{First:'Katherine',Last:'Johnson'},{First:'Missing'}],{First:'firstName',Last:'lastName'});expect(result).toMatchObject({valid:1,invalid:1});expect(result.rows[1].errors[0]).toContain('lastName');expect(db.prepare('SELECT COUNT(*) AS count FROM contacts').get()).toEqual({count:0});});
+
+it('rejects cross-workspace references during import',async()=>{db.prepare('INSERT INTO workspaces VALUES (?,?,?)').run('other-workspace','Other',now);db.prepare('INSERT INTO companies (id,workspace_id,name,created_at,updated_at) VALUES (?,?,?,?,?)').run('foreign-company','other-workspace','Foreign',now,now);await expect(writeImportRecord(env,workspace,'opportunity',{id:'deal',name:'Unsafe',companyId:'foreign-company'},now)).rejects.toThrow('company is not available');expect(db.prepare('SELECT COUNT(*) AS count FROM opportunities').get()).toEqual({count:0});});

@@ -13,7 +13,7 @@ npm test -- --run
 npm run db:migrations:check
 npm run security:production:check
 npx wrangler whoami
-npx wrangler deploy --dry-run --containers-rollout=none
+npx wrangler deploy --dry-run
 ```
 
 The account printed by `wrangler whoami` must own the configured D1, R2,

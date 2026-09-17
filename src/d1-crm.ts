@@ -1,5 +1,9 @@
 import { accessIdentityForRequest, type AccessIdentity } from "./access";
 import type { Env } from "./types";
+import { nativeSessionCookie, nativeSessionExpiresAt } from "./native-auth";
+import { crmPermissions } from './crm-records';
+import { isCrmImportType, mapImportRecord, previewImportRecords, writeImportRecord, type ImportMapping } from './crm-import';
+import { reconcileMigration } from './crm-reconciliation';
 
 type Contact = {
   id: string;
@@ -14,6 +18,16 @@ type Contact = {
 
 const json = (body: unknown, status = 200) =>
   Response.json(body, { status, headers: { "cache-control": "no-store" } });
+
+export async function cleanupExpiredFileUploads(env: Env): Promise<void> {
+  if (!env.CRM_DB) return;
+  const now = new Date().toISOString();
+  const expired = await env.CRM_DB.prepare("SELECT id,object_key as objectKey FROM pending_file_uploads WHERE status IN ('pending','uploading','failed') AND expires_at <= ? LIMIT 100").bind(now).all<{id:string;objectKey:string}>();
+  for (const row of expired.results) {
+    await env.STORAGE.delete(row.objectKey).catch(() => undefined);
+    await env.CRM_DB.prepare("UPDATE pending_file_uploads SET status='expired' WHERE id=? AND status IN ('pending','uploading','failed')").bind(row.id).run();
+  }
+}
 
 function requestId(request: Request): string {
   const supplied = request.headers.get("x-request-id");
@@ -36,7 +50,7 @@ async function emitCrmEvent(env: Env, workspaceId: string, actorSubject: string,
   const payload = { eventId, workspaceId, actorSubject, requestId: requestIdValue, objectType, objectId, action };
   await env.CRM_DB!.prepare("INSERT INTO crm_event_outbox (event_id, workspace_id, actor_subject, action, object_type, object_id, payload_json, status, attempts, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', 0, ?, ?)").bind(eventId, workspaceId, actorSubject, action, objectType, objectId, JSON.stringify(payload), now, now).run();
   try {
-    await env.EVENTS_QUEUE.send({ type: `crm.${action}`, payload: JSON.stringify(payload), receivedAt: now });
+    await env.EVENTS_QUEUE.send({ eventId, type: `crm.${action}`, payload: JSON.stringify(payload), receivedAt: now });
     await env.CRM_DB!.prepare("UPDATE crm_event_outbox SET status = 'queued', attempts = attempts + 1, updated_at = ? WHERE event_id = ?").bind(new Date().toISOString(), eventId).run();
   } catch (error) {
     await env.CRM_DB!.prepare("UPDATE crm_event_outbox SET status = 'failed', attempts = attempts + 1, last_error = ?, updated_at = ? WHERE event_id = ?").bind(String(error).slice(0, 500), new Date().toISOString(), eventId).run();
@@ -67,11 +81,19 @@ async function authorizedWorkspace(
   if (!actor) return json({ error: "unauthorized" }, 401);
   const workspaceId = request.headers.get("x-workspace-id");
   if (!validId(workspaceId)) return json({ error: "x-workspace-id is required" }, 400);
+  if (actor.authenticationType === "api-key") {
+    if (actor.workspaceId !== workspaceId || !actor.workspaceRole) return json({ error: "workspace access denied" }, 403);
+    return { actor, workspaceId, role: actor.workspaceRole };
+  }
   const member = await env.CRM_DB!.prepare(
-    "SELECT role FROM workspace_members WHERE workspace_id = ? AND identity_subject = ? AND status = 'active' LIMIT 1",
+    "SELECT COALESCE('custom:' || ra.role_id,m.role) AS role FROM workspace_members m LEFT JOIN role_assignments ra ON ra.workspace_id=m.workspace_id AND ra.identity_subject=m.identity_subject WHERE m.workspace_id = ? AND m.identity_subject = ? AND m.status = 'active' LIMIT 1",
   ).bind(workspaceId, actor.subject).first();
   if (!member) return json({ error: "workspace access denied" }, 403);
   return { actor, workspaceId, role: String((member as { role?: unknown }).role ?? "member") };
+}
+
+async function permission(env: Env, workspaceId: string, role: string, action: 'read' | 'create' | 'update' | 'delete', objectType?: string): Promise<boolean> {
+  return (await crmPermissions(env,workspaceId,role,objectType))[action];
 }
 
 function parseContact(body: unknown): { firstName: string; lastName: string; email: string | null } | null {
@@ -135,11 +157,11 @@ export async function handleD1Crm(request: Request, env: Env): Promise<Response 
     if (!member) return json({ error: "workspace access denied" }, 403);
     if (request.method === "GET") {
       const profile = await env.CRM_DB.prepare("SELECT display_name as displayName, locale, notification_preferences_json as notificationPreferencesJson, created_at as createdAt, updated_at as updatedAt FROM voter_profiles WHERE workspace_id = ? AND identity_subject = ?").bind(workspaceId, actor.subject).first<{displayName: string; locale: string; notificationPreferencesJson: string; createdAt: string; updatedAt: string}>();
-      return json({ data: { subject: actor.subject, email: actor.email ?? null, displayName: profile?.displayName ?? actor.email?.split("@")[0] ?? "", locale: profile?.locale ?? "es-VE", notificationPreferences: JSON.parse(profile?.notificationPreferencesJson ?? "{}"), createdAt: profile?.createdAt ?? null, updatedAt: profile?.updatedAt ?? null } });
+      return json({ data: { subject: actor.subject, email: actor.email ?? null, displayName: profile?.displayName ?? actor.email?.split("@")[0] ?? "", locale: profile?.locale === "es-VE" ? "es-ES" : profile?.locale ?? "es-ES", notificationPreferences: JSON.parse(profile?.notificationPreferencesJson ?? "{}"), createdAt: profile?.createdAt ?? null, updatedAt: profile?.updatedAt ?? null } });
     }
     const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
     const displayName = typeof body?.displayName === "string" ? body.displayName.trim().slice(0, 120) : "";
-    const locale = typeof body?.locale === "string" && /^[a-z]{2}(?:-[A-Z]{2})?$/.test(body.locale) ? body.locale : "es-VE";
+    const locale = body?.locale === "es" || body?.locale === "es-VE" ? "es-ES" : typeof body?.locale === "string" && /^(?:en-US|es-ES|fr-FR|de-DE|it-IT|pt-BR)$/.test(body.locale) ? body.locale : "es-ES";
     const preferences = body?.notificationPreferences && typeof body.notificationPreferences === "object" && !Array.isArray(body.notificationPreferences) ? body.notificationPreferences : {};
     const now = new Date().toISOString();
     await env.CRM_DB.prepare("INSERT INTO voter_profiles (workspace_id, identity_subject, display_name, locale, notification_preferences_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(workspace_id, identity_subject) DO UPDATE SET display_name = excluded.display_name, locale = excluded.locale, notification_preferences_json = excluded.notification_preferences_json, updated_at = excluded.updated_at").bind(workspaceId, actor.subject, displayName, locale, JSON.stringify(preferences), now, now).run();
@@ -159,6 +181,37 @@ export async function handleD1Crm(request: Request, env: Env): Promise<Response 
     ]);
     await audit(env, invitation.workspaceId, actor.subject, correlationId, "accept", "workspace_invitation", invitation.id);
     return json({ data: { workspaceId: invitation.workspaceId, role: invitation.role, status: "active" } });
+  }
+  const directUploadId = url.pathname.match(/^\/api\/crm\/file-uploads\/([a-zA-Z0-9_-]{1,128})$/)?.[1];
+  if (directUploadId && request.method === 'PUT') {
+    const token = url.searchParams.get('token') ?? '';
+    if (token.length < 40 || token.length > 160) return json({ error: 'invalid upload token' }, 401);
+    const hash = await tokenHash(token); const now = new Date().toISOString();
+    const upload = await env.CRM_DB.prepare("SELECT id,workspace_id as workspaceId,filename,content_type as contentType,expected_bytes as expectedBytes,object_key as objectKey,status,expires_at as expiresAt FROM pending_file_uploads WHERE id = ? AND token_hash = ?")
+      .bind(directUploadId, hash).first<{id:string;workspaceId:string;filename:string;contentType:string;expectedBytes:number;objectKey:string;status:string;expiresAt:string}>();
+    if (!upload || upload.status !== 'pending' || upload.expiresAt <= now) return json({ error: 'upload target is invalid, expired, or already used' }, 410);
+    const declared = Number(request.headers.get('content-length') ?? -1);
+    const requestType = (request.headers.get('content-type') ?? '').split(';')[0].trim();
+    if (!request.body || (declared >= 0 && declared !== upload.expectedBytes) || (requestType && requestType !== upload.contentType)) return json({ error: 'upload metadata mismatch' }, 400);
+    const claim = await env.CRM_DB.prepare("UPDATE pending_file_uploads SET status = 'uploading' WHERE id = ? AND token_hash = ? AND status = 'pending' AND expires_at > ?").bind(upload.id, hash, now).run();
+    if (!claim.meta || Number((claim.meta as {changes?:number}).changes ?? 0) !== 1) return json({ error: 'upload target already used' }, 409);
+    try {
+      const object = await env.STORAGE.put(upload.objectKey, request.body, { httpMetadata: { contentType: upload.contentType }, customMetadata: { workspaceId: upload.workspaceId, fileId: upload.id } });
+      if (object.size !== upload.expectedBytes || object.size > 25 * 1024 * 1024) {
+        await env.STORAGE.delete(upload.objectKey);
+        await env.CRM_DB.prepare("UPDATE pending_file_uploads SET status = 'failed' WHERE id = ? AND status = 'uploading'").bind(upload.id).run();
+        return json({ error: 'uploaded size does not match requested size' }, 400);
+      }
+      await env.CRM_DB.batch([
+        env.CRM_DB.prepare('INSERT INTO crm_files (id,workspace_id,object_key,filename,content_type,bytes,created_at) VALUES (?,?,?,?,?,?,?)').bind(upload.id, upload.workspaceId, upload.objectKey, upload.filename, upload.contentType, object.size, now),
+        env.CRM_DB.prepare("UPDATE pending_file_uploads SET status = 'uploaded', uploaded_at = ? WHERE id = ? AND status = 'uploading'").bind(now, upload.id),
+      ]);
+      return new Response(null, { status: 204, headers: { 'cache-control': 'no-store' } });
+    } catch (error) {
+      await env.CRM_DB.prepare("UPDATE pending_file_uploads SET status = 'failed' WHERE id = ? AND status = 'uploading'").bind(upload.id).run();
+      console.error('Direct upload failed', { fileId: upload.id, error: String(error) });
+      return json({ error: 'upload failed' }, 500);
+    }
   }
   const auth = await authorizedWorkspace(request, env);
   if (auth instanceof Response) return auth;
@@ -290,7 +343,7 @@ export async function handleD1Crm(request: Request, env: Env): Promise<Response 
     if (auth.role !== "owner" && auth.role !== "admin") return json({ error: "admin access required" }, 403);
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     const requested = typeof body.objectType === "string" ? body.objectType : "all";
-    if (!/^(all|contact|company|opportunity|activity)$/.test(requested)) return json({ error: "invalid objectType" }, 400);
+    if (!/^(all|contact|company|pipeline|opportunity|activity|task|taskTarget|note|noteTarget|attachment|file|fileLink|relationship|customObject|customField|customRecord|view)$/.test(requested)) return json({ error: "invalid objectType" }, 400);
     if (!env.CRM_EXPORT_WF) return json({ error: "CRM_EXPORT_WF is not configured" }, 503);
     const id = crypto.randomUUID();
     const instance = await env.CRM_EXPORT_WF.create({ params: { workspaceId, objectType: requested, exportId: id } });
@@ -303,49 +356,76 @@ export async function handleD1Crm(request: Request, env: Env): Promise<Response 
     const row = await env.CRM_DB.prepare("SELECT id, workflow_id as workflowId, object_type as objectType, status, object_key as objectKey, bytes, error, created_at as createdAt, updated_at as updatedAt FROM crm_exports WHERE id = ? AND workspace_id = ?").bind(exportIdPath, workspaceId).first();
     return row ? json({ data: row }) : json({ error: "export not found" }, 404);
   }
+  const exportAction=url.pathname.match(/^\/api\/crm\/exports\/([a-zA-Z0-9_-]{1,128})\/(cancel|resume|download)$/);
+  if(exportAction){
+    if(auth.role!=="owner"&&auth.role!=="admin")return json({error:'admin access required'},403);
+    const [,id,action]=exportAction;const row=await env.CRM_DB.prepare('SELECT * FROM crm_exports WHERE id=? AND workspace_id=?').bind(id,workspaceId).first<Record<string,any>>();if(!row)return json({error:'export not found'},404);
+    if(action==='cancel'&&request.method==='POST'){const now=new Date().toISOString();const changed=await env.CRM_DB.prepare("UPDATE crm_exports SET status='cancelled',cancelled_at=?,updated_at=? WHERE id=? AND workspace_id=? AND status IN ('queued','running')").bind(now,now,id,workspaceId).run();if(Number(changed.meta?.changes??0)!==1)return json({error:'only queued or running exports can be cancelled'},409);return json({data:{id,status:'cancelled'}});}
+    if(action==='resume'&&request.method==='POST'){if(!env.CRM_EXPORT_WF)return json({error:'CRM_EXPORT_WF is not configured'},503);if(!['failed','cancelled'].includes(String(row.status)))return json({error:'only failed or cancelled exports can resume'},409);const instance=await env.CRM_EXPORT_WF.create({params:{workspaceId,objectType:String(row.object_type),exportId:id}});const now=new Date().toISOString();await env.CRM_DB.prepare("UPDATE crm_exports SET workflow_id=?,status='queued',error=NULL,cancelled_at=NULL,updated_at=? WHERE id=? AND workspace_id=?").bind(instance.id,now,id,workspaceId).run();return json({data:{id,workflowId:instance.id,status:'queued'}},202);}
+    if(action==='download'&&request.method==='GET'){if(row.status!=='complete'||!row.object_key)return json({error:'export is not ready'},409);const object=await env.STORAGE.get(String(row.object_key));if(!object)return json({error:'export object missing'},410);const ndjson=String(row.object_key).endsWith('.ndjson');return new Response(object.body,{headers:{'content-type':ndjson?'application/x-ndjson':'application/json','content-disposition':`attachment; filename="twenty-export-${id}.${ndjson?'ndjson':'json'}"`,'cache-control':'private, no-store'}});}
+    return json({error:'method not allowed'},405);
+  }
+  if(url.pathname==='/api/crm/imports/upload'&&request.method==='POST'){
+    if(auth.role!=='owner'&&auth.role!=='admin')return json({error:'admin access required'},403);
+    if(!env.CRM_IMPORT_WF)return json({error:'CRM_IMPORT_WF is not configured'},503);
+    const objectType=request.headers.get('x-object-type')??'';if(!isCrmImportType(objectType))return json({error:'unsupported x-object-type'},400);
+    let mapping:ImportMapping={};const mappingHeader=request.headers.get('x-import-mapping');if(mappingHeader){if(mappingHeader.length>8192)return json({error:'import mapping is too large'},431);try{const parsed=JSON.parse(mappingHeader);if(!parsed||typeof parsed!=='object'||Array.isArray(parsed)||Object.entries(parsed).some(([source,target])=>source.length>128||typeof target!=='string'||target.length>128))throw new Error();mapping=parsed;}catch{return json({error:'x-import-mapping must be a JSON object'},400);}}
+    const contentType=(request.headers.get('content-type')??'').split(';')[0].trim();if(!['application/x-ndjson','application/ndjson'].includes(contentType))return json({error:'large imports require NDJSON'},415);
+    const declared=Number(request.headers.get('content-length')??-1);if(declared===0||declared>250*1024*1024)return json({error:'import must be between 1 byte and 250 MiB'},413);if(!request.body)return json({error:'import body required'},400);
+    const id=crypto.randomUUID(),key=`imports/${workspaceId}/${id}/source.ndjson`,now=new Date().toISOString();
+    const stored=await env.STORAGE.put(key,request.body,{httpMetadata:{contentType:'application/x-ndjson'},customMetadata:{workspaceId,importId:id,objectType}});if(stored.size<1||stored.size>250*1024*1024){await env.STORAGE.delete(key);return json({error:'import must be between 1 byte and 250 MiB'},413);}
+    await env.CRM_DB.prepare("INSERT INTO migration_runs (id,workspace_id,status,cursor,processed,failed,total,mapping_json,object_key,object_type,bytes,source_etag,created_at,updated_at) VALUES (?,?,'pending','0',0,0,NULL,?,?,?,?,?,?,?)").bind(id,workspaceId,JSON.stringify(mapping),key,objectType,stored.size,stored.etag,now,now).run();
+    try{const instance=await env.CRM_IMPORT_WF.create({params:{workspaceId,importId:id}});await env.CRM_DB.prepare('UPDATE migration_runs SET workflow_id=?,updated_at=? WHERE id=? AND workspace_id=?').bind(instance.id,new Date().toISOString(),id,workspaceId).run();return json({data:{id,workflowId:instance.id,status:'pending',objectType,bytes:stored.size}},202);}catch(error){await env.CRM_DB.prepare("UPDATE migration_runs SET status='failed',error=?,updated_at=? WHERE id=? AND workspace_id=?").bind(String(error).slice(0,500),new Date().toISOString(),id,workspaceId).run();return json({error:'import workflow could not be started',id},503);}
+  }
+  if(url.pathname==='/api/crm/imports/preview'&&request.method==='POST'){
+    if(auth.role!=='owner'&&auth.role!=='admin')return json({error:'admin access required'},403);
+    const body=await request.json().catch(()=>null) as Record<string,unknown>|null;const objectType=body?.objectType;if(!isCrmImportType(objectType))return json({error:'unsupported objectType'},400);const records=Array.isArray(body?.records)?body.records:[];if(records.length<1||records.length>50||records.some(record=>!record||typeof record!=='object'||Array.isArray(record)))return json({error:'records must contain 1 to 50 objects'},400);const mapping=body?.mapping&&typeof body.mapping==='object'&&!Array.isArray(body.mapping)?body.mapping as ImportMapping:{};
+    try{return json({data:await previewImportRecords(env,workspaceId,objectType,records as Record<string,unknown>[],mapping)});}catch(error){return json({error:String(error instanceof Error?error.message:error).slice(0,200)},400);}
+  }
+  if(url.pathname==='/api/crm/reconciliation'&&request.method==='POST'){
+    if(auth.role!=='owner'&&auth.role!=='admin')return json({error:'admin access required'},403);const body=await request.json().catch(()=>null) as Record<string,unknown>|null;try{return json({data:await reconcileMigration(env,workspaceId,body?.sourceManifestSha256,body?.expectedCounts)});}catch(error){return json({error:String(error instanceof Error?error.message:error).slice(0,300)},400);}
+  }
+  if(url.pathname==='/api/crm/migration-files/upload'&&request.method==='POST'){
+    if(auth.role!=='owner'&&auth.role!=='admin')return json({error:'admin access required'},403);const key=request.headers.get('x-object-key')??'',filename=request.headers.get('x-file-name')??'',declared=Number(request.headers.get('content-length')??-1),contentType=(request.headers.get('content-type')??'application/octet-stream').split(';')[0];if(!key.startsWith(`migrations/${workspaceId}/`)||key.length>1024||!filename||filename.length>255||declared<1||declared>250*1024*1024||!request.body)return json({error:'invalid migration file upload'},400);const stored=await env.STORAGE.put(key,request.body,{httpMetadata:{contentType},customMetadata:{workspaceId,filename,migration:'postgres'}});if(stored.size!==declared){await env.STORAGE.delete(key);return json({error:'uploaded byte count does not match content-length'},409);}return json({data:{objectKey:key,bytes:stored.size,etag:stored.etag}},201);
+  }
   if (url.pathname === "/api/crm/import" && request.method === "POST") {
     if (auth.role !== "owner" && auth.role !== "admin") return json({ error: "admin access required" }, 403);
     const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
     const objectType = typeof body?.objectType === "string" ? body.objectType : "";
     const records = Array.isArray(body?.records) ? body.records : [];
-    if (!/^(contact|company|opportunity)$/.test(objectType) || records.length > 100 || records.some((record) => !record || typeof record !== "object" || Array.isArray(record))) return json({ error: "invalid import batch" }, 400);
-    const now = new Date().toISOString(); const runId = validId(typeof body?.runId === "string" ? body.runId : null) ? body?.runId : crypto.randomUUID();
+    if (!isCrmImportType(objectType) || records.length > 100 || records.some((record) => !record || typeof record !== "object" || Array.isArray(record))) return json({ error: "invalid import batch" }, 400);
+    const now = new Date().toISOString(); const runId = validId(typeof body?.runId === "string" ? body.runId : null) ? String(body?.runId) : crypto.randomUUID();
     const cursor = typeof body?.cursor === "string" ? body.cursor.slice(0, 256) : null;
-    await env.CRM_DB.prepare("INSERT INTO migration_runs (id, workspace_id, status, cursor, processed, failed, created_at, updated_at) VALUES (?, ?, 'running', ?, 0, 0, ?, ?) ON CONFLICT(id) DO UPDATE SET status = 'running', cursor = excluded.cursor, updated_at = excluded.updated_at").bind(runId, workspaceId, cursor, now, now).run();
-    let processed = 0;
-    for (const raw of records as Record<string, unknown>[]) {
-      const id = validId(typeof raw.id === "string" ? raw.id : null) ? raw.id : crypto.randomUUID();
-      const createdAt = typeof raw.createdAt === "string" ? raw.createdAt : now; const updatedAt = typeof raw.updatedAt === "string" ? raw.updatedAt : now;
+    const existingRun=await env.CRM_DB.prepare('SELECT status FROM migration_runs WHERE id=? AND workspace_id=?').bind(runId,workspaceId).first<{status:string}>();if(existingRun?.status==='cancelled'&&body?.resume!==true)return json({error:'import is cancelled; resume it explicitly'},409);
+    const mapping=body?.mapping&&typeof body.mapping==='object'&&!Array.isArray(body.mapping)?body.mapping:{};const total=Number.isInteger(body?.total)&&Number(body?.total)>=0?Number(body?.total):null;
+    await env.CRM_DB.prepare("INSERT INTO migration_runs (id, workspace_id, status, cursor, processed, failed,total,mapping_json, created_at, updated_at) VALUES (?, ?, 'running', ?, 0, 0,?,?, ?, ?) ON CONFLICT(id) DO UPDATE SET status = 'running', cursor = excluded.cursor,total=COALESCE(excluded.total,migration_runs.total),mapping_json=excluded.mapping_json,cancelled_at=NULL, updated_at = excluded.updated_at").bind(runId, workspaceId, cursor,total,JSON.stringify(mapping), now, now).run();
+    let processed = 0,failed=0;const errors:{index:number;message:string}[]=[];
+    for (const [recordIndex,raw] of (records as Record<string, unknown>[]).entries()) {
       try {
-        if (objectType === "contact") {
-          const firstName = typeof raw.firstName === "string" ? raw.firstName.slice(0, 120) : ""; const lastName = typeof raw.lastName === "string" ? raw.lastName.slice(0, 120) : "";
-          if (!firstName || !lastName) continue;
-          await env.CRM_DB.prepare("INSERT INTO contacts (id, workspace_id, first_name, last_name, email, custom_fields_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET first_name = excluded.first_name, last_name = excluded.last_name, email = excluded.email, custom_fields_json = excluded.custom_fields_json, updated_at = excluded.updated_at WHERE contacts.workspace_id = excluded.workspace_id").bind(id, workspaceId, firstName, lastName, typeof raw.email === "string" ? raw.email.slice(0, 254) : null, JSON.stringify(raw.customFields && typeof raw.customFields === "object" ? raw.customFields : {}), createdAt, updatedAt).run();
-        } else if (objectType === "company") {
-          const name = typeof raw.name === "string" ? raw.name.slice(0, 200) : ""; if (!name) continue;
-          await env.CRM_DB.prepare("INSERT INTO companies (id, workspace_id, name, domain, custom_fields_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET name = excluded.name, domain = excluded.domain, custom_fields_json = excluded.custom_fields_json, updated_at = excluded.updated_at WHERE companies.workspace_id = excluded.workspace_id").bind(id, workspaceId, name, typeof raw.domain === "string" ? raw.domain.slice(0, 254) : null, JSON.stringify(raw.customFields && typeof raw.customFields === "object" ? raw.customFields : {}), createdAt, updatedAt).run();
-        } else {
-          const name = typeof raw.name === "string" ? raw.name.slice(0, 200) : ""; if (!name) continue;
-          await env.CRM_DB.prepare("INSERT INTO opportunities (id, workspace_id, name, amount_cents, stage, company_id, point_of_contact_id, pipeline_id, custom_fields_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET name = excluded.name, amount_cents = excluded.amount_cents, stage = excluded.stage, custom_fields_json = excluded.custom_fields_json, updated_at = excluded.updated_at WHERE opportunities.workspace_id = excluded.workspace_id").bind(id, workspaceId, name, Number.isSafeInteger(raw.amountCents) ? raw.amountCents : null, typeof raw.stage === "string" ? raw.stage.slice(0, 80) : "prospecting", validId(typeof raw.companyId === "string" ? raw.companyId : null) ? raw.companyId : null, validId(typeof raw.pointOfContactId === "string" ? raw.pointOfContactId : null) ? raw.pointOfContactId : null, validId(typeof raw.pipelineId === "string" ? raw.pipelineId : null) ? raw.pipelineId : null, JSON.stringify(raw.customFields && typeof raw.customFields === "object" ? raw.customFields : {}), createdAt, updatedAt).run();
-        }
+        await writeImportRecord(env,workspaceId,objectType,mapImportRecord(objectType,raw,mapping as ImportMapping),now);
         processed++;
-      } catch { /* batch continues; caller can replay failed records */ }
+      } catch(error) {failed++;errors.push({index:recordIndex,message:error instanceof Error?error.message.slice(0,200):'record failed'});}
     }
     const done = body?.done === true;
-    await env.CRM_DB.prepare("UPDATE migration_runs SET status = ?, cursor = ?, processed = processed + ?, updated_at = ? WHERE id = ? AND workspace_id = ?").bind(done ? "completed" : "running", cursor, processed, now, runId, workspaceId).run();
-    return json({ data: { runId, status: done ? "completed" : "running", processed, cursor } });
+    let errorKey:string|null=null;if(errors.length){errorKey=`imports/${workspaceId}/${runId}/errors-${Date.now()}.json`;await env.STORAGE.put(errorKey,JSON.stringify({runId,cursor,errors}),{httpMetadata:{contentType:'application/json'},customMetadata:{workspaceId,runId}});}
+    await env.CRM_DB.prepare("UPDATE migration_runs SET status = ?, cursor = ?, processed = processed + ?,failed=failed+?,error_object_key=COALESCE(?,error_object_key), updated_at = ? WHERE id = ? AND workspace_id = ? AND status!='cancelled'").bind(done ? "completed" : "running", cursor, processed,failed,errorKey, now, runId, workspaceId).run();
+    return json({ data: { runId, status: done ? "completed" : "running", processed,failed, cursor,errorObjectKey:errorKey } });
   }
   const importStatusId = url.pathname.match(/^\/api\/crm\/import\/([a-zA-Z0-9_-]{1,128})$/)?.[1];
   if (importStatusId && request.method === "GET") {
-    const run = await env.CRM_DB.prepare("SELECT id, status, cursor, processed, failed, error, created_at as createdAt, updated_at as updatedAt FROM migration_runs WHERE id = ? AND workspace_id = ?").bind(importStatusId, workspaceId).first();
+    const run = await env.CRM_DB.prepare("SELECT id, status, cursor, processed, failed,total,mapping_json as mapping,error_object_key as errorObjectKey,error,object_type as objectType,bytes,workflow_id as workflowId, cancelled_at as cancelledAt,created_at as createdAt, updated_at as updatedAt FROM migration_runs WHERE id = ? AND workspace_id = ?").bind(importStatusId, workspaceId).first();
     return run ? json({ data: run }) : json({ error: "migration run not found" }, 404);
   }
+  const importAction=url.pathname.match(/^\/api\/crm\/import\/([a-zA-Z0-9_-]{1,128})\/(cancel|resume|errors)$/);
+  if(importAction){if(auth.role!=="owner"&&auth.role!=="admin")return json({error:'admin access required'},403);const[,id,action]=importAction;const row=await env.CRM_DB.prepare('SELECT * FROM migration_runs WHERE id=? AND workspace_id=?').bind(id,workspaceId).first<Record<string,any>>();if(!row)return json({error:'migration run not found'},404);if(action==='cancel'&&request.method==='POST'){const now=new Date().toISOString();await env.CRM_DB.prepare("UPDATE migration_runs SET status='cancelled',cancelled_at=?,updated_at=? WHERE id=? AND workspace_id=? AND status IN ('pending','running')").bind(now,now,id,workspaceId).run();return json({data:{id,status:'cancelled',cursor:row.cursor}});}if(action==='resume'&&request.method==='POST'){if(!['cancelled','failed'].includes(String(row.status)))return json({error:'only cancelled or failed imports can resume'},409);if(row.object_key){if(!env.CRM_IMPORT_WF)return json({error:'CRM_IMPORT_WF is not configured'},503);const now=new Date().toISOString();await env.CRM_DB.prepare("UPDATE migration_runs SET status='pending',cancelled_at=NULL,error=NULL,updated_at=? WHERE id=? AND workspace_id=?").bind(now,id,workspaceId).run();try{const instance=await env.CRM_IMPORT_WF.create({params:{workspaceId,importId:id}});await env.CRM_DB.prepare('UPDATE migration_runs SET workflow_id=?,updated_at=? WHERE id=? AND workspace_id=?').bind(instance.id,new Date().toISOString(),id,workspaceId).run();return json({data:{id,workflowId:instance.id,status:'pending',cursor:row.cursor}},202);}catch(error){await env.CRM_DB.prepare("UPDATE migration_runs SET status='failed',error=?,updated_at=? WHERE id=? AND workspace_id=?").bind(String(error).slice(0,500),new Date().toISOString(),id,workspaceId).run();return json({error:'import workflow could not be resumed'},503);}}await env.CRM_DB.prepare("UPDATE migration_runs SET status='pending',cancelled_at=NULL,error=NULL,updated_at=? WHERE id=? AND workspace_id=?").bind(new Date().toISOString(),id,workspaceId).run();return json({data:{id,status:'pending',cursor:row.cursor}});}if(action==='errors'&&request.method==='GET'){if(!row.error_object_key)return json({error:'no error artifact'},404);const object=await env.STORAGE.get(String(row.error_object_key));if(!object)return json({error:'error artifact missing'},410);return new Response(object.body,{headers:{'content-type':'application/json','content-disposition':`attachment; filename="import-errors-${id}.json"`,'cache-control':'private, no-store'}});}return json({error:'method not allowed'},405);}
   const fileMatch = url.pathname.match(/^\/api\/crm\/files(?:\/([a-zA-Z0-9_-]{1,128}))?$/);
   if (fileMatch && request.method === "GET" && !fileMatch[1]) {
+    if (!(await permission(env, workspaceId, auth.role, 'read','attachment'))) return json({ error: 'read access denied' }, 403);
     const rows = await env.CRM_DB.prepare("SELECT id, filename, content_type as contentType, bytes, created_at as createdAt FROM crm_files WHERE workspace_id = ? ORDER BY created_at DESC LIMIT 100").bind(workspaceId).all();
     return json({ data: rows.results });
   }
   if (fileMatch && request.method === "POST" && !fileMatch[1]) {
+    if (!(await permission(env, workspaceId, auth.role, 'create','attachment'))) return json({ error: 'create access denied' }, 403);
     const filename = (request.headers.get("x-file-name") ?? "upload.bin").trim().slice(0, 255);
     const contentType = (request.headers.get("content-type") ?? "application/octet-stream").split(";")[0].trim();
     const declared = Number(request.headers.get("content-length") ?? 0);
@@ -368,15 +448,51 @@ export async function handleD1Crm(request: Request, env: Env): Promise<Response 
   if (url.pathname === "/api/crm/file-links" && request.method === "GET") {
     const recordType = url.searchParams.get("recordType"); const recordId = url.searchParams.get("recordId");
     if (!recordType || !/^(contact|company|opportunity|activity)$/.test(recordType) || !validId(recordId)) return json({ error: "invalid record" }, 400);
+    if (!(await permission(env, workspaceId, auth.role, 'read',recordType==='contact'?'person':recordType))) return json({ error: 'read access denied' }, 403);
     const rows = await env.CRM_DB.prepare("SELECT f.id, f.filename, f.content_type as contentType, f.bytes, f.created_at as createdAt FROM crm_files f JOIN crm_file_links l ON l.file_id = f.id WHERE l.workspace_id = ? AND l.record_type = ? AND l.record_id = ? ORDER BY f.created_at DESC").bind(workspaceId, recordType, recordId).all();
     return json({ data: rows.results });
   }
+  if (url.pathname === "/api/crm/file-links" && request.method === 'POST') {
+    const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+    const fileId = typeof body?.fileId === 'string' ? body.fileId : null; const recordType = typeof body?.recordType === 'string' ? body.recordType : ''; const recordId = typeof body?.recordId === 'string' ? body.recordId : null;
+    if (!validId(fileId) || !validId(recordId) || !/^(contact|company|opportunity|activity|custom:[a-z][a-z0-9_]{0,63})$/.test(recordType)) return json({ error: 'invalid file link' }, 400);
+    const permissionObject=recordType==='contact'?'person':recordType.startsWith('custom:')?recordType.slice(7):recordType;if (!(await permission(env, workspaceId, auth.role, 'update',permissionObject))) return json({ error: 'update access denied' }, 403);
+    const file = await env.CRM_DB.prepare('SELECT 1 FROM crm_files WHERE workspace_id=? AND id=?').bind(workspaceId, fileId).first();
+    const record = recordType.startsWith('custom:')
+      ? await env.CRM_DB.prepare('SELECT 1 FROM custom_records WHERE workspace_id=? AND object_key=? AND id=? AND deleted_at IS NULL').bind(workspaceId, recordType.slice(7), recordId).first()
+      : await env.CRM_DB.prepare(`SELECT 1 FROM ${recordType === 'contact' ? 'contacts' : recordType === 'company' ? 'companies' : recordType === 'opportunity' ? 'opportunities' : 'activities'} WHERE workspace_id=? AND id=? AND deleted_at IS NULL`).bind(workspaceId, recordId).first();
+    if (!file || !record) return json({ error: 'file or record not found' }, 404);
+    const now = new Date().toISOString();
+    await env.CRM_DB.prepare('INSERT OR IGNORE INTO crm_file_links (file_id,workspace_id,record_type,record_id,created_at) VALUES (?,?,?,?,?)').bind(fileId, workspaceId, recordType, recordId, now).run();
+    await audit(env, workspaceId, auth.actor.subject, correlationId, 'link', 'file', fileId, { recordType, recordId });
+    return json({ data: { fileId, recordType, recordId, createdAt: now } }, 201);
+  }
+  const fileLinkId = url.pathname.match(/^\/api\/crm\/file-links\/([a-zA-Z0-9_-]{1,128})$/)?.[1];
+  if (fileLinkId && request.method === 'DELETE') {
+    const recordType = url.searchParams.get('recordType') ?? ''; const recordId = url.searchParams.get('recordId');
+    if (!validId(recordId) || !/^(contact|company|opportunity|activity|custom:[a-z][a-z0-9_]{0,63})$/.test(recordType)) return json({ error: 'invalid file link' }, 400);
+    const permissionObject=recordType==='contact'?'person':recordType.startsWith('custom:')?recordType.slice(7):recordType;if (!(await permission(env, workspaceId, auth.role, 'update',permissionObject))) return json({ error: 'update access denied' }, 403);
+    const result = await env.CRM_DB.prepare('DELETE FROM crm_file_links WHERE workspace_id=? AND file_id=? AND record_type=? AND record_id=?').bind(workspaceId, fileLinkId, recordType, recordId).run();
+    if (Number(result.meta?.changes ?? 0) !== 1) return json({ error: 'file link not found' }, 404);
+    await audit(env, workspaceId, auth.actor.subject, correlationId, 'unlink', 'file', fileLinkId, { recordType, recordId });
+    return new Response(null, { status: 204 });
+  }
   if (fileMatch?.[1] && request.method === "GET") {
+    if (!(await permission(env, workspaceId, auth.role, 'read','attachment'))) return json({ error: 'read access denied' }, 403);
     const row = await env.CRM_DB.prepare("SELECT object_key as objectKey, filename, content_type as contentType FROM crm_files WHERE id = ? AND workspace_id = ?").bind(fileMatch[1], workspaceId).first<{objectKey: string; filename: string; contentType: string}>();
     if (!row) return json({ error: "file not found" }, 404);
     const object = await env.STORAGE.get(row.objectKey);
     if (!object) return json({ error: "file not found" }, 404);
     return new Response(object.body, { headers: { "content-type": row.contentType, "content-disposition": `attachment; filename="${row.filename.replace(/"/g, "")}"`, "cache-control": "private, no-store" } });
+  }
+  if (fileMatch?.[1] && request.method === 'DELETE') {
+    if (!(await permission(env, workspaceId, auth.role, 'delete','attachment'))) return json({ error: 'delete access denied' }, 403);
+    const row = await env.CRM_DB.prepare('SELECT object_key as objectKey FROM crm_files WHERE id=? AND workspace_id=?').bind(fileMatch[1], workspaceId).first<{objectKey:string}>();
+    if (!row) return json({ error: 'file not found' }, 404);
+    await env.STORAGE.delete(row.objectKey);
+    await env.CRM_DB.prepare('DELETE FROM crm_files WHERE id=? AND workspace_id=?').bind(fileMatch[1], workspaceId).run();
+    await audit(env, workspaceId, auth.actor.subject, correlationId, 'delete', 'file', fileMatch[1]);
+    return new Response(null, { status: 204 });
   }
   if (url.pathname === "/api/auth/me" && request.method === "GET") {
     const now = new Date().toISOString();
@@ -387,9 +503,9 @@ export async function handleD1Crm(request: Request, env: Env): Promise<Response 
     return json({ data: { subject: auth.actor.subject, email: auth.actor.email ?? null, workspaceId, session: cookie ?? null } });
   }
   if (url.pathname === "/api/auth/session" && request.method === "POST") {
-    const now = new Date(); const id = crypto.randomUUID(); const expires = new Date(now.getTime() + 8 * 60 * 60 * 1000).toISOString();
+    const now = new Date(); const id = crypto.randomUUID(); const expires = nativeSessionExpiresAt(now);
     await env.CRM_DB.prepare("INSERT INTO native_sessions (id, workspace_id, identity_subject, created_at, last_seen_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)").bind(id, workspaceId, auth.actor.subject, now.toISOString(), now.toISOString(), expires).run();
-    return new Response(JSON.stringify({ data: { session: id, expiresAt: expires } }), { status: 201, headers: { "content-type": "application/json", "cache-control": "no-store", "set-cookie": `twenty_session=${id}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=28800` } });
+    return new Response(JSON.stringify({ data: { session: id, expiresAt: expires } }), { status: 201, headers: { "content-type": "application/json", "cache-control": "no-store", "set-cookie": nativeSessionCookie(id) } });
   }
   if (url.pathname === "/api/auth/logout" && request.method === "POST") {
     const cookie = request.headers.get("cookie")?.match(/(?:^|;\s*)twenty_session=([^;]+)/)?.[1];

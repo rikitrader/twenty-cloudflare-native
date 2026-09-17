@@ -39,13 +39,13 @@ for (const gate of manifest.gates) {
 // These gates have machine-readable external acceptance criteria. Keep the
 // manifest from becoming an unsafe hand-edited assertion when the evidence is
 // still partial or blocked.
-const g3Evidence = await evidenceJson("docs/evidence/g3-auth-revocation-canary.json");
-const g10Evidence = await evidenceJson("docs/evidence/g10-canary-security.json");
+const g3Evidence = await evidenceJson("docs/evidence/g3-production-session-cache-soak.json");
+const g10Evidence = await evidenceJson("docs/evidence/g10-production-security-inspection.json");
 const g12Evidence = await evidenceJson("docs/evidence/g12-rollback-drill.json");
 const g13Evidence = await evidenceJson("docs/evidence/g13-production-observation.json");
 const evidenceBackstops = [
-  ["G3", g3Evidence?.result === "partial"],
-  ["G10", g10Evidence?.result === "partial"],
+  ["G3", g3Evidence?.result !== "passed"],
+  ["G10", g10Evidence?.result !== "passed"],
   ["G12", g12Evidence?.passed !== true],
   ["G13", g13Evidence?.result === "blocked"],
 ];

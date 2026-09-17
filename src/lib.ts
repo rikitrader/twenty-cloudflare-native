@@ -143,7 +143,9 @@ export function parseWebhookEvent(
   try {
     const body = JSON.parse(raw) as Record<string, unknown>;
     const type =
-      typeof body.eventName === "string"
+      typeof body.event === "string"
+        ? body.event
+        : typeof body.eventName === "string"
         ? body.eventName
         : typeof body.type === "string"
           ? body.type
@@ -152,4 +154,35 @@ export function parseWebhookEvent(
   } catch {
     return null;
   }
+}
+
+function webhookTimestampMs(value: string): number {
+  if (/^\d{10,13}$/.test(value)) {
+    const numeric = Number(value);
+    return value.length === 10 ? numeric * 1000 : numeric;
+  }
+  return Date.parse(value);
+}
+
+function hexBytes(value: string): Uint8Array | null {
+  if (!/^[0-9a-f]{64}$/i.test(value)) return null;
+  return new Uint8Array(value.match(/../g)!.map(byte => Number.parseInt(byte, 16)));
+}
+
+/** Verify Twenty's documented timestamp:raw-body HMAC without parsing first. */
+export async function verifyTwentyWebhookSignature(
+  raw: string,
+  timestamp: string | null,
+  signature: string | null,
+  secret: string | undefined,
+  nowMs = Date.now(),
+  replayWindowMs = 5 * 60_000,
+): Promise<boolean> {
+  if (!secret || !timestamp || !signature) return false;
+  const sentAt = webhookTimestampMs(timestamp);
+  if (!Number.isFinite(sentAt) || Math.abs(nowMs - sentAt) > replayWindowMs) return false;
+  const signatureBytes = hexBytes(signature);
+  if (!signatureBytes) return false;
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+  return crypto.subtle.verify("HMAC", key, signatureBytes, new TextEncoder().encode(`${timestamp}:${raw}`));
 }

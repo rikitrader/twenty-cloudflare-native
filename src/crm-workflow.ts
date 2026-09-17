@@ -1,32 +1,31 @@
 import { WorkflowEntrypoint, type WorkflowEvent, type WorkflowStep } from "cloudflare:workers";
 import type { Env } from "./types";
-
-export interface CrmExportParams { workspaceId: string; objectType: string; exportId: string }
+import { writeCrmExport, type CrmExportParams } from "./crm-export";
+import { processImportChunk, type CrmImportParams } from './crm-import';
 
 export class CrmExportWorkflow extends WorkflowEntrypoint<Env, CrmExportParams> {
   async run(event: WorkflowEvent<CrmExportParams>, step: WorkflowStep) {
-    const { workspaceId, objectType, exportId } = event.payload;
-    const tables: Record<string, string> = { contact: "contacts", company: "companies", opportunity: "opportunities", activity: "activities" };
-    await this.env.CRM_DB!.prepare("UPDATE crm_exports SET status = 'running', updated_at = ? WHERE id = ? AND workspace_id = ?").bind(new Date().toISOString(), exportId, workspaceId).run();
+    const { workspaceId, exportId } = event.payload;
+    const accepted = await this.env.CRM_DB!.prepare("UPDATE crm_exports SET status='running',error=NULL,updated_at=? WHERE id=? AND workspace_id=? AND status='queued'").bind(new Date().toISOString(), exportId, workspaceId).run();
+    if (Number(accepted.meta?.changes ?? 0) !== 1) return { cancelled: true };
     try {
-    const data = await step.do("read-d1", async () => {
-      const result: Record<string, any[]> = {};
-      for (const [type, table] of Object.entries(tables)) {
-        if (objectType !== "all" && objectType !== type) continue;
-        result[type] = (await this.env.CRM_DB!.prepare(`SELECT * FROM ${table} WHERE workspace_id = ? LIMIT 10000`).bind(workspaceId).all()).results;
-      }
+      const result = await step.do("write-paginated-r2-export", async () => writeCrmExport(this.env, event.payload));
+      const current = await this.env.CRM_DB!.prepare("SELECT status FROM crm_exports WHERE id=? AND workspace_id=?").bind(exportId, workspaceId).first<{ status: string }>();
+      if (current?.status === "cancelled") return { cancelled: true };
+      await this.env.CRM_DB!.prepare("UPDATE crm_exports SET status='complete',object_key=?,bytes=?,updated_at=? WHERE id=? AND workspace_id=? AND status='running'").bind(result.key, result.bytes, new Date().toISOString(), exportId, workspaceId).run();
       return result;
-    });
-    return await step.do("write-r2", async () => {
-      const exportedAt = new Date().toISOString(); const key = `exports/${workspaceId}/${exportId}.json`;
-      const payload = JSON.stringify({ schemaVersion: 1, workspaceId, exportedAt, data });
-      await this.env.STORAGE.put(key, payload, { httpMetadata: { contentType: "application/json" }, customMetadata: { workspaceId, exportId } });
-      await this.env.CRM_DB!.prepare("UPDATE crm_exports SET status = 'complete', object_key = ?, bytes = ?, updated_at = ? WHERE id = ? AND workspace_id = ?").bind(key, payload.length, new Date().toISOString(), exportId, workspaceId).run();
-      return { key, bytes: payload.length, exportedAt };
-    });
     } catch (error) {
-      await this.env.CRM_DB!.prepare("UPDATE crm_exports SET status = 'failed', error = ?, updated_at = ? WHERE id = ? AND workspace_id = ?").bind(String(error).slice(0, 500), new Date().toISOString(), exportId, workspaceId).run();
-      throw error;
+      const cancelled = String(error).includes("export cancelled");
+      if (!cancelled) await this.env.CRM_DB!.prepare("UPDATE crm_exports SET status='failed',error=?,updated_at=? WHERE id=? AND workspace_id=? AND status!='cancelled'").bind(String(error).slice(0, 500), new Date().toISOString(), exportId, workspaceId).run();
+      if (cancelled) return { cancelled: true }; throw error;
     }
+  }
+}
+
+export class CrmImportWorkflow extends WorkflowEntrypoint<Env, CrmImportParams> {
+  async run(event:WorkflowEvent<CrmImportParams>,step:WorkflowStep){
+    const{workspaceId,importId}=event.payload;const accepted=await this.env.CRM_DB!.prepare("UPDATE migration_runs SET status='running',error=NULL,updated_at=? WHERE id=? AND workspace_id=? AND status='pending'").bind(new Date().toISOString(),importId,workspaceId).run();if(Number(accepted.meta?.changes??0)!==1)return{cancelled:true};
+    try{for(let batch=0;batch<10000;batch++){const result=await step.do(`import-r2-chunk-${batch}`,async()=>processImportChunk(this.env,event.payload));if(result.done)return result;}throw new Error('import exceeded workflow batch limit');}
+    catch(error){await this.env.CRM_DB!.prepare("UPDATE migration_runs SET status='failed',error=?,updated_at=? WHERE id=? AND workspace_id=? AND status!='cancelled'").bind(String(error).slice(0,500),new Date().toISOString(),importId,workspaceId).run();throw error;}
   }
 }

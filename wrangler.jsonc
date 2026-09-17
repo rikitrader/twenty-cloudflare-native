@@ -3,6 +3,9 @@
   "account_id": "0dd0d155f8dafdca9d2bade1141986a2",
   "main": "src/index-native.ts",
   "compatibility_date": "2026-06-08",
+  "secrets": {
+    "required": ["INTERNAL_SERVICE_TOKEN", "WEBHOOK_TOKEN", "OUTBOUND_WEBHOOK_SECRET"]
+  },
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
   "assets": { "directory": "./frontend", "binding": "ASSETS", "run_worker_first": true },
   "durable_objects": {
@@ -35,6 +38,7 @@
     // Backup store (backups/ prefix) + Twenty attachments once S3 keys are set.
     { "binding": "STORAGE", "bucket_name": "twenty-storage" }
   ],
+  "ai": { "binding": "AI" },
   "d1_databases": [
     // Platform ops: webhook events + backup ledger (NOT Twenty's CRM data).
     { "binding": "OPS_DB", "database_name": "twenty-ops", "database_id": "81b71b4e-feb0-4a99-ad8c-85793af8ac2f", "migrations_dir": "migrations" },
@@ -52,6 +56,10 @@
       "name": "OPS_ALERT_EMAIL",
       "destination_address": "rikitrader@gmail.com",
       "allowed_sender_addresses": ["twenty-alerts@sismo911.com"]
+    },
+    {
+      "name": "CRM_EMAIL",
+      "allowed_sender_addresses": ["crm@mipolitico.com"]
     }
   ],
   "queues": {
@@ -93,16 +101,22 @@
       "binding": "CRM_EXPORT_WF",
       "name": "twenty-crm-export",
       "class_name": "CrmExportWorkflow"
+    },
+    {
+      "binding": "CRM_IMPORT_WF",
+      "name": "twenty-crm-import",
+      "class_name": "CrmImportWorkflow"
     }
   ],
   "triggers": {
     // Cost-controlled production health probe every fifteen minutes + hourly backup.
     // The probe still validates the server and worker; backups remain hourly.
-    "crons": ["*/15 * * * *", "0 * * * *"]
+    "crons": ["* * * * *", "*/15 * * * *", "0 * * * *"]
   },
   "vars": {
     "D1_NATIVE_MODE": "true",
     "AUTO_PROVISION_ACCESS_MEMBERS": "true",
+    "AI_MODEL": "@cf/meta/llama-3.1-8b-instruct-fast",
     "SERVER_URL": "https://twenty-crm.observatorio-publico.workers.dev",
     "REDIS_BACKEND": "cloudflare",
     "CLOUDFLARE_PUBSUB_TRANSPORT": "poll",
@@ -116,6 +130,8 @@
     "JOB_DLQ_NAME": "twenty-jobs-dlq",
     "OPS_ALERT_FROM": "twenty-alerts@sismo911.com",
     "OPS_ALERT_TO": "rikitrader@gmail.com"
+    ,"CRM_EMAIL_FROM": "crm@mipolitico.com",
+    "WEBHOOK_ALLOWED_HOSTS": "twenty-crm.observatorio-publico.workers.dev"
   },
   "observability": { "enabled": true }
 }

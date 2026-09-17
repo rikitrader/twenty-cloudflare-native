@@ -1,0 +1,2010 @@
+{
+  "generatedAt": "2026-09-17T23:44:49.581Z",
+  "upstream": "/Users/ricardoprieto/projects/twenty-upstream",
+  "total": 333,
+  "summary": {
+    "implemented-review": 206,
+    "explicitly-unavailable": 35,
+    "provider-disabled-review": 92
+  },
+  "operations": [
+    {
+      "client": "metadata",
+      "name": "ActivateSkill",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "ActivateWorkflowVersion",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ActivateWorkspace",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "AddQueryToEventStream",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "AnswerAgentChatQuestion",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ApplicationConnectedAccounts",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ApplicationConnectionProviders",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ApplicationRegistrationTarballUrl",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ArchiveChatThread",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "AssignRoleToAgent",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "AssignRoleToApiKey",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "AuthorizeApp",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "BarChartData",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "BillingPortalSession",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CallRecordingIdForCalendarEvent",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CancelMessageCampaign",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CancelSwitchBillingInterval",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CancelSwitchBillingPlan",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CancelSwitchResourceCreditPrice",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CheckCustomDomainValidRecords",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CheckoutSession",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CheckPublicDomainValidRecords",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CheckUserExists",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CheckWorkspaceSubdomainAvailability",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ClaimApplicationRegistrationOwnership",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CompleteBookCallOnboardingStep",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CompleteFileUpload",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "ComputeStepOutputSchema",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateApiKey",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateApprovedAccessDomain",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateBillingPaymentMethodSetupIntent",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateCalendarEvent",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateChatThread",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "CreateCoreWorkflow",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "CreateDraftFromWorkflowVersion",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateEmailGroupChannel",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateFileUpload",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateManyNavigationMenuItems",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateManyViewFields",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateManyViewGroups",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateOidcIdentityProvider",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateOneAgent",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateOneFieldMetadataItem",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateOneIndexMetadataItem",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateOneLogicFunction",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateOneObjectMetadataItem",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateOneRole",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreatePublicDomain",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateSamlIdentityProvider",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateSkill",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateSubscriptionPaymentIntent",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateUnsubscribeTopic",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateUsageLimit",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateView",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateViewFilter",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateViewFilterGroup",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateViewSort",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "CreateWebhook",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "CreateWorkflowVersionEdge",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "workspace",
+      "name": "CreateWorkflowVersionStep",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "CurrentUserSessions",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeactivateSkill",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "DeactivateWorkflowVersion",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteApplicationRegistration",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteApprovedAccessDomain",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteChatThread",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteConnectedAccount",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "workspace",
+      "name": "DeleteCoreWorkflows",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteCurrentWorkspace",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteEmailGroupChannel",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteManyNavigationMenuItems",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteOneAgent",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteOneFieldMetadataItem",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteOneIndexMetadataItem",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteOneLogicFunction",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteOneObjectMetadataItem",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteOneRole",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeletePublicDomain",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteQueuedChatMessage",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteSkill",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteSsoIdentityProvider",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteTwoFactorAuthenticationMethod",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteUnsubscribeTopic",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteUsageLimit",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteUserAccount",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteUserWorkspace",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteWebhook",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "DeleteWorkflowVersionEdge",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "workspace",
+      "name": "DeleteWorkflowVersionStep",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "DeleteWorkspaceInvitation",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DestroyView",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DestroyViewField",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DestroyViewFilter",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DestroyViewFilterGroup",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DestroyViewSort",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "DiscardCoreWorkflowDraft",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DuplicateDashboard",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "DuplicateMessageList",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "workspace",
+      "name": "DuplicateWorkflow",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "DuplicateWorkflowVersionStep",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "EditSsoIdentityProvider",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "EmailPasswordResetLink",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "EndSubscriptionTrialPeriod",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "EnrichWorkspaceCompany",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "EnterpriseCheckoutSession",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "EnterprisePortalSession",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "EnterpriseSubscriptionStatus",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "EvaluateAgentTurn",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "EventLogs",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "EventLogsLive",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ExecuteOneLogicFunction",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "FindAllRecordFormPageLayouts",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindAllRecordPageLayouts",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindAllViews",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindApplicationRegistrationByClientId",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindApplicationRegistrationStats",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindApplicationRegistrationVariables",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindClaimableApplicationRegistration",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindFieldsWidgetViews",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindInstallApplicationJobStatus",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManyAgents",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManyApplicationRegistrations",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManyApplications",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManyApplicationsForToolTable",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManyAvailablePackages",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManyCommandMenuItems",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManyFrontComponents",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManyLogicFunctions",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManyMarketplaceApps",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManyMarketplaceAppsForToolTable",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManyNavigationMenuItems",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManyPublicDomains",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManySkills",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManySkillsForSuggestion",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManyTimelineActivityTypes",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindManyViews",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindMarketplaceAppDetail",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindMarketplaceAppManifest",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindMinimalMetadata",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindOneAgent",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindOneApplication",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindOneApplicationByUniversalIdentifier",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindOneApplicationName",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindOneApplicationRegistration",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindOneApplicationSummary",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindOneFrontComponent",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindOneLogicFunction",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindOnePageLayout",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindOnePageLayoutType",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindOneSkill",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindTableWidgetViews",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindUninstallApplicationJobStatus",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "FindWorkspaceAiStats",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GenerateApiKeyToken",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GeneratePlaygroundToken",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "GenerateTransientToken",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "GetAddressDetails",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetAgentTurns",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetAiChatUsage",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetAiSystemPromptPreview",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetApiKey",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetApiKeyRoles",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetApiKeys",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetApplicationSdkClientChecksums",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetApprovedAccessDomains",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetAuthorizationUrlForSso",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetAuthTokensFromLoginToken",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetAuthTokensFromOtp",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "GetAuthTokensFromSsoExchangeToken",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetAutoCompleteAddress",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetChatMessages",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetChatThreads",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetConnectedImapSmtpCaldavAccount",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "workspace",
+      "name": "GetCoreWorkflow",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "GetCoreWorkflows",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "GetCoreWorkflowVersion",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "GetCoreWorkflowVersions",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetCurrentUser",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetEmailingDomains",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetInviteSuggestions",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetLogicFunctionSourceCode",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetLoginTokenFromCredentials",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetPublicWorkspaceDataByDomain",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetPublicWorkspaceDataById",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetResourceCreditUsage",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetRoles",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetSsoIdentityProviders",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "workspace",
+      "name": "GetTimelineCalendarEventsFromObjectRecord",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "GetTimelineThreadsFromObjectRecord",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetToolIndex",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetToolInputSchema",
+      "kind": "subscription",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetUsageAnalytics",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetWebhook",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetWebhooks",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "GetWorkflowVersionContent",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetWorkspaceCreationDefaults",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetWorkspaceFromInviteHash",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GetWorkspaceInvitations",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GithubClaimAuthorizationUrl",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "GoBackToPreviousOnboardingStep",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "Impersonate",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "InitiateOtpProvisioning",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "InitiateOtpProvisioningForAuthenticatedUser",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "InstallApplication",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "IsApplicationStopped",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "LineChartData",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ListPlans",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "MessageSuppressions",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "MetadataTranslations",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "MostlyEmptyFieldMetadataIds",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "MyCalendarChannels",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "MyConnectedAccounts",
+      "kind": "query",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "MyMessageChannels",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "MyMessageFolders",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ObjectMetadataItems",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ObjectRecordCounts",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "OnAgentChatEvent",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "OnEventSubscription",
+      "kind": "subscription",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "PieChartData",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "PreviewMessageCampaignAudience",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "RefreshEnterpriseValidityToken",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ReleaseEnterpriseServerBinding",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "RemoveQueryFromEventStream",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "RemoveRoleFromAgent",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "RenameChatThread",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "RenewApplicationToken",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "RenewToken",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ResendEmailVerificationToken",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ResendWorkspaceInvitation",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ResetCommandMenuItem",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ResetPageLayoutTabToDefault",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "ResetPageLayoutToDefault",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ResetPageLayoutWidgetToDefault",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ResetTimelineActivityType",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "RetryChatMessage",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "workspace",
+      "name": "RetryWorkflowRun",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "RevokeAllOtherUserSessions",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "RevokeApiKey",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "RevokeUserSession",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "RotateApplicationRegistrationClientSecret",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "RunEvaluationInput",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "workspace",
+      "name": "RunWorkflowVersion",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SaveImapSmtpCaldavAccount",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "workspace",
+      "name": "Search",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SendChatMessage",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SendEmail",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SendInvitations",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SendMessageCampaign",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SendMessageCampaignTest",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SetEnterpriseKey",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SetResourceCreditSubscriptionPrice",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SignIn",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SignOut",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SignUp",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SignUpInNewWorkspace",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SignUpInWorkspace",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SkipSyncEmailOnboardingStep",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "StartChannelSync",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "StartWorkspaceSetupChat",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "StopAgentChatStream",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "StopImpersonation",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "workspace",
+      "name": "StopWorkflowRun",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "workspace",
+      "name": "SubmitFormStep",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "SwitchBillingPlan",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SwitchSubscriptionInterval",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "SyncMarketplaceCatalog",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "workspace",
+      "name": "TestHttpRequest",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "TrackAnalytics",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "TransferApplicationRegistrationOwnership",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "TriggerInstallApplicationJob",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "TriggerInstallAppsOnboardingStep",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "TriggerUninstallApplicationJob",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UnarchiveChatThread",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UninstallApplication",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UnsubscribeTopics",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateApiKey",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateApplication",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateApplicationRegistration",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateApplicationRegistrationVariable",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateCalendarChannel",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateCommandMenuItem",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateEmailGroupChannel",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateLabPublicFeatureFlag",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateManyNavigationMenuItems",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateManyViewGroups",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateMessageChannel",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateMessageFolders",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateOneAgent",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateOneApplicationVariable",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateOneFieldMetadataItem",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateOneLogicFunction",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateOneObjectMetadataItem",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateOneRole",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdatePageLayoutWithTabsAndWidgets",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdatePasswordViaResetToken",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateSkill",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateTimelineActivityTypeIsActive",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateUnsubscribeTopic",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateUsageLimit",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateUserEmail",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateView",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateViewField",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateViewFilter",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateViewFilterGroup",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateViewSort",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateWebhook",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "UpdateWorkflowRunStep",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "workspace",
+      "name": "UpdateWorkflowVersionPositions",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "workspace",
+      "name": "UpdateWorkflowVersionStep",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "workspace",
+      "name": "UpdateWorkflowVersionTrigger",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateWorkspace",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateWorkspaceMemberRole",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpdateWorkspaceMemberSettings",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpgradeApplication",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UploadNewWorkspaceLogo",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "UploadWorkspaceLogo",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "UploadWorkspaceMemberProfilePicture",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "metadata",
+      "name": "UpsertFieldPermissions",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpsertFieldsWidget",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpsertObjectPermissions",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpsertPermissionFlags",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpsertRowLevelPermissionPredicates",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UpsertViewWidget",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UsageQuotaDefinitions",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UsageQuotaScopeConsumption",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "UsageQuotasWithConsumption",
+      "kind": "query",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ValidateApprovedAccessDomain",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "ValidatePasswordResetToken",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "VerifyEmailAndGetLoginToken",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "VerifyEmailAndGetWorkspaceAgnosticToken",
+      "kind": "mutation",
+      "status": "implemented-review"
+    },
+    {
+      "client": "metadata",
+      "name": "VerifyEmailingDomain",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    },
+    {
+      "client": "metadata",
+      "name": "VerifyTwoFactorAuthenticationMethodForAuthenticatedUser",
+      "kind": "mutation",
+      "status": "explicitly-unavailable"
+    },
+    {
+      "client": "workspace",
+      "name": "WorkflowStepConnectedAccountHandle",
+      "kind": "mutation",
+      "status": "provider-disabled-review"
+    }
+  ]
+}

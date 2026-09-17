@@ -1,32 +1,15 @@
-# Controlled Redis-free production cutover
+# Controlled production cutover
 
-The cutover is deliberately blocked until enterprise gates G0–G12 and the
-production security preflight pass. G13 is the post-cutover observation gate.
-Do not set the approval variable to bypass a failed preflight.
+1. Run typecheck, unit tests, GraphQL coverage, Playwright desktop/mobile, and
+   dependency/security checks.
+2. Confirm all D1 migrations are applied and R2/Queue/Workflow/DO/KV bindings
+   match `wrangler.jsonc`.
+3. Confirm required secret names exist; never export secret values.
+4. Capture WAF, Logpush, Access/MFA, binding, and observability evidence.
+5. Run `npm run cutover:production -- --dry-run` and retain the version/status
+   snapshot.
+6. Deploy, verify `/_status`, authentication, tenant isolation, CRUD, file
+   authorization, Queue delivery, and `/_status/g3` collection.
+7. Roll back to the recorded Worker version if health or smoke checks fail.
 
-## Dry run
-
-```sh
-npm run cutover:production -- --dry-run
-```
-
-The dry run records the current Worker version and `/_status` snapshot in
-`docs/evidence/g13-production-cutover.json` without changing production.
-
-## Authorized cutover
-
-After production Access/IdP/MFA, WAF, Logpush, external PostgreSQL, and Worker
-secrets are provisioned and G0–G12 are passed:
-
-```sh
-CUTOVER_APPROVAL=CUTOVER_APPROVAL_REQUIRED npm run cutover:production
-```
-
-The command snapshots the current version, deploys the exact `wrangler.jsonc`
-artifact, verifies `/_status` reports `redisBackend=cloudflare`,
-`productionReady=true`, and `durableRedis=true`, and automatically rolls back
-to the snapshot if health validation fails. G13 observation must then be
-enabled with the repository variable `G13_OBSERVATION_ENABLED=true`.
-
-Production remains unchanged until the explicit approval variable is supplied
-and all preflights pass.
+Time-based gates remain open until their full observation window completes.

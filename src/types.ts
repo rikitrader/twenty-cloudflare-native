@@ -6,9 +6,9 @@ import type { JobExecutionFailureCode } from "./cloudflare-state/contracts";
 export interface Env {
   // Production is Cloudflare-native; historical container namespaces remain
   // unbound and are retained only for migration compatibility.
-  TWENTY_SERVER: DurableObjectNamespace;
-  TWENTY_WORKER: DurableObjectNamespace;
-  BACKUP_CONTAINER: DurableObjectNamespace;
+  TWENTY_SERVER?: DurableObjectNamespace;
+  TWENTY_WORKER?: DurableObjectNamespace;
+  BACKUP_CONTAINER?: DurableObjectNamespace;
   // Redis-free state, schedule, and pub/sub Durable Objects.
   STATE_DO: DurableObjectNamespace<TwentyState>;
   SCHEDULER_DO: DurableObjectNamespace<TwentyScheduler>;
@@ -26,12 +26,16 @@ export interface Env {
   CRM_DB?: D1Database;
   OPS_RATE_LIMITER?: RateLimit;
   OPS_ALERT_EMAIL?: SendEmail;
+  CRM_EMAIL?: SendEmail;
   EVENTS_QUEUE: Queue<WebhookMessage>;
   JOBS_QUEUE: Queue<CloudflareTwentyJob>;
   CANARY_QUEUE?: Queue<CloudflareTwentyJob>;
   JOBS_DLQ: Queue<CloudflareJobFailure>;
+  /** Cloudflare Workers AI; optional in local tests, required for native AI jobs. */
+  AI?: Ai;
   BACKUP_WF: Workflow;
   CRM_EXPORT_WF?: Workflow;
+  CRM_IMPORT_WF?: Workflow;
   SERVER_URL: string;
   // Secrets. ENCRYPTION_KEY is Twenty's primary secret; APP_SECRET is legacy.
   ENCRYPTION_KEY?: string;
@@ -39,6 +43,8 @@ export interface Env {
   APP_SECRET?: string;
   BACKUP_TOKEN?: string;
   WEBHOOK_TOKEN?: string;
+  OUTBOUND_WEBHOOK_SECRET?: string;
+  WEBHOOK_ALLOWED_HOSTS?: string;
   INTERNAL_SERVICE_TOKEN?: string;
   // Compatibility flag consumed by the upstream adapter patch. Cloudflare is
   // the only supported value; Redis is not a deployment or rollback option.
@@ -55,6 +61,7 @@ export interface Env {
   ACCESS_ALLOWED_GROUPS?: string;
   OPS_ALERT_FROM?: string;
   OPS_ALERT_TO?: string;
+  CRM_EMAIL_FROM?: string;
   JOB_QUEUE_NAME?: string;
   JOB_DLQ_NAME?: string;
   CANARY_QUEUE_NAME?: string;
@@ -64,6 +71,8 @@ export interface Env {
   D1_NATIVE_MODE?: string;
   /** Explicit opt-in for first-login Access member provisioning. */
   AUTO_PROVISION_ACCESS_MEMBERS?: string;
+  /** Server-controlled Workers AI model. Client-supplied model identifiers are ignored. */
+  AI_MODEL?: string;
   // R2 via Twenty's native S3 driver. Upstream names take precedence;
   // AWS_* kept as aliases for older credential chains.
   STORAGE_S3_ENDPOINT?: string; // https://<account_id>.r2.cloudflarestorage.com
@@ -76,6 +85,8 @@ export interface Env {
 }
 
 export interface WebhookMessage {
+  /** Stable delivery key. Queue retries and concurrent outbox drains are deduplicated by this value. */
+  eventId: string;
   type: string;
   payload: string;
   receivedAt: string;

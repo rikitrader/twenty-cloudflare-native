@@ -1,0 +1,18 @@
+{
+  "capturedAt": "2026-09-17T20:07:16.512Z",
+  "result": "passed",
+  "command": "npm run audit:mutations",
+  "generatedOperations": 333,
+  "mutationsAudited": 233,
+  "unclassifiedOperations": 0,
+  "findings": [],
+  "invariants": [
+    "database mutations verify affected rows before returning success",
+    "multi-row business state and outbox writes use an atomic D1 batch",
+    "asynchronous actions return success only after durable Queue or Workflow acceptance",
+    "queue acceptance failures persist an explicit failed state and return an error",
+    "duplicate webhook acceptance reports the authoritative persisted delivery state",
+    "password-reset consumption, password update, and session revocation are atomically guarded",
+    "provider-disabled and unsupported operations fail explicitly instead of returning synthetic success"
+  ]
+}

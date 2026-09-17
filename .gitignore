@@ -4,3 +4,13 @@ node_modules/
 .dev.vars*
 *.pem
 *.key
+playwright-report/
+test-results/
+coverage/
+.DS_Store
+*.log
+
+# Local migration payloads can contain customer data and attachments.
+postgres-export/
+reconciled-export/
+cutover-inputs/

@@ -7,10 +7,9 @@ Durable Objects, Workflows, and Cron Triggers.
 - Architecture + activation runbook: `docs/MIGRATION.md`
 - Criteria/verification: `ISA.md`
 - Production requires no PostgreSQL, Redis, Docker, or external database.
-- Production container ceiling: one server, one worker, and one short-lived
-  backup. Canary, staging, probes, and release containers are deploy-on-demand
-  only and must not remain live after validation.
-- Deploy: `bun x wrangler deploy` (needs Docker running for the wrapper image).
+- Production has no legacy server-process runtime. Historical Durable Object
+  migration classes are unbound compatibility shims only.
+- Deploy: `npm run deploy` or `npx wrangler deploy`.
   Always `unset CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID` first (OAuth session).
 - Tests: `bun run test` (vitest). Typecheck: `bun x tsc --noEmit`.
 

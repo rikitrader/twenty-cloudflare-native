@@ -1,47 +1,37 @@
 {
   "gate": "G3",
-  "capturedAt": "2026-07-26T21:15:46Z",
-  "scope": "main production Worker",
-  "worker": "https://twenty-crm.rikitrader.workers.dev",
-  "workerVersion": "c17f6614-806c-46e3-ba52-4ed0fc32d337",
   "result": "collecting",
-  "checks": {
-    "sampler": "Cloudflare scheduled handler on the existing */15 cron",
-    "additionalWorkersOrContainers": 0,
-    "sessionIsolation": "two independent synthetic Twenty session keys through the production state gateway",
-    "permissionInvalidation": "production cache namespace set/read/delete/read with the second session rechecked",
-    "revocationIsolation": "one of two concurrent JWT-shaped sessions revoked; the other must remain valid",
-    "stateGatewaySloMs": 5000,
-    "maximumContinuityGapMs": 1800000,
-    "requiredConsecutivePassedSamples": 673,
-    "requiredDurationMs": 604800000,
-    "publicLedger": "/_status/g3",
-    "manualObserver": ".github/workflows/g3-session-soak.yml (manual-only to avoid duplicate scheduled compute cost)",
-    "automatedTests": "24 files and 150 tests passed"
+  "capturedAt": "2026-09-17T20:16:45.579Z",
+  "endpoint": "https://twenty-crm.observatorio-publico.workers.dev/_status/g3",
+  "requirements": {
+    "durationMs": 604800000,
+    "samples": 673,
+    "maxAllowedGapMs": 1800000,
+    "maxAllowedStateGatewayMs": 5000
   },
-  "liveLedgerAtCapture": {
+  "observation": {
+    "gate": "G3",
     "status": "collecting",
     "ready": false,
+    "durationMs": 0,
+    "requiredDurationMs": 604800000,
+    "requiredSamples": 673,
+    "maxAllowedStateGatewayMs": 5000,
+    "maxAllowedGapMs": 1800000,
+    "firstAt": "2026-09-17T20:15:44.000Z",
+    "lastAt": "2026-09-17T20:15:44.000Z",
     "samples": 1,
     "consecutivePassedSamples": 1,
-    "requiredSamples": 673,
+    "cleanWindowStartedAt": "2026-09-17T20:15:44.000Z",
     "failures": 0,
+    "lastFailureAt": null,
     "sessionLosses": 0,
     "permissionInvalidationFailures": 0,
     "revocationFailures": 0,
-    "maxStateGatewayMs": 1959,
-    "lastPassed": true,
-    "cleanWindowStartedAt": "2026-07-26T21:15:43.431Z"
+    "maxStateGatewayMs": 2491,
+    "maxGapMs": 0,
+    "lastRunId": "g3-1789676144000-305861da",
+    "lastPassed": true
   },
-  "browserValidation": {
-    "productionWelcomePage": "passed",
-    "configuredDemoCredentials": "not provisioned in the production Neon database",
-    "observedResponse": "New workspace setup is disabled",
-    "remaining": "A provisioned production test user is required for the final real-browser concurrent-session and role-change scenario."
-  },
-  "limitations": [
-    "A seven-day observation cannot be completed before seven real days have elapsed.",
-    "The gate remains partial until 673 clean production samples (672 fifteen-minute intervals) span at least seven days and the real-browser role-change scenario passes.",
-    "The optional GitHub observer is manual-only because the account reported failed payments or a spending-limit block; this does not affect the Cloudflare-native ledger."
-  ]
+  "note": "Evidence collection is active. This gate cannot pass until real elapsed time and all required samples are present."
 }

@@ -3,6 +3,7 @@ import { bearerAuthorized, boundedReplicaCount } from "./lib";
 import type { JobExecutionFailureCode } from "./cloudflare-state/contracts";
 import { deterministicFailureId, validJob } from "./job-envelope";
 import type { CloudflareTwentyJob, Env } from "./types";
+import { executeNativeJob } from './native-job-executor';
 
 const MAX_QUEUE_DELAY_SECONDS = 43_200;
 const JOB_BODY_MAX_BYTES = 128 * 1024;
@@ -269,13 +270,10 @@ async function consumeJobMessage(
         message.ack();
         return;
       }
-      const workerReplicas = boundedReplicaCount(env.WORKER_REPLICAS);
-      const worker =
-        workerReplicas > 1
-          ? await getRandom(env.TWENTY_WORKER, workerReplicas)
-          : getContainer(env.TWENTY_WORKER, "main");
-      const response = await worker.fetch(
-        new Request("http://twenty-worker/_jobs/execute", {
+      const response = env.CRM_DB ? await executeNativeJob(job, env) : await (async () => {
+        const workerReplicas = boundedReplicaCount(env.WORKER_REPLICAS);
+        const worker = workerReplicas > 1 ? await getRandom(env.TWENTY_WORKER!, workerReplicas) : getContainer(env.TWENTY_WORKER!, "main");
+        return worker.fetch(new Request("http://twenty-worker/_jobs/execute", {
           method: "POST",
           headers: {
             authorization: `Bearer ${env.INTERNAL_SERVICE_TOKEN}`,
@@ -284,8 +282,8 @@ async function consumeJobMessage(
           },
           body: JSON.stringify(job),
           signal: AbortSignal.timeout(jobExecutionTimeout(job)),
-        }),
-      );
+        }));
+      })();
       if (response.ok) {
         const completed = await executionStub.completeJobExecution({
           jobId: job.id,

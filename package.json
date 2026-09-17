@@ -1,15 +1,26 @@
 {
   "name": "twenty-cf",
   "private": true,
+  "type": "module",
   "scripts": {
     "deploy": "npm run patch:twenty && npm run readiness:check && npm run security:production:check && wrangler deploy",
-    "patch:twenty": "node scripts/patch-twenty-bootstrap.mjs && node scripts/patch-twenty-captcha.mjs",
+    "patch:twenty": "node scripts/patch-twenty-bootstrap.mjs && node scripts/patch-twenty-captcha.mjs && node scripts/patch-twenty-password-policy.mjs && node scripts/patch-twenty-cache-fragments.mjs && node scripts/check-twenty-module-graph.mjs",
     "tail": "wrangler tail",
     "test": "vitest run",
     "test:browser:console": "node scripts/check-browser-console.mjs",
+    "test:e2e:ui": "playwright test",
+    "test:a11y": "playwright test e2e/crm-accessibility.spec.ts",
+    "evidence:g3": "node scripts/capture-g3-production-evidence.mjs",
+    "audit:mutations": "node scripts/audit-graphql-operations.mjs && node scripts/audit-mutation-durability.mjs",
     "smoke:graphql": "node scripts/smoke-graphql-surface.mjs",
     "test:workflow:e2e": "node scripts/test-crm-workflow-e2e.mjs",
     "migrate:crm": "node scripts/migrate-crm-ndjson.mjs",
+    "extract:postgres": "node scripts/extract-twenty-postgres.mjs",
+    "reconcile:postgres": "node scripts/reconcile-postgres-export.mjs",
+    "import:reconciled": "node scripts/import-reconciled-bundle.mjs",
+    "upload:reconciled-files": "node scripts/upload-reconciled-files.mjs",
+    "cutover:inputs:check": "node scripts/check-postgres-cutover-inputs.mjs",
+    "test:webhook-replay:production": "node scripts/test-production-webhook-replay.mjs",
     "verify:crm-export": "node scripts/verify-crm-export.mjs",
     "test:jobs:canary": "node scripts/run-job-fault-canary.mjs",
     "test:dlq:canary": "node scripts/run-dlq-ops-canary.mjs",
@@ -26,6 +37,7 @@
     "contract:check": "bash scripts/check-twenty-contract.sh",
     "contract:runtime:capture": "node scripts/capture-twenty-redis-trace.mjs",
     "contract:runtime:check": "node scripts/check-runtime-contract.mjs",
+    "contract:graphql:audit": "node scripts/audit-graphql-operations.mjs",
     "processors:idempotency:check": "node scripts/check-processor-idempotency.mjs",
     "readiness:check": "node scripts/enterprise-readiness.mjs --require-ready",
     "observation:production": "node scripts/run-production-observation.mjs",
@@ -40,15 +52,20 @@
   },
   "dependencies": {
     "cron-parser": "^5.6.2",
-    "jose": "^6.2.4"
+    "jose": "^6.2.4",
+    "pg": "^8.16.3"
   },
   "overrides": {
     "postcss": "^8.5.23"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@cloudflare/workers-types": "^5.20260711.1",
+    "@playwright/test": "^1.61.0",
+    "esbuild": "^0.28.1",
+    "jsdom": "^30.0.1",
     "typescript": "^5.8.0",
-    "vitest": "^3.0.0",
-    "wrangler": "4.114.0"
+    "vitest": "^5.0.1",
+    "wrangler": "^4.134.0"
   }
 }

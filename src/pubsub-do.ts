@@ -66,6 +66,11 @@ export class TwentyPubSub extends DurableObject<Env> {
         latest_id INTEGER NOT NULL DEFAULT 0,
         retention_floor INTEGER NOT NULL DEFAULT 0
       );
+      CREATE TABLE IF NOT EXISTS pubsub_dedupe (
+        event_key TEXT PRIMARY KEY,
+        event_id INTEGER NOT NULL,
+        created_at INTEGER NOT NULL
+      );
 
       INSERT OR IGNORE INTO pubsub_channels (
         channel, latest_id, retention_floor
@@ -151,7 +156,12 @@ export class TwentyPubSub extends DurableObject<Env> {
   async publish(channel: string, payload: unknown): Promise<number> {
     const encoded = JSON.stringify(payload);
     if (encoded === undefined) throw new Error("event is not JSON serializable");
-    const id = this.ctx.storage.transactionSync(() => {
+    const outcome = this.ctx.storage.transactionSync(() => {
+      const eventKey = payload && typeof payload === 'object' && typeof (payload as Record<string,unknown>).eventId === 'string' ? String((payload as Record<string,unknown>).eventId) : null;
+      if (eventKey) {
+        const prior = this.ctx.storage.sql.exec<CursorRow>('SELECT event_id AS id FROM pubsub_dedupe WHERE event_key=?',eventKey).toArray()[0];
+        if (prior) return {id:prior.id,inserted:false};
+      }
       this.ctx.storage.sql.exec(
         `INSERT INTO pubsub_events (channel, payload_json, created_at)
          VALUES (?, ?, ?)`,
@@ -170,8 +180,11 @@ export class TwentyPubSub extends DurableObject<Env> {
         channel,
         insertedId,
       );
-      return insertedId;
+      if (eventKey) this.ctx.storage.sql.exec('INSERT INTO pubsub_dedupe (event_key,event_id,created_at) VALUES (?,?,?)',eventKey,insertedId,Date.now());
+      return {id:insertedId,inserted:true};
     });
+    if (!outcome.inserted) return outcome.id;
+    const id=outcome.id;
     const event = { id, payload };
     for (const resolve of this.waiters.get(channel) ?? []) resolve(event);
     this.waiters.delete(channel);
@@ -244,6 +257,7 @@ export class TwentyPubSub extends DurableObject<Env> {
         "DELETE FROM pubsub_events WHERE created_at <= ?",
         expiresBefore,
       );
+      this.ctx.storage.sql.exec('DELETE FROM pubsub_dedupe WHERE created_at <= ?',expiresBefore);
     });
     const remaining = this.ctx.storage.sql
       .exec<CursorRow>("SELECT COUNT(*) AS id FROM pubsub_events")

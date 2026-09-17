@@ -1,0 +1,75 @@
+{
+  "gate": "G10",
+  "result": "partial",
+  "inspectedAt": "2026-09-17T20:08:02.632Z",
+  "worker": "twenty-crm",
+  "deployedVersion": "9f9349e8-27c5-4446-a01a-bfd58755783f",
+  "accountId": "0dd0d155f8dafdca9d2bade1141986a2",
+  "hostname": "twenty-crm.observatorio-publico.workers.dev",
+  "checks": {
+    "bindings": {
+      "result": "passed",
+      "method": "wrangler deploy --dry-run",
+      "observed": [
+        "CRM_DB",
+        "OPS_DB",
+        "STORAGE",
+        "STATUS_KV",
+        "EVENTS_QUEUE",
+        "JOBS_QUEUE",
+        "JOBS_DLQ",
+        "STATE_DO",
+        "SCHEDULER_DO",
+        "PUBSUB_DO",
+        "BACKUP_WF",
+        "CRM_EXPORT_WF",
+        "CRM_IMPORT_WF",
+        "CRM_EMAIL",
+        "OPS_ALERT_EMAIL",
+        "AI",
+        "OPS_RATE_LIMITER",
+        "ASSETS",
+        "CF_VERSION_METADATA"
+      ],
+      "legacyRuntimeBindings": []
+    },
+    "requiredSecrets": {
+      "result": "passed",
+      "namesOnly": [
+        "INTERNAL_SERVICE_TOKEN",
+        "OUTBOUND_WEBHOOK_SECRET",
+        "WEBHOOK_TOKEN"
+      ],
+      "valuesInspected": false
+    },
+    "observability": {
+      "result": "passed",
+      "workersObservabilityEnabled": true
+    },
+    "waf": {
+      "result": "blocked",
+      "reason": "The release is hosted only on workers.dev. Zone-level WAF rules require a Cloudflare zone/custom production hostname; no such route is declared in wrangler.jsonc."
+    },
+    "logpush": {
+      "result": "blocked",
+      "reason": "No Workers Logpush job was verified and the authenticated deployment token does not expose Logpush read/write permission. Workers observability is enabled but is not equivalent to exported Logpush evidence."
+    },
+    "accountMfaEnforcement": {
+      "result": "failed",
+      "enforceTwoFactor": false
+    }
+  },
+  "requiredActions": [
+    "Map a production custom hostname in a Cloudflare zone, then inspect and record its WAF managed/custom/rate-limit rules.",
+    "Grant a narrowly scoped Logpush inspection credential and verify an enabled workers_trace_events job and destination.",
+    "Enable account-wide two-factor enforcement and recapture this evidence."
+  ],
+  "sources": [
+    "wrangler whoami --json",
+    "wrangler secret list --config wrangler.jsonc",
+    "wrangler deploy --dry-run --config wrangler.jsonc",
+    "wrangler deploy --config wrangler.jsonc",
+    "production /healthz and /_status responses",
+    "wrangler.jsonc"
+  ]
+}
