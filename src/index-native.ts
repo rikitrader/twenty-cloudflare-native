@@ -59,6 +59,9 @@ export default {
       return Response.json({
         status: "ok",
         productionReady: true,
+        durableRedis: true,
+        redisBackend: env.REDIS_BACKEND ?? "cloudflare",
+        cloudflareStateReady: Boolean(env.STATE_DO),
         runtime: "cloudflare-d1",
         cloudflareVersionId: env.CF_VERSION_METADATA?.id ?? null,
       });
