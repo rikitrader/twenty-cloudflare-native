@@ -20,4 +20,11 @@ describe("GraphQL D1 compatibility boundary", () => {
     expect(response?.headers.get("content-type")).toContain("text/event-stream");
     expect(await response?.text()).toContain("twenty-metadata-ready");
   });
+
+  it("keeps invite resolution valid before authentication", async () => {
+    const env = { CRM_DB: { prepare: () => ({ bind: () => ({ first: async () => null }) }) } } as never;
+    const response = await handleGraphql(request({ operationName: "GetWorkspaceFromInviteHash", variables: { inviteHash: "unknown" } }), env);
+    expect(response?.status).toBe(200);
+    expect((await response?.json()) as { data: { workspace: unknown } }).toMatchObject({ data: { workspace: null } });
+  });
 });

@@ -63,6 +63,16 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
     return Response.json({ data: { publicWorkspaceData: publicWorkspace, workspace: publicWorkspace, getPublicWorkspaceDataByDomain: publicWorkspace, getPublicWorkspaceDataById: publicWorkspace } });
   }
   if (/CheckUserExists/i.test(op) && env.CRM_DB) { const email = String(vars.email ?? "").trim().toLowerCase(); const row = email ? await env.CRM_DB.prepare("SELECT 1 FROM native_users WHERE email = ? COLLATE NOCASE LIMIT 1").bind(email).first() : null; return Response.json({ data: { checkUserExists: { exists: Boolean(row) } } }); }
+  // Invite links are resolved before a session exists.  Invitation hashes are
+  // stored as one-way digests, so only an exact stored hash may reveal the
+  // workspace; unknown/expired hashes return a valid null payload rather than
+  // falling through to the authenticated boundary.
+  if (/GetWorkspaceFromInviteHash/i.test(op) && env.CRM_DB) {
+    const inviteHash = String(vars.inviteHash ?? vars.workspaceInviteHash ?? vars.hash ?? "").trim();
+    const row = inviteHash ? await env.CRM_DB.prepare("SELECT i.id, i.email, i.role, i.status, i.expires_at as expiresAt, w.id as workspaceId, w.name as workspaceName FROM workspace_invitations i JOIN workspaces w ON w.id = i.workspace_id WHERE i.token_hash = ? AND i.status = 'pending' AND i.expires_at > ? LIMIT 1").bind(inviteHash, new Date().toISOString()).first() : null;
+    const workspace = row ? { id: row.workspaceId, name: row.workspaceName, displayName: row.workspaceName } : null;
+    return Response.json({ data: { workspaceFromInviteHash: workspace, workspace, invitation: row ? { id: row.id, email: row.email, role: row.role, expiresAt: row.expiresAt } : null } });
+  }
   // The upstream client preloads minimal metadata on the unauthenticated
   // welcome route. Keep that bootstrap request non-failing; full metadata is
   // returned after the membership boundary below.
