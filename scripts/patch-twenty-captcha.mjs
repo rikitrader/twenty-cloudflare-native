@@ -25,4 +25,10 @@ if (!mainSource.includes('./SignInUp-CinvB_D3-v3.js')) {
   if (references !== 2) throw new Error(`Expected two login chunk references, found ${references}`);
   await writeFile(mainPath, mainSource.replaceAll('./SignInUp-CinvB_D3-v2.js', './SignInUp-CinvB_D3-v3.js'));
 }
+const preloadNeedle = 'assets/SignInUp-CinvB_D3.js';
+if (mainSource.includes(preloadNeedle)) {
+  const preloadReferences = mainSource.split(preloadNeedle).length - 1;
+  if (preloadReferences !== 1) throw new Error(`Expected one login preload reference, found ${preloadReferences}`);
+  await writeFile(mainPath, mainSource.replace(preloadNeedle, 'assets/SignInUp-CinvB_D3-v3.js'));
+}
 await copyFile(path, versionedPath);
