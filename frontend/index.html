@@ -63,7 +63,27 @@
         }
       }
     </style>
-    <script type="module" crossorigin src="/assets/index-D6X3OEUa.js?v=cf-native-20260916-2"></script>
+    <script>
+      // Native D1 bootstrap guard: keep the upstream Twenty bundle from
+      // dereferencing an empty public-workspace response during first load.
+      (() => {
+        const originalFetch = window.fetch.bind(window);
+        window.fetch = async (...args) => {
+          const response = await originalFetch(...args);
+          const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+          if (!/\/graphql(?:\?|$)/.test(url) || !response.headers.get('content-type')?.includes('json')) return response;
+          try {
+            const payload = await response.clone().json();
+            if (payload?.data && !payload.data.getPublicWorkspaceDataByDomain && !payload.errors) {
+              payload.data.getPublicWorkspaceDataByDomain = { displayName: 'Twenty', logo: null, authProviders: { google: false, magicLink: false, password: true, microsoft: false, sso: [] }, authBypassProviders: { google: false, password: false, microsoft: false }, workspaceUrls: { subdomainUrl: null, customUrl: null } };
+              return new Response(JSON.stringify(payload), { status: response.status, headers: response.headers });
+            }
+          } catch {}
+          return response;
+        };
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-D6X3OEUa.js?v=cf-native-20260916-3"></script>
     <link rel="modulepreload" crossorigin href="/assets/chunk-ChpBd9eV.js">
     <link rel="modulepreload" crossorigin href="/assets/preload-helper-CcgcQsTF.js">
     <link rel="modulepreload" crossorigin href="/assets/react-M6yZRsSc.js">
