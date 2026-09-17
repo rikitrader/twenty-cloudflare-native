@@ -36,6 +36,10 @@ Neon/container path has been retired.
 - [x] Make the public-workspace bootstrap null-safe for empty D1 workspaces;
       `scripts/patch-twenty-bootstrap.mjs` reapplies the generated-bundle fix
       and the live login screen has been verified in Chrome.
+- [x] Verify a disposable authenticated vertical slice against production D1:
+      native signup/session, `GetCurrentUser`, tenant-scoped `CreatePerson`,
+      list/read, and cross-tenant denial; remove the disposable records after
+      verification.
 - [~] GraphQL compatibility maps CRM CRUD, search, aggregates/charts, workspace,
       metadata, views/layouts, workflows, messaging, calendar, automation,
       settings, and auth operations; provider-dependent operations remain
