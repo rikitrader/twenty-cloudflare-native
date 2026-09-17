@@ -7,6 +7,9 @@ Production is `twenty-crm` at
 interface is served by Workers Static Assets. D1 bindings `CRM_DB` and `OPS_DB`
 store authoritative data, R2 stores files, Queues and Workflows own background
 work, Durable Objects coordinate state, and KV stores disposable status data.
+The private publication repository is
+`https://github.com/rikitrader/twenty-cloudflare-native`; its `main` branch is
+the reviewable source for this Cloudflare-native derivative.
 
 Production must not gain an external database, Redis service, persistent local
 disk, or traditional application host. Historical Durable Object class exports
