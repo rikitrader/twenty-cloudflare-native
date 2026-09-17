@@ -50,6 +50,13 @@ and migration status endpoints. Roll back by setting `D1_NATIVE_MODE=false`
 and restoring the previous Worker version; do not delete D1 rows or source
 records. Post-cutover writes must be reconciled before any retry.
 
+For standard Observatorio members authenticated by Cloudflare Access, member
+provisioning is an explicit change-control step: set
+`AUTO_PROVISION_ACCESS_MEMBERS=true` only after approving the target shared
+workspace and membership policy. It is `false` in the checked-in production
+configuration. Native password users must be imported or created through the
+Twenty signup flow.
+
 ## Operations
 
 - Failed CRM events: `GET /api/crm/outbox`, then replay with
