@@ -33,6 +33,9 @@ Neon/container path has been retired.
       Wrangler binding for atomic remote migration application.
 - [x] Serve the upstream Twenty frontend from Workers Assets and route its
       GraphQL client to the D1 compatibility endpoint.
+- [x] Make the public-workspace bootstrap null-safe for empty D1 workspaces;
+      `scripts/patch-twenty-bootstrap.mjs` reapplies the generated-bundle fix
+      and the live login screen has been verified in Chrome.
 - [~] GraphQL compatibility maps CRM CRUD, search, aggregates/charts, workspace,
       metadata, views/layouts, workflows, messaging, calendar, automation,
       settings, and auth operations; provider-dependent operations remain
