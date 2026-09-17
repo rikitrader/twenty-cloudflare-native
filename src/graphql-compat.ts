@@ -35,6 +35,10 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
   // Both endpoints share the D1 compatibility resolver and auth boundary.
   if (!["/graphql", "/metadata"].includes(new URL(request.url).pathname) || request.method !== "POST") return null;
   const body = (await request.json().catch(() => ({}))) as { query?: string; operationName?: string; variables?: Vars }; const op = operationName(body); const vars = body.variables ?? {};
+  // Generated Twenty auth mutations vary between top-level variables and an
+  // input/data envelope; normalize both without changing the public contract.
+  if (vars.input && typeof vars.input === "object" && !Array.isArray(vars.input)) Object.assign(vars, vars.input);
+  if (vars.data && typeof vars.data === "object" && !Array.isArray(vars.data)) Object.assign(vars, vars.data);
   if (op === "IntrospectionQuery" || /__schema|__type/.test(body.query ?? "")) return Response.json({ data: { __schema: { queryType: { name: "Query" }, mutationType: { name: "Mutation" }, types: [] } } });
   if (/GetCurrentUser|CurrentUser|^Me$/i.test(op) && !request.headers.get("cf-access-jwt-assertion") && !request.headers.get("authorization")) { const native = await nativeSessionIdentity(request, env); if (!native) return new Response(JSON.stringify({ data: { currentUser: null, me: null } }), { headers: { "content-type": "application/json", "cache-control": "no-store", "set-cookie": "twenty_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0" } }); }
   if (/AvailableWorkspacesForAuth|AvailableWorkspacesForSignIn|GetWorkspaceCreationDefaults/i.test(op) && env.CRM_DB && !request.headers.get("cf-access-jwt-assertion") && !request.headers.get("authorization") && !request.headers.get("cookie")) return Response.json({ data: { availableWorkspaces: { availableWorkspacesForSignIn: [], availableWorkspacesForSignUp: [] }, availableWorkspacesForAuth: [], workspaceCreationDefaults: { locale: "es-VE" } } });
