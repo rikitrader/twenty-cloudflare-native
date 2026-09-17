@@ -40,6 +40,8 @@ Neon/container path has been retired.
 - [x] Port native sign-in/sign-up and session persistence to D1 (`native_users`,
       `native_sessions`); Cloudflare Access remains the preferred production
       identity provider.
+- [x] Use the Workers-supported PBKDF2 ceiling (100,000 iterations) and cover
+      native password hashing/verification with a regression test.
 - [x] Port imports, exports, attachments, search, automations, and integrations
       through D1/R2/Queues; external delivery providers remain optional.
 - [~] Build resumable PostgreSQL-to-D1/R2 migration and verification tooling
@@ -81,3 +83,8 @@ The remaining gaps are provider-bound behavior (payment processor checkout,
 external OAuth/SMTP delivery, enterprise licensing, and execution by a real AI
 model). Those operations are intentionally explicit and non-authoritative;
 core voter/member CRM workflows are D1-authoritative.
+
+Production onboarding still requires either a native account created through
+`/sign-up` or a Cloudflare Access application/policy for the Worker hostname;
+the current Wrangler token has no Access-write scope, so Access configuration
+must be performed by an account administrator.
