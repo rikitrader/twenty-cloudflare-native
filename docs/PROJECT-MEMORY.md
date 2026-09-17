@@ -4,7 +4,7 @@ Last updated: 2026-07-27
 
 ## Canonical production
 
-- Main application: <https://twenty-crm.rikitrader.workers.dev/>
+- Main application: <https://twenty-crm.observatorio-publico.workers.dev/>
 - Cloudflare Worker: `twenty-crm`
 - Production database: Neon PostgreSQL.
 - Production is currently healthy in `external-db` mode.

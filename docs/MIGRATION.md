@@ -2,7 +2,7 @@
 
 The only persistent deployment is `twenty-crm`:
 
-https://twenty-crm.rikitrader.workers.dev
+https://twenty-crm.observatorio-publico.workers.dev
 
 Production is permanently Neon-backed and Redis-free. It fails closed when
 `PG_DATABASE_URL`, `INTERNAL_SERVICE_TOKEN`, or the Cloudflare coordination
@@ -86,7 +86,7 @@ bun run test
 bun run cost:starter:check
 bun run security:production:check
 bun run readiness:check
-curl -fsS https://twenty-crm.rikitrader.workers.dev/_status
+curl -fsS https://twenty-crm.observatorio-publico.workers.dev/_status
 ```
 
 The status response must report:
