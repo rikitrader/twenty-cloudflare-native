@@ -27,6 +27,32 @@ export { TwentyState, TwentyScheduler, TwentyPubSub, BackupWorkflow, CrmExportWo
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    // Twenty's first-load bootstrap calls this REST endpoint before GraphQL.
+    // Returning a same-origin config is required for the frontend to mark the
+    // backend as reachable and expose the native D1 password flow.
+    if (url.pathname === "/client-config" && request.method === "GET") {
+      return Response.json({
+        appVersion: "cloudflare-native",
+        authProviders: { google: false, magicLink: false, password: true, microsoft: false, sso: [] },
+        billing: { isBillingEnabled: false, billingUrl: null, stripePublishableKey: null, trialPeriods: [] },
+        aiModels: [], aiModelTiers: [], signInPrefilled: false,
+        isMultiWorkspaceEnabled: true, isEmailVerificationRequired: false,
+        defaultSubdomain: null, frontDomain: url.hostname, publicFunctionDomain: null,
+        analyticsEnabled: false, support: { supportDriver: "NONE", supportFrontChatId: null },
+        isAttachmentPreviewEnabled: true, sentry: { environment: null, release: null, dsn: null, tracesSampleRate: 0 },
+        captcha: { provider: null, siteKey: null }, api: { mutationMaximumAffectedRecords: 1000 },
+        onboarding: null, canManageFeatureFlags: false, publicFeatureFlags: [],
+        isCookieSessionEnabled: true, isMicrosoftMessagingEnabled: false,
+        isMicrosoftCalendarEnabled: false, isGoogleMessagingEnabled: false,
+        isGoogleCalendarEnabled: false, isConfigVariablesInDbEnabled: true,
+        isImapSmtpCaldavEnabled: false, isEmailingDomainInDemoMode: false,
+        allowRequestsToTwentyIcons: false, calendarBookingPageId: null,
+        isBookCallOnboardingStepEnabled: false, isCompanyEnrichmentEnabled: false,
+        isCloudflareIntegrationEnabled: true, isClickHouseConfigured: false,
+        isWorkspaceSchemaDDLLocked: false, isOnboardingAiChatEnabled: false,
+        enterpriseInstanceType: "SELF_HOSTED", maintenance: null,
+      }, { headers: { "cache-control": "no-store" } });
+    }
     if (url.pathname === "/d1-dashboard") return d1Dashboard();
     if (url.pathname === "/profile" || url.pathname === "/settings") return profileDashboard();
     if (url.pathname === "/_status") {
