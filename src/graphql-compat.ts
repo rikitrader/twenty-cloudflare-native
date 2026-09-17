@@ -133,6 +133,20 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
     const membership = await env.CRM_DB.prepare("SELECT workspace_id as workspaceId FROM workspace_members WHERE identity_subject = ? AND status = 'active' ORDER BY created_at LIMIT 1").bind(actor.subject).first<{ workspaceId: string }>();
     workspaceId = membership?.workspaceId ?? "";
   }
+  // Cloudflare Access has already authenticated this identity.  Provision its
+  // first CRM session into the shared Observatorio workspace so standard
+  // members do not need a second password database.  Native `user:*` accounts
+  // still require explicit signup and are never silently created here.
+  if (!workspaceId && env.AUTO_PROVISION_ACCESS_MEMBERS === "true" && !actor.subject.startsWith("user:")) {
+    const provisionedWorkspaceId = "observatorio-publico";
+    const now = new Date().toISOString();
+    await env.CRM_DB.batch([
+      env.CRM_DB.prepare("INSERT OR IGNORE INTO workspaces (id, name, created_at) VALUES (?, ?, ?)").bind(provisionedWorkspaceId, "Observatorio Público", now),
+      env.CRM_DB.prepare("INSERT OR IGNORE INTO workspace_members (workspace_id, identity_subject, role, status, created_at) VALUES (?, ?, 'member', 'active', ?)").bind(provisionedWorkspaceId, actor.subject, now),
+      env.CRM_DB.prepare("INSERT OR IGNORE INTO voter_profiles (workspace_id, identity_subject, display_name, locale, created_at, updated_at) VALUES (?, ?, ?, 'es-VE', ?, ?)").bind(provisionedWorkspaceId, actor.subject, actor.email?.split("@")[0] ?? actor.actor, now, now),
+    ]);
+    workspaceId = provisionedWorkspaceId;
+  }
   if (!workspaceId) return Response.json({ errors: [{ message: "x-workspace-id required" }] }, { status: 400 });
   const member = await env.CRM_DB.prepare("SELECT role FROM workspace_members WHERE workspace_id = ? AND identity_subject = ? AND status = 'active' LIMIT 1").bind(workspaceId, actor.subject).first<{ role: string }>(); if (!member) return Response.json({ errors: [{ message: "forbidden" }] }, { status: 403 });
   if (/GetApprovedAccessDomains|GetSSOIdentityProviders|GetEmailingDomains|GetUsageAnalytics|GetAiChatUsage|GetResourceCreditUsage/i.test(op)) {

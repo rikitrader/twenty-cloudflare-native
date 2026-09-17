@@ -62,6 +62,8 @@ export interface Env {
   WORKER_REPLICAS?: string;
   /** Enables the native D1 CRM runtime. */
   D1_NATIVE_MODE?: string;
+  /** Explicit opt-in for first-login Access member provisioning. */
+  AUTO_PROVISION_ACCESS_MEMBERS?: string;
   // R2 via Twenty's native S3 driver. Upstream names take precedence;
   // AWS_* kept as aliases for older credential chains.
   STORAGE_S3_ENDPOINT?: string; // https://<account_id>.r2.cloudflarestorage.com
