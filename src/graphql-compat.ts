@@ -102,7 +102,7 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
   }
   if (!workspaceId) return Response.json({ errors: [{ message: "x-workspace-id required" }] }, { status: 400 });
   const member = await env.CRM_DB.prepare("SELECT role FROM workspace_members WHERE workspace_id = ? AND identity_subject = ? AND status = 'active' LIMIT 1").bind(workspaceId, actor.subject).first<{ role: string }>(); if (!member) return Response.json({ errors: [{ message: "forbidden" }] }, { status: 403 });
-  if (/FindManyApplications|FindOneApplication|GetApplications|GetWebhooks|FindManyWebhooks|GetWorkspaceInvitations|GetRoles|GetApprovedAccessDomains|GetSSOIdentityProviders|GetEmailingDomains|GetUsageAnalytics|GetAiChatUsage|GetResourceCreditUsage/i.test(op)) {
+  if (/GetApprovedAccessDomains|GetSSOIdentityProviders|GetEmailingDomains|GetUsageAnalytics|GetAiChatUsage|GetResourceCreditUsage/i.test(op)) {
     const empty = { edges: [], nodes: [], totalCount: 0, pageInfo: { hasNextPage: false, hasPreviousPage: false } };
     return Response.json({ data: { applications: empty, webhooks: empty, workspaceInvitations: [], invitations: [], roles: [{ id: "member", name: "Member", label: "Member" }, { id: "admin", name: "Admin", label: "Admin" }], approvedAccessDomains: [], ssoIdentityProviders: [], emailingDomains: [], usageAnalytics: [], aiChatUsage: { used: 0, limit: 0 }, resourceCreditUsage: { used: 0, limit: 0 } } });
   }
