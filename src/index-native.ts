@@ -37,7 +37,7 @@ export default {
         billing: { isBillingEnabled: false, billingUrl: null, stripePublishableKey: null, trialPeriods: [] },
         aiModels: [], aiModelTiers: [], signInPrefilled: false,
         isMultiWorkspaceEnabled: true, isEmailVerificationRequired: false,
-        defaultSubdomain: null, frontDomain: url.hostname, publicFunctionDomain: null,
+        defaultSubdomain: url.hostname.split(".")[0] || "twenty-crm", frontDomain: url.hostname, publicFunctionDomain: null,
         analyticsEnabled: false, support: { supportDriver: "NONE", supportFrontChatId: null },
         isAttachmentPreviewEnabled: true, sentry: { environment: null, release: null, dsn: null, tracesSampleRate: 0 },
         captcha: { provider: null, siteKey: null }, api: { mutationMaximumAffectedRecords: 1000 },
