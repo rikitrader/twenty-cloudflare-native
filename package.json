@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "deploy": "npm run patch:twenty && npm run readiness:check && npm run security:production:check && wrangler deploy",
-    "patch:twenty": "node scripts/patch-twenty-bootstrap.mjs",
+    "patch:twenty": "node scripts/patch-twenty-bootstrap.mjs && node scripts/patch-twenty-captcha.mjs",
     "tail": "wrangler tail",
     "test": "vitest run",
     "test:browser:console": "node scripts/check-browser-console.mjs",
