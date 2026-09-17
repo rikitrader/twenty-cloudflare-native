@@ -60,7 +60,10 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
   if (vars.data && typeof vars.data === "object" && !Array.isArray(vars.data)) Object.assign(vars, vars.data);
   if (op === "IntrospectionQuery" || /__schema|__type/.test(body.query ?? "")) return Response.json({ data: { __schema: { queryType: { name: "Query" }, mutationType: { name: "Mutation" }, types: [] } } });
   if (/GetCurrentUser|CurrentUser|^Me$/i.test(op) && !request.headers.get("cf-access-jwt-assertion") && !request.headers.get("authorization")) { const native = await nativeSessionIdentity(request, env); if (!native) return new Response(JSON.stringify({ data: { currentUser: null, me: null } }), { headers: { "content-type": "application/json", "cache-control": "no-store", "set-cookie": "twenty_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0" } }); }
-  if (/AvailableWorkspacesForAuth|AvailableWorkspacesForSignIn|GetWorkspaceCreationDefaults/i.test(op) && env.CRM_DB && !request.headers.get("cf-access-jwt-assertion") && !request.headers.get("authorization") && !request.headers.get("cookie")) return Response.json({ data: { availableWorkspaces: { availableWorkspacesForSignIn: [], availableWorkspacesForSignUp: [] }, availableWorkspacesForAuth: [], workspaceCreationDefaults: { locale: "es-VE" } } });
+  // These are public welcome-page bootstrap queries. A stale native session
+  // cookie must not turn them into protected requests; actual CRM operations
+  // still require a valid server-side session below.
+  if (/AvailableWorkspacesForAuth|AvailableWorkspacesForSignIn|GetWorkspaceCreationDefaults/i.test(op) && env.CRM_DB && !request.headers.get("cf-access-jwt-assertion") && !request.headers.get("authorization")) return Response.json({ data: { availableWorkspaces: { availableWorkspacesForSignIn: [], availableWorkspacesForSignUp: [] }, availableWorkspacesForAuth: [], workspaceCreationDefaults: { locale: "es-VE" } } });
   if (/GetPublicWorkspaceDataByDomain|GetPublicWorkspaceDataById|CheckWorkspaceSubdomainAvailability|FindManyPublicDomains|getPublicWorkspaceDataByDomain|getPublicWorkspaceDataById/i.test(`${op} ${body.query ?? ""}`) && env.CRM_DB) {
     const domain = String(vars.domain ?? vars.subdomain ?? vars.origin ?? "").trim().toLowerCase(); const id = String(vars.workspaceId ?? vars.id ?? "");
     const requested = `${op} ${body.query ?? ""}`;
@@ -92,7 +95,7 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
   // The upstream client preloads minimal metadata on the unauthenticated
   // welcome route. Keep that bootstrap request non-failing; full metadata is
   // returned after the membership boundary below.
-  if (/FindMinimalMetadata/i.test(requestedOp) && !request.headers.get("cf-access-jwt-assertion") && !request.headers.get("authorization") && !request.headers.get("cookie")) {
+  if (/FindMinimalMetadata/i.test(requestedOp) && !request.headers.get("cf-access-jwt-assertion") && !request.headers.get("authorization")) {
     const minimalMetadata = { objectMetadataItems: [], views: [], collectionHashes: [], fields: [], objects: [] };
     return Response.json({ data: { minimalMetadata, findMinimalMetadata: minimalMetadata, findManyObjectMetadata: [], objectMetadataItems: [], views: [], collectionHashes: {} } });
   }

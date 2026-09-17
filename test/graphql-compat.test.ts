@@ -30,4 +30,13 @@ describe("GraphQL D1 compatibility boundary", () => {
     expect(response?.status).toBe(200);
     expect((await response?.json()) as { data: { workspace: unknown } }).toMatchObject({ data: { workspace: null } });
   });
+
+  it("keeps welcome metadata public when a stale session cookie is present", async () => {
+    const response = await handleGraphql(
+      request({ operationName: "FindMinimalMetadata", query: "query FindMinimalMetadata { findMinimalMetadata { objectMetadataItems { id } } }" }, { cookie: "twenty_session=expired" }),
+      {} as never,
+    );
+    expect(response?.status).toBe(200);
+    expect((await response?.json()) as { data: { minimalMetadata: unknown } }).toMatchObject({ data: { minimalMetadata: { objectMetadataItems: [] } } });
+  });
 });
