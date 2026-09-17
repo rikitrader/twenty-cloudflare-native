@@ -52,7 +52,7 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
   // welcome route. Keep that bootstrap request non-failing; full metadata is
   // returned after the membership boundary below.
   if (/FindMinimalMetadata/i.test(op) && !request.headers.get("cf-access-jwt-assertion") && !request.headers.get("authorization") && !request.headers.get("cookie")) {
-    const minimalMetadata = { objectMetadataItems: [], views: [], collectionHashes: {}, fields: [], objects: [] };
+    const minimalMetadata = { objectMetadataItems: [], views: [], collectionHashes: [], fields: [], objects: [] };
     return Response.json({ data: { minimalMetadata, findMinimalMetadata: minimalMetadata, findManyObjectMetadata: [], objectMetadataItems: [], views: [], collectionHashes: {} } });
   }
   if (/GetInviteSuggestions/i.test(op)) return Response.json({ data: { inviteSuggestions: [] } });
