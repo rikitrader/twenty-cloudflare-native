@@ -31,7 +31,9 @@ async function enrich(env: Env, workspaceId: string, entity: Entity, row: Record
 
 /** Compatibility resolver for the upstream Twenty GraphQL client, backed only by tenant-scoped D1. */
 export async function handleGraphql(request: Request, env: Env): Promise<Response | null> {
-  if (new URL(request.url).pathname !== "/graphql" || request.method !== "POST") return null;
+  // Twenty uses a second same-origin GraphQL path for metadata operations.
+  // Both endpoints share the D1 compatibility resolver and auth boundary.
+  if (!["/graphql", "/metadata"].includes(new URL(request.url).pathname) || request.method !== "POST") return null;
   const body = (await request.json().catch(() => ({}))) as { query?: string; operationName?: string; variables?: Vars }; const op = operationName(body); const vars = body.variables ?? {};
   if (op === "IntrospectionQuery" || /__schema|__type/.test(body.query ?? "")) return Response.json({ data: { __schema: { queryType: { name: "Query" }, mutationType: { name: "Mutation" }, types: [] } } });
   if (/GetCurrentUser|CurrentUser|^Me$/i.test(op) && !request.headers.get("cf-access-jwt-assertion") && !request.headers.get("authorization")) { const native = await nativeSessionIdentity(request, env); if (!native) return new Response(JSON.stringify({ data: { currentUser: null, me: null } }), { headers: { "content-type": "application/json", "cache-control": "no-store", "set-cookie": "twenty_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0" } }); }
