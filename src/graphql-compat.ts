@@ -1,6 +1,6 @@
 import { accessIdentityForRequest } from "./access";
 import type { Env } from "./types";
-import { createNativeSession, hashPassword, verifyPassword } from "./native-auth";
+import { createNativeSession, hashPassword, nativeSessionIdentity, verifyPassword } from "./native-auth";
 
 type Vars = Record<string, unknown>;
 type Entity = { table: string; singular: string; plural: string; columns: string[] };
@@ -34,7 +34,7 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
   if (new URL(request.url).pathname !== "/graphql" || request.method !== "POST") return null;
   const body = (await request.json().catch(() => ({}))) as { query?: string; operationName?: string; variables?: Vars }; const op = operationName(body); const vars = body.variables ?? {};
   if (op === "IntrospectionQuery" || /__schema|__type/.test(body.query ?? "")) return Response.json({ data: { __schema: { queryType: { name: "Query" }, mutationType: { name: "Mutation" }, types: [] } } });
-  if (/GetCurrentUser|CurrentUser|^Me$/i.test(op) && !request.headers.get("cf-access-jwt-assertion") && !request.headers.get("authorization") && !request.headers.get("cookie")) return Response.json({ data: { currentUser: null, me: null } });
+  if (/GetCurrentUser|CurrentUser|^Me$/i.test(op) && !request.headers.get("cf-access-jwt-assertion") && !request.headers.get("authorization")) { const native = await nativeSessionIdentity(request, env); if (!native) return new Response(JSON.stringify({ data: { currentUser: null, me: null } }), { headers: { "content-type": "application/json", "cache-control": "no-store", "set-cookie": "twenty_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0" } }); }
   if (/AvailableWorkspacesForAuth|AvailableWorkspacesForSignIn|GetWorkspaceCreationDefaults/i.test(op) && env.CRM_DB && !request.headers.get("cf-access-jwt-assertion") && !request.headers.get("authorization") && !request.headers.get("cookie")) return Response.json({ data: { availableWorkspaces: { availableWorkspacesForSignIn: [], availableWorkspacesForSignUp: [] }, availableWorkspacesForAuth: [], workspaceCreationDefaults: { locale: "es-VE" } } });
   if (/GetPublicWorkspaceDataByDomain|GetPublicWorkspaceDataById|CheckWorkspaceSubdomainAvailability|FindManyPublicDomains/i.test(op) && env.CRM_DB) {
     const domain = String(vars.domain ?? vars.subdomain ?? "").trim().toLowerCase(); const id = String(vars.workspaceId ?? vars.id ?? "");
