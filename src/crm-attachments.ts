@@ -1,5 +1,5 @@
 import type { Env } from './types';
-import { crmPermissions } from './crm-records';
+import { crmCanAccessRecord, crmPermissions } from './crm-records';
 
 type Vars = Record<string, unknown>;
 type Row = Record<string, any>;
@@ -47,6 +47,9 @@ const attachment = (row: Row): Row => {
   };
 };
 const selection = `SELECT a.*, f.filename FROM crm_attachments a JOIN crm_files f ON f.id=a.file_id AND f.workspace_id=a.workspace_id`;
+const policyObject = (targetType: string) => targetType === 'task' || targetType === 'note' ? 'activity' : targetType;
+const targetAllowed = (env: Env, workspaceId: string, role: string, actor: string, targetType: string, targetId: string, right: 'read'|'update' = 'read') =>
+  crmCanAccessRecord(env, workspaceId, role, policyObject(targetType), actor, targetId, right);
 
 export async function crmAttachments(operation: string, query: string, variables: Vars, env: Env, workspaceId: string, role: string, actor: string): Promise<Response | null> {
   const action = operation.match(/^(FindMany|FindOne|CreateOne|UpdateOne|DeleteOne|RestoreOne|DestroyOne)Attachments?$/i)?.[1];
@@ -63,6 +66,7 @@ export async function crmAttachments(operation: string, query: string, variables
       const targets = Object.entries(targetFields).filter(([field]) => object(filter[field]) && typeof (filter[field] as Record<string, unknown>).eq === 'string');
       if (targets.length !== 1) return Response.json({ errors: [{ message: 'An attachment target filter is required' }] }, { status: 400 });
       const [field, [targetType]] = targets[0]; const targetId = String((filter[field] as Record<string, unknown>).eq);
+      if (!await targetAllowed(env, workspaceId, role, actor, targetType, targetId)) return Response.json({ errors: [{ message: 'Attachment target not found' }] }, { status: 404 });
       const rows = await env.CRM_DB!.prepare(`${selection} WHERE a.workspace_id=? AND a.target_type=? AND a.target_id=? AND a.deleted_at IS NULL ORDER BY a.created_at DESC LIMIT 100`).bind(workspaceId, targetType, targetId).all<Row>();
       const nodes = rows.results.map(attachment);
       return success({ __typename: 'AttachmentConnection', nodes, edges: nodes.map((node, index) => ({ node, cursor: btoa(String(index)) })), totalCount: nodes.length, pageInfo: { hasNextPage: false, hasPreviousPage: false, startCursor: nodes.length ? btoa('0') : null, endCursor: nodes.length ? btoa(String(nodes.length - 1)) : null } });
@@ -70,7 +74,7 @@ export async function crmAttachments(operation: string, query: string, variables
     if (action === 'FindOne') {
       if (typeof id !== 'string') return Response.json({ errors: [{ message: 'Attachment ID is required' }] }, { status: 400 });
       const row = await env.CRM_DB!.prepare(`${selection} WHERE a.workspace_id=? AND a.id=? AND a.deleted_at IS NULL`).bind(workspaceId, id).first<Row>();
-      return success(row ? attachment(row) : null);
+      return success(row && await targetAllowed(env, workspaceId, role, actor, row.target_type, row.target_id) ? attachment(row) : null);
     }
     if (action === 'CreateOne') {
       const input = inputFor(variables); const name = typeof input.name === 'string' ? input.name.trim() : '';
@@ -82,6 +86,7 @@ export async function crmAttachments(operation: string, query: string, variables
       const file = await env.CRM_DB!.prepare('SELECT filename FROM crm_files WHERE workspace_id=? AND id=?').bind(workspaceId, fileId).first<{filename:string}>();
       const target = await env.CRM_DB!.prepare(`SELECT id FROM ${table} WHERE workspace_id=? AND id=? AND deleted_at IS NULL`).bind(workspaceId, targetId).first();
       if (!file || !target) return Response.json({ errors: [{ message: 'The file or attachment target is not available in this workspace' }] }, { status: 400 });
+      if (!await targetAllowed(env, workspaceId, role, actor, targetType, targetId, 'update')) return Response.json({ errors: [{ message: 'Attachment target not found' }] }, { status: 404 });
       if ((targetType === 'task' || targetType === 'note')) {
         const typed = await env.CRM_DB!.prepare('SELECT id FROM activities WHERE workspace_id=? AND id=? AND type=? AND deleted_at IS NULL').bind(workspaceId, targetId, targetType).first();
         if (!typed) return Response.json({ errors: [{ message: `The target is not a ${targetType}` }] }, { status: 400 });
@@ -96,7 +101,7 @@ export async function crmAttachments(operation: string, query: string, variables
     }
     if (typeof id !== 'string' || !id) return Response.json({ errors: [{ message: 'Attachment ID is required' }] }, { status: 400 });
     const existing = await env.CRM_DB!.prepare(`${selection} WHERE a.workspace_id=? AND a.id=?`).bind(workspaceId, id).first<Row>();
-    if (!existing) return Response.json({ errors: [{ message: 'Attachment not found' }] }, { status: 404 });
+    if (!existing || !await targetAllowed(env, workspaceId, role, actor, existing.target_type, existing.target_id)) return Response.json({ errors: [{ message: 'Attachment not found' }] }, { status: 404 });
     const now = new Date().toISOString();
     if (action === 'UpdateOne') {
       const input = inputFor(variables); const name = input.name === undefined ? existing.name : typeof input.name === 'string' ? input.name.trim() : '';

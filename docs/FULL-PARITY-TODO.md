@@ -68,6 +68,8 @@ cache services, traditional application hosts, and persistent local disk are pro
   - [ ] Enforce object permissions on GraphQL, REST, search, exports, files, relationships, and automations.
   - [ ] Enforce field read/write restrictions during projection, filtering, sorting, and mutation.
   - [ ] Compile and enforce row predicates with bounded, validated expressions.
+  - [x] Reuse the record authorization compiler in global search so custom-role object grants, hidden fields, and bounded row predicates cannot be bypassed by the command menu.
+  - [x] Recheck attachment targets through the target object's object/row policy for list, read, create, update, trash, restore, and destroy operations.
 
 ## 6. Workflows and automations
 

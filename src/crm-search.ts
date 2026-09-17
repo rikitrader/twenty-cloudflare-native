@@ -1,5 +1,5 @@
 import type { Env } from './types';
-import { crmPermissions, crmRecords } from './crm-records';
+import { crmRecords, crmSearchAuthorization } from './crm-records';
 
 type Row = Record<string, any>;
 const objects = [
@@ -35,8 +35,18 @@ export async function crmSearch(op:string,query:string,vars:Row,env:Env,workspac
   const include=vars.includedObjectNameSingulars??[],exclude=vars.excludedObjectNameSingulars??[];
   if(!Array.isArray(include)||!Array.isArray(exclude)||include.length>100||exclude.length>100) return failure('Invalid search object selection');
   const candidates=objects.filter(object=>(!include.length||include.includes(object.name))&&!exclude.includes(object.name));
-  const selected=[] as typeof objects;
-  for(const candidate of candidates) if((await crmPermissions(env,workspaceId,role,candidate.name)).read) selected.push(candidate);
+  const selected=[] as Array<(typeof objects)[number] & {rowSql:string;rowParams:Array<string|number|null>;searchLabel:boolean;searchExtra:boolean}>;
+  for(const candidate of candidates) {
+    const authorization=await crmSearchAuthorization(env,workspaceId,role,candidate.name,subject);
+    if(!authorization.allowed) continue;
+    const labelFields=candidate.name==='person'?['name','firstName','lastName']:[candidate.label];
+    const searchLabel=labelFields.every(field=>!authorization.readDenied.has(field));
+    const searchExtra=!authorization.readDenied.has(candidate.extra);
+    // A search result must have a readable label. Never substitute a hidden
+    // field or leak its existence through matching behavior.
+    if(!searchLabel) continue;
+    selected.push({...candidate,rowSql:authorization.rowSql,rowParams:authorization.rowParams,searchLabel,searchExtra});
+  }
   if(candidates.length&&!selected.length) return failure('Read access denied',403);
   const params:unknown[]=[];
   const pattern=`%${vars.searchInput.replace(/[\\%_]/g,(char:string)=>`\\${char}`)}%`;
@@ -68,8 +78,11 @@ export async function crmSearch(op:string,query:string,vars:Row,env:Env,workspac
     const filterClause=filter(vars.filter);
     const filterParams=[...params];params.length=0;
     const selects=selected.map(object=>{
-      params.push(workspaceId,pattern,pattern,...filterParams);
-      return `SELECT id AS recordId, '${object.name}' AS objectNameSingular, '${object.title}' AS objectLabelSingular, ${object.label} AS label, NULL AS imageUrl FROM ${object.table} WHERE workspace_id=? AND deleted_at IS NULL AND ((${object.label}) LIKE ? ESCAPE '\\' OR ${object.extra} LIKE ? ESCAPE '\\') AND (${filterClause})`;
+      const searchable=[`(${object.label}) LIKE ? ESCAPE '\\'`];
+      params.push(workspaceId,pattern);
+      if(object.searchExtra) { searchable.push(`${object.extra} LIKE ? ESCAPE '\\'`); params.push(pattern); }
+      params.push(...filterParams,...object.rowParams);
+      return `SELECT id AS recordId, '${object.name}' AS objectNameSingular, '${object.title}' AS objectLabelSingular, ${object.label} AS label, NULL AS imageUrl FROM ${object.table} WHERE workspace_id=? AND deleted_at IS NULL AND (${searchable.join(' OR ')}) AND (${filterClause}) AND (${object.rowSql})`;
     });
     let cursorClause='';
     if(vars.after) {

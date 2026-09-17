@@ -119,6 +119,59 @@ async function roleControls(env: Env, workspaceId: string, role: string, entity:
   const rootParts=[...(grouped.get(null)??[]).map(expression),...(children.get(null)??[]).map(group=>compileGroup(group,0))];
   return {...empty,rowSql:rootParts.length?rootParts.map(part=>`(${part})`).join(' AND '):'1 = 1',rowParams:params};
 }
+
+export type CrmSearchAuthorization = {
+  allowed: boolean;
+  readDenied: ReadonlySet<string>;
+  rowSql: string;
+  rowParams: Scalar[];
+};
+
+/**
+ * Reuses the exact record authorization compiler for non-record-query surfaces
+ * such as command-menu search. This prevents those surfaces from implementing
+ * a weaker approximation of object, field, or row-level permissions.
+ */
+export async function crmSearchAuthorization(
+  env: Env,
+  workspaceId: string,
+  role: string,
+  objectType: string,
+  actorSubject: string,
+): Promise<CrmSearchAuthorization> {
+  const entity = entities.find(item => item.singular === objectType);
+  if (!entity) return { allowed: false, readDenied: new Set(), rowSql: '0 = 1', rowParams: [] };
+  const permissions = await crmPermissions(env, workspaceId, role, entity.singular);
+  if (!permissions.read) return { allowed: false, readDenied: new Set(), rowSql: '0 = 1', rowParams: [] };
+  const fields = await env.CRM_DB!.prepare(
+    'SELECT id, object_type, field_key, field_type, options_json FROM custom_fields WHERE workspace_id = ?',
+  ).bind(workspaceId).all<CustomField>();
+  const controls = await roleControls(env, workspaceId, role, entity, customFor(fields.results, entity), actorSubject);
+  return { allowed: true, readDenied: controls.readDenied, rowSql: controls.rowSql, rowParams: controls.rowParams };
+}
+
+/** Authorize access to one record through the same object and row policy used by GraphQL CRUD. */
+export async function crmCanAccessRecord(
+  env: Env,
+  workspaceId: string,
+  role: string,
+  objectType: string,
+  actorSubject: string,
+  recordId: string,
+  right: Right = 'read',
+): Promise<boolean> {
+  const entity = entities.find(item => item.singular === objectType);
+  if (!entity || !recordId || recordId.length > 100) return false;
+  const permissions = await crmPermissions(env, workspaceId, role, entity.singular);
+  if (!permissions[right]) return false;
+  const fields = await env.CRM_DB!.prepare(
+    'SELECT id, object_type, field_key, field_type, options_json FROM custom_fields WHERE workspace_id = ?',
+  ).bind(workspaceId).all<CustomField>();
+  const controls = await roleControls(env, workspaceId, role, entity, customFor(fields.results, entity), actorSubject);
+  return Boolean(await env.CRM_DB!.prepare(
+    `SELECT 1 FROM ${entity.table} WHERE workspace_id = ? AND id = ? AND deleted_at IS NULL AND (${controls.rowSql}) LIMIT 1`,
+  ).bind(workspaceId, recordId, ...controls.rowParams).first());
+}
 const fieldExpression = (ctx: Context, key: string): string => {
   if (ctx.readDenied.has(key)) return bad(`Field access denied: ${key}`, 403);
   if (key === 'name' && ctx.entity.singular === 'person') return "(first_name || ' ' || last_name)";

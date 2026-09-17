@@ -2,6 +2,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { readFileSync,readdirSync } from 'node:fs';
 import { afterEach,beforeEach,expect,it } from 'vitest';
 import { crmSearch } from '../src/crm-search';
+import { compatibilityId } from '../src/compatibility-id';
 import type { Env } from '../src/types';
 // @ts-expect-error Shared operator fixture script.
 import { seedSql } from '../scripts/seed-crm-sample.mjs';
@@ -33,6 +34,27 @@ it('does not return another tenant or bypass a stored read denial',async()=>{
   expect((await result.json() as any).data.search.edges).toEqual([]);
   db.prepare('INSERT INTO workspace_settings VALUES (?,?,?,?,?)').run(workspace,'permissions',JSON.stringify({member:{read:false}}),'2026-09-17',subject);
   expect((await crmSearch('Search','',{searchInput:'DEMO',limit:10},env,workspace,'member',subject))!.status).toBe(403);
+});
+it('enforces custom-role row predicates and field restrictions in global search',async()=>{
+  const now='2026-09-17';
+  db.prepare('INSERT INTO custom_roles VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)').run(
+    'search-role',workspace,'Search restricted',null,null,0,0,0,0,0,0,1,0,0,now,now,
+  );
+  const objectId=await compatibilityId(`object:${workspace}:company`);
+  const nameFieldId=await compatibilityId(`field:${objectId}:name`);
+  const domainFieldId=await compatibilityId(`field:${objectId}:domain`);
+  db.prepare('INSERT INTO object_permissions VALUES (?,?,?,?,?,?,?,?)').run(workspace,'search-role',objectId,1,0,0,0,now);
+  db.prepare('INSERT INTO field_permissions VALUES (?,?,?,?,?,?,?,?)').run(crypto.randomUUID(),workspace,'search-role',objectId,domainFieldId,0,0,now);
+  db.prepare('INSERT INTO row_permission_predicates VALUES (?,?,?,?,?,?,?,?,?,?,?,?)').run(
+    crypto.randomUUID(),workspace,'search-role',objectId,nameFieldId,'CONTAINS',JSON.stringify('Aurora'),null,null,null,null,0,
+  );
+  const allowed=(await crmSearch('Search','',{searchInput:'DEMO',limit:20,includedObjectNameSingulars:['company']},env,workspace,'custom:search-role',subject))!;
+  expect(allowed.status).toBe(200);
+  const allowedBody=await allowed.json() as any;
+  expect(allowedBody.data.search.edges.map((edge:any)=>edge.node.label)).toEqual(['DEMO · Aurora Labs']);
+  const hidden=(await crmSearch('Search','',{searchInput:'aurora.example',limit:20,includedObjectNameSingulars:['company']},env,workspace,'custom:search-role',subject))!;
+  expect(hidden.status).toBe(200);
+  expect((await hidden.json() as any).data.search.edges).toEqual([]);
 });
 it('maps combined relation-picker queries to tenant-scoped core connections',async()=>{
   const result=(await crmSearch('CombinedFindManyRecords','query CombinedFindManyRecords { companies(filter:$filterCompany) {edges{node{id}}} people(filter:$filterPerson){edges{node{id}}}}',
