@@ -13,4 +13,11 @@ describe("GraphQL D1 compatibility boundary", () => {
     const env = { OPS_TOKEN: "test-token" } as never;
     expect(await handleGraphql(new Request("https://example.test/api", { method: "GET" }), env)).toBeNull();
   });
+
+  it("answers the metadata event stream without falling through to assets", async () => {
+    const response = await handleGraphql(new Request("https://example.test/metadata", { method: "GET" }), {} as never);
+    expect(response?.status).toBe(200);
+    expect(response?.headers.get("content-type")).toContain("text/event-stream");
+    expect(await response?.text()).toContain("twenty-metadata-ready");
+  });
 });
