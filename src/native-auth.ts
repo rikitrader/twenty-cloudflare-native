@@ -1,6 +1,9 @@
 import type { Env } from "./types";
 
-const ITERATIONS = 120_000;
+// Workers WebCrypto currently rejects PBKDF2 iteration counts above 100,000.
+// Keep this at the supported ceiling so signup and credential verification
+// work in production while retaining a strong password-derived key.
+const ITERATIONS = 100_000;
 const encoder = new TextEncoder();
 
 function bytesToB64(bytes: Uint8Array): string {
