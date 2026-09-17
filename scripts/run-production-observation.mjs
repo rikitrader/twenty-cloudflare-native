@@ -1,5 +1,5 @@
 const baseUrl = (
-  process.env.OBSERVATION_URL ?? "https://twenty-crm.rikitrader.workers.dev"
+  process.env.OBSERVATION_URL ?? "https://twenty-crm.observatorio-publico.workers.dev"
 ).replace(/\/$/, "");
 const response = await fetch(`${baseUrl}/_status`, {
   signal: AbortSignal.timeout(30_000),

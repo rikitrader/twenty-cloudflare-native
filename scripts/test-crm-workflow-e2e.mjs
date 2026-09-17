@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 
 const BASE_URL =
   process.env.TWENTY_BASE_URL ??
-  "https://twenty-crm.rikitrader.workers.dev";
+  "https://twenty-crm.observatorio-publico.workers.dev";
 const WORKFLOW_ID =
   process.env.TWENTY_WORKFLOW_ID ??
   "887c6c06-fbc5-4b45-8d6b-f7b6b0f40b12";

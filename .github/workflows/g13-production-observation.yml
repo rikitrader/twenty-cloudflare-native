@@ -8,7 +8,7 @@ on:
       observation_url:
         description: "Production Worker URL after the controlled Redis-free cutover"
         required: false
-        default: "https://twenty-crm.rikitrader.workers.dev"
+        default: "https://twenty-crm.observatorio-publico.workers.dev"
 
 permissions:
   contents: read
