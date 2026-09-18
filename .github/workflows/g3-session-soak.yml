@@ -26,7 +26,7 @@ jobs:
           export LEDGER="$ledger" CAPTURED_AT PRODUCTION_URL
           node -e 'const fs=require("fs"); const ledger=JSON.parse(process.env.LEDGER); if(ledger.gate!=="G3" || typeof ledger.ready!=="boolean" || ledger.status!=="passed" && ledger.status!=="collecting") throw new Error("invalid production G3 ledger"); const body={capturedAt:process.env.CAPTURED_AT,worker:process.env.PRODUCTION_URL,ledger,result:ledger.lastPassed===false?"failed":"observed"}; fs.writeFileSync("g3-session-soak.json",JSON.stringify(body,null,2)); if(ledger.lastPassed===false) process.exitCode=1;'
       - name: Upload soak observation
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: g3-session-soak-${{ github.run_id }}
           path: g3-session-soak.json
