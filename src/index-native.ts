@@ -11,7 +11,7 @@ import { TwentyPubSub } from "./pubsub-do";
 import { Container } from "./container-compat";
 import type { Env } from "./types";
 import { handleGraphql } from "./graphql-compat";
-import { withFrontendCachePolicy } from "./frontend-assets";
+import { shouldServeSpaShell, withFrontendCachePolicy } from "./frontend-assets";
 import { frontendClientConfig } from "./frontend-config";
 import { drainMutationOutbox } from "./crm-mutation-ledger";
 import { dispatchScheduledWorkflows } from './workflow-triggers';
@@ -99,10 +99,12 @@ export default {
     if (crm) return crm;
     if (env.ASSETS) {
       const asset = await env.ASSETS.fetch(request);
-      if (asset.status !== 404 || request.method !== "GET") {
+      if (!shouldServeSpaShell(request, asset)) {
         return withFrontendCachePolicy(asset, url.pathname);
       }
-      const fallback = await env.ASSETS.fetch(new Request(new URL("/index.html", request.url), request));
+      // Static Assets canonicalizes `/index.html` to `/`. Fetch the canonical
+      // shell directly so React Router keeps the original navigation URL.
+      const fallback = await env.ASSETS.fetch(new Request(new URL("/", request.url), request));
       const headers = new Headers(fallback.headers);
       headers.set("cache-control", "no-store, max-age=0");
       headers.set("pragma", "no-cache");

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { withFrontendCachePolicy } from '../src/frontend-assets';
+import { shouldServeSpaShell, withFrontendCachePolicy } from '../src/frontend-assets';
 
 describe('frontend cache policy', () => {
   it.each(['/assets/index-D6X3OEUa.js', '/assets/SignInUp-CinvB_D3-v3.js'])('does not cache patched %s', async (path) => {
@@ -26,5 +26,16 @@ describe('frontend cache policy', () => {
     const bundle = readFileSync(new URL('../frontend/assets/index-D6X3OEUa.js', import.meta.url), 'utf8');
     expect(bundle).toContain('b!==be.NotFound&&i2(b)&&f(b),window.location.replace(be.SignInUp)');
     expect(bundle).not.toContain('i2(b)&&f(b),n(be.SignInUp)');
+  });
+
+  it.each(['/welcome', '/reset-password/token', '/objects/people'])('serves the SPA shell for redirected navigation route %s', (path) => {
+    const request = new Request(`https://crm.example.test${path}`);
+    const redirect = new Response(null, { status: 307, headers: { location: '/' } });
+    expect(shouldServeSpaShell(request, redirect)).toBe(true);
+  });
+
+  it('preserves redirects and not-found responses for real asset paths', () => {
+    expect(shouldServeSpaShell(new Request('https://crm.example.test/assets/app.js'), new Response(null, { status: 307 }))).toBe(false);
+    expect(shouldServeSpaShell(new Request('https://crm.example.test/favicon.ico'), new Response(null, { status: 404 }))).toBe(false);
   });
 });

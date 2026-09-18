@@ -18,6 +18,7 @@ import { crmTasksNotes } from "./crm-tasks-notes";
 import { crmNotifications } from './crm-notifications';
 import { validateWebhookDestination } from './outbound-webhooks';
 import { emailRecipients, executeEmailDelivery } from './crm-email';
+import { requestPasswordReset, validatePasswordReset } from './password-reset';
 
 type Vars = Record<string, unknown>;
 type Entity = { table: string; singular: string; plural: string; columns: string[] };
@@ -168,10 +169,10 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
     return new Response(JSON.stringify({ data: { signUp: { availableWorkspaces: { availableWorkspacesForSignUp: [{ id: workspaceId, displayName: workspaceName, loginToken: session.id }] }, tokens: { accessOrWorkspaceAgnosticToken: token, refreshToken: token } } } }), { headers: { "content-type": "application/json", "cache-control": "no-store", "set-cookie": nativeSessionCookie(session.id) } });
   }
   if (/EmailPasswordResetLink/i.test(op) && env.CRM_DB) {
-    return unavailable(op, 'Password-reset delivery requires a configured email provider', 'PROVIDER_NOT_CONFIGURED');
+    return requestPasswordReset(request, env, String(vars.email ?? ""));
   }
   if (/ValidatePasswordResetToken/i.test(op) && env.CRM_DB) {
-    const token = String(vars.token ?? vars.passwordResetToken ?? vars.resetToken ?? ""); const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token)); const tokenHash = [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join(""); const row = await env.CRM_DB.prepare("SELECT id, expires_at as expiresAt, used_at as usedAt FROM native_password_resets WHERE token_hash = ? LIMIT 1").bind(tokenHash).first<{ id: string; expiresAt: string; usedAt: string | null }>(); const valid = Boolean(row && !row.usedAt && row.expiresAt > new Date().toISOString()); return Response.json({ data: { validatePasswordResetToken: { valid, expiresAt: row?.expiresAt ?? null } } });
+    return validatePasswordReset(env, String(vars.token ?? vars.passwordResetToken ?? vars.resetToken ?? ""));
   }
   if (/UpdatePasswordViaResetToken/i.test(op) && env.CRM_DB) {
     const token = String(vars.token ?? vars.passwordResetToken ?? vars.resetToken ?? ''); const password = String(vars.password ?? vars.newPassword ?? '');

@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
-import { afterEach, beforeEach, expect, it } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { handleGraphql } from '../src/graphql-compat';
 import type { Env } from '../src/types';
 
@@ -90,6 +90,59 @@ it('rejects wrong passwords and cross-workspace session access with __typename p
   expect(wrong.status).toBe(401);
   const other = (await post('FindManyPeople', 'query FindManyPeople { people { id __typename } }', {}, cookie, 'another-workspace'))!;
   expect(other.status).toBe(403);
+});
+
+it('delivers a single-use password reset link and accepts the replacement password', async () => {
+  await signup();
+  const sent: Array<Record<string, unknown>> = [];
+  env.CRM_EMAIL_FROM = 'crm@example.test';
+  env.CRM_EMAIL = { send: async (message: unknown) => { sent.push(message as Record<string, unknown>); return { messageId: 'reset-message' }; } } as SendEmail;
+
+  const requested = (await post(
+    'EmailPasswordResetLink',
+    'mutation EmailPasswordResetLink($email:String!) { emailPasswordResetLink(email:$email) { success } }',
+    { email: 'native-test@example.invalid' },
+  ))!;
+  expect(requested.status).toBe(200);
+  expect(await requested.json()).toEqual({ data: { emailPasswordResetLink: { success: true } } });
+  expect(sent).toHaveLength(1);
+  expect(sent[0].to).toEqual(['native-test@example.invalid']);
+  const token = String(sent[0].text).match(/reset-password\/([A-Za-z0-9_-]+)/)?.[1];
+  expect(token).toBeTruthy();
+  const stored = db.prepare('SELECT token_hash AS tokenHash FROM native_password_resets').get() as {tokenHash:string};
+  expect(stored.tokenHash).not.toContain(token!);
+
+  const validated = (await post(
+    'ValidatePasswordResetToken',
+    'query ValidatePasswordResetToken($token:String!) { validatePasswordResetToken(passwordResetToken:$token) { id email hasPassword } }',
+    { token },
+  ))!;
+  expect(await validated.json()).toMatchObject({ data: { validatePasswordResetToken: { email: 'native-test@example.invalid', hasPassword: true } } });
+
+  const updated = (await post(
+    'UpdatePasswordViaResetToken',
+    'mutation UpdatePasswordViaResetToken($token:String!,$newPassword:String!) { updatePasswordViaResetToken(passwordResetToken:$token,newPassword:$newPassword) { success } }',
+    { token, newPassword: 'Replacement password 456!' },
+  ))!;
+  expect(updated.status).toBe(200);
+  expect(await updated.json()).toEqual({ data: { updatePasswordViaResetToken: { success: true } } });
+  expect((await post('GetLoginTokenFromCredentials', 'mutation GetLoginTokenFromCredentials { getLoginTokenFromCredentials { loginToken { token } } }', {email:'native-test@example.invalid',password:'Local regression test 123!'}))!.status).toBe(401);
+  expect((await post('GetLoginTokenFromCredentials', 'mutation GetLoginTokenFromCredentials { getLoginTokenFromCredentials { loginToken { token } } }', {email:'native-test@example.invalid',password:'Replacement password 456!'}))!.status).toBe(200);
+  expect(await (await post('ValidatePasswordResetToken', 'query ValidatePasswordResetToken($token:String!) { validatePasswordResetToken(passwordResetToken:$token) { id } }', {token}))!.json()).toEqual({data:{validatePasswordResetToken:null}});
+});
+
+it('does not reveal whether a password-reset email belongs to an account', async () => {
+  const send = vi.fn();
+  env.CRM_EMAIL_FROM = 'crm@example.test';
+  env.CRM_EMAIL = { send } as unknown as SendEmail;
+  const response = (await post(
+    'EmailPasswordResetLink',
+    'mutation EmailPasswordResetLink($email:String!) { emailPasswordResetLink(email:$email) { success } }',
+    { email: 'unknown@example.invalid' },
+  ))!;
+  expect(response.status).toBe(200);
+  expect(await response.json()).toEqual({ data: { emailPasswordResetLink: { success: true } } });
+  expect(send).not.toHaveBeenCalled();
 });
 
 it('does not confuse current-user nested metadata fragments with metadata operations', async () => {
