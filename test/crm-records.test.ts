@@ -37,7 +37,9 @@ const request = async (op: string, vars: Record<string, unknown> = {}, role = 'o
 const createCompany = (id = companyId, name = 'Example company') => request('CreateOneCompany', { input: { id, name, domain: 'example.invalid' } });
 
 it('supports the upstream workspace blocklist settings workflow', async () => {
-  const firstId=crypto.randomUUID(),secondId=crypto.randomUUID();
+  // Stable IDs preserve the API's documented id-ascending tie-break when two
+  // records share the same millisecond-level createdAt value in SQLite.
+  const firstId='00000000-0000-4000-8000-000000000002',secondId='00000000-0000-4000-8000-000000000001';
   const created=await request('CreateManyBlocklists',{input:[{id:firstId,handle:'blocked@example.invalid',scope:'WORKSPACE'},{id:secondId,handle:'@example.invalid',scope:'WORKSPACE'}]});
   expect(created.status).toBe(200);
   expect(created.body.data.createBlocklists).toHaveLength(2);
