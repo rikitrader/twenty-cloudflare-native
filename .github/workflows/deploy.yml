@@ -14,130 +14,39 @@ jobs:
   verify-and-deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    environment: production
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
-      - run: bun install --frozen-lockfile
-      - run: bun run typecheck
-      - run: bun run test
-      - run: bun run db:migrations:check
-      - run: bun run contract:check
-      - run: bun run contract:runtime:check
-      - run: bun run processors:idempotency:check
-      - name: Enforce starter-scale cost configuration
-        run: bun run cost:starter:check
-      - name: Require complete enterprise readiness before production
-        run: bun run readiness:check
-      - name: Require production security configuration
-        run: bun run security:production:check
-      - run: bun audit
-      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-      - name: Verify reproducible production image
-        run: bun run image:reproducibility:check
-      - name: Build exact image for release security checks
-        id: production-image
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+      - uses: actions/setup-node@v4
         with:
-          context: .
-          file: Dockerfile.production
-          load: true
-          push: false
-          provenance: false
-          sbom: false
-          tags: twenty-cf-production:${{ github.sha }}
-      - name: Record exact application image digest
-        id: image-digest
-        run: echo "digest=$(docker image inspect --format='{{.Id}}' twenty-cf-production:${{ github.sha }})" >> "$GITHUB_OUTPUT"
-      - name: Generate release SPDX SBOM
-        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
-        with:
-          image: twenty-cf-production:${{ github.sha }}
-          format: spdx-json
-          artifact-name: twenty-production-sbom
-          output-file: twenty-production.spdx.json
-          upload-artifact: true
-          upload-artifact-retention: 90
-      - name: Enforce container vulnerability policy
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          image-ref: twenty-cf-production:${{ github.sha }}
-          version: v0.72.0
-          scanners: vuln
-          vuln-type: os,library
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          format: json
-          output: twenty-production.trivy.json
-          exit-code: 1
-      - name: Retain release vulnerability report
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: twenty-production-trivy
-          path: twenty-production.trivy.json
-          if-no-files-found: error
-          retention-days: 90
-      # Requires repo secret CLOUDFLARE_API_TOKEN (Workers Scripts:Edit,
-      # Containers:Edit, Workers KV:Edit, D1:Edit on account e9a13cb0...).
-      - name: Apply D1 migrations
-        uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run patch:twenty
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run db:migrations:check
+      - run: npm run audit:mutations
+      - run: npm run cost:starter:check
+      - run: npm run readiness:check
+      - run: npm run security:production:check
+      - name: Apply CRM D1 migrations
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: d1 migrations apply CRM_DB --remote
+      - name: Apply operations D1 migrations
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: d1 migrations apply OPS_DB --remote
-      - name: Deploy stable Cloudflare release controller
-        uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
+      - name: Deploy Worker and Static Assets
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: >-
-            deploy --config wrangler.release.jsonc --strict
-            --tag "${{ github.sha }}"
-            --message "Release controller ${{ github.sha }}"
-      - name: Rehearse and prepare the database release
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-          APP_IMAGE_DIGEST: ${{ steps.image-digest.outputs.digest }}
-          APP_VERSION: "2.24.1"
-          RELEASE_CONTROL_URL: "https://twenty-crm-release.rikitrader.workers.dev"
-          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          CF_ACCESS_CLIENT_ID: ${{ secrets.RELEASE_ACCESS_CLIENT_ID }}
-          CF_ACCESS_CLIENT_SECRET: ${{ secrets.RELEASE_ACCESS_CLIENT_SECRET }}
-        run: bun run release:prepare
-      - name: Deploy the prepared production release
-        id: production-deploy
-        continue-on-error: true
-        uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: >-
-            deploy --strict --containers-rollout gradual
-            --tag "${{ github.sha }}"
-            --message "GitHub Actions ${{ github.sha }}"
-      - name: Signal a failed production deployment
-        if: steps.production-deploy.outcome == 'failure'
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-          APP_IMAGE_DIGEST: ${{ steps.image-digest.outputs.digest }}
-          APP_VERSION: "2.24.1"
-          RELEASE_CONTROL_URL: "https://twenty-crm-release.rikitrader.workers.dev"
-          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          CF_ACCESS_CLIENT_ID: ${{ secrets.RELEASE_ACCESS_CLIENT_ID }}
-          CF_ACCESS_CLIENT_SECRET: ${{ secrets.RELEASE_ACCESS_CLIENT_SECRET }}
-          RELEASE_FAILURE: "Cloudflare production deployment failed"
-        run: bun run release:fail
-      - name: Fail the job after recording deployment failure
-        if: steps.production-deploy.outcome == 'failure'
-        run: exit 1
-      - name: Complete and internally verify the release
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-          APP_IMAGE_DIGEST: ${{ steps.image-digest.outputs.digest }}
-          APP_VERSION: "2.24.1"
-          RELEASE_CONTROL_URL: "https://twenty-crm-release.rikitrader.workers.dev"
-          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-          CF_ACCESS_CLIENT_ID: ${{ secrets.RELEASE_ACCESS_CLIENT_ID }}
-          CF_ACCESS_CLIENT_SECRET: ${{ secrets.RELEASE_ACCESS_CLIENT_SECRET }}
-        run: bun run release:complete
-      - name: Warm production after maintenance clears
-        run: bun run warm:production
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy

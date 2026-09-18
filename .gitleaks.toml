@@ -1,0 +1,12 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Narrow false positives: public Worker version IDs, Access audiences, and compiled Twenty state keys"
+regexTarget = "match"
+regexes = [
+  '''API_KEYS_AND_WEBHOOKS:"[0-9a-fA-F-]{36}"''',
+  '''(?:deploymentVersionAfterSecretChange|fixedCanaryVersionAfterCredentialRotation|activeSecretVersionId|activeVersionIdAfterCredentialRotation)"?:\s*"[0-9a-fA-F-]{36}"''',
+  '''ACCESS_AUD"?:\s*"[0-9a-fA-F]{64}"''',
+  '''key:"ai/(?:isDictationRecording|hasWebSpeechProvenSilent)"'''
+]

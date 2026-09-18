@@ -100,6 +100,6 @@ describe("security configuration", () => {
       "node scripts/check-starter-cost-config.mjs",
     );
     const workflow = readFileSync(resolve(".github/workflows/deploy.yml"), "utf8");
-    expect(workflow).toContain("bun run cost:starter:check");
+    expect(workflow).toContain("npm run cost:starter:check");
   });
 });

@@ -3,6 +3,10 @@
 This project is a Cloudflare-native derivative of
 [Twenty](https://github.com/twentyhq/twenty).
 
+Cloudflare-native modifications and original integration code Copyright 2026
+Ricardo Prieto and contributors. Source repository:
+https://github.com/rikitrader/twenty-cloudflare-native
+
 The upstream Twenty project is primarily licensed under the GNU Affero General
 Public License version 3 with the additional Twenty Application Exception.
 Some upstream packages use the MIT license, and files explicitly marked
