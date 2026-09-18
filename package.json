@@ -37,6 +37,7 @@
     "evidence:g3": "node scripts/capture-g3-production-evidence.mjs",
     "evidence:continuity": "node scripts/capture-production-readiness-evidence.mjs",
     "audit:mutations": "node scripts/audit-graphql-operations.mjs && node scripts/audit-mutation-durability.mjs",
+    "audit:operations:update": "node scripts/audit-graphql-operations.mjs --write",
     "smoke:graphql": "node scripts/smoke-graphql-surface.mjs",
     "test:workflow:e2e": "node scripts/test-crm-workflow-e2e.mjs",
     "migrate:crm": "node scripts/migrate-crm-ndjson.mjs",

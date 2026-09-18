@@ -26,6 +26,11 @@ npm run security:production:check
 gitleaks git --config .gitleaks.toml --redact .
 ```
 
+Maintainers updating against a new upstream Twenty checkout can regenerate the
+committed operation inventory with `TWENTY_UPSTREAM=/path/to/twenty npm run
+audit:operations:update`. Normal contributors and CI verify that inventory
+without requiring a separate upstream repository.
+
 Add focused tests for authorization failures, cross-tenant access, duplicate
 delivery, retries, partial provider failures, and schema changes whenever they
 apply. Use disposable workspaces and synthetic data for browser tests.
