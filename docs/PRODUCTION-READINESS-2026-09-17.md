@@ -8,7 +8,7 @@ blocked. The application is **not** declared production-ready.
 
 ## Implemented and deployed
 
-- Deployed Worker version `b9f7a3c0-5e17-4ac2-8f79-5a8acc8fcc96` at both
+- Deployed Worker version `3aaed4c1-6f50-45a1-968e-5e040fe3640b` at both
   `crm.mipolitico.com` and the compatibility workers.dev hostname.
 - Applied D1 migrations through `0055_provider_callback_origin.sql` to both production D1
   bindings. It adds operational-continuity samples plus encrypted provider
@@ -106,13 +106,14 @@ role-navigation, integration-failure, sign-out, console, keyboard, screen
 reader, contrast, and responsive journeys in that profile once a dedicated
 test window and accounts are available.
 
-### Real migration cutover
+### Legacy-data migration applicability
 
-The synthetic local and remote rehearsals passed. Actual PostgreSQL-to-D1/R2
-cutover remains blocked on the authorized read-only Twenty export, attachment
-manifest/files, write-freeze or change-capture decision, and rollback owner.
-Do not substitute sample data for reconciliation evidence and do not delete or
-overwrite the source database.
+The owner confirmed on 2026-09-17 that no legacy PostgreSQL Twenty records or
+attachments need to be preserved. The PostgreSQL-to-D1/R2 customer-data
+cutover is therefore **not applicable**, not blocked. D1 and R2 are the initial
+systems of record for this Cloudflare-native deployment. The tested migration
+tooling remains available for a future explicitly authorized import, but no
+source database, write freeze, or rollback owner is required for this release.
 
 ## Awaiting elapsed time
 

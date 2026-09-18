@@ -76,7 +76,7 @@ export default {
         productionReady: false,
         productionReadiness: {
           status: "gated",
-          reason: "Required observation, migration rehearsal, browser, WAF, and Logpush evidence is incomplete",
+          reason: "Required observation, production browser, WAF, and Logpush evidence is incomplete",
         },
         durableRedis: true,
         redisBackend: env.REDIS_BACKEND ?? "cloudflare",

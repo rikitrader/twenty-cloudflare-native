@@ -26,6 +26,12 @@ Production evidence:
 
 ## Actual PostgreSQL to D1/R2 cutover
 
+Applicability decision: **not applicable**. On 2026-09-17 the owner confirmed
+that this is a fresh Cloudflare-native deployment and that no legacy Twenty
+PostgreSQL records or attachments must be preserved. The migration tooling is
+retained and tested, but no customer-data migration will be executed for this
+release.
+
 - [x] Provide a read-only, repeatable-read PostgreSQL extractor with resumable table checkpoints.
 - [x] Checksum every exported table and preserve source IDs, timestamps, and workspace ownership.
 - [x] Convert supported Twenty tables into dependency-ordered D1 import families.
@@ -33,13 +39,13 @@ Production evidence:
 - [x] Resume D1 imports with Workflow checkpoints and idempotent record IDs.
 - [x] Reconcile record counts, relationships, attachment references, and R2 object presence.
 - [x] Add a strict cutover-input gate that rejects missing, incomplete, mismatched, or tampered artifacts.
-- [ ] Obtain the real source PostgreSQL connection or completed `manifest.json` export.
-- [ ] Obtain the real attachment binary directory matching `r2-required.json`.
-- [ ] Identify and approve the source workspace UUID and target production workspace.
-- [ ] Record the write-freeze boundary and final source manifest checksum.
-- [ ] Run the real extraction, conversion, R2 upload, Workflow import, and persisted reconciliation.
-- [ ] Verify representative values and authenticated CRM journeys against the migrated records.
-- [ ] Preserve the source database and attachment store unchanged for rollback.
+- [x] N/A — no real source PostgreSQL connection or export exists or is required.
+- [x] N/A — no legacy attachment directory exists or is required.
+- [x] N/A — no source workspace needs mapping; production D1 owns the initial workspace.
+- [x] N/A — no source write-freeze boundary or final source manifest is required.
+- [x] N/A — no customer-data extraction/import run is required.
+- [x] N/A — legacy-value verification is replaced by current D1 workflow verification.
+- [x] N/A — there is no source database or attachment store to preserve for rollback.
 
 ## Current input audit
 
@@ -47,4 +53,6 @@ Production evidence:
 - [x] Checked the active environment for `TWENTY_POSTGRES_URL`, `TWENTY_SOURCE_WORKSPACE_ID`, and `TWENTY_ATTACHMENT_ROOT`: none configured.
 - [x] Checked authorized local data sources for a legacy database/attachment export: none present.
 
-The actual customer-data cutover is therefore blocked on source data, not on application code. It must remain unchecked until the real records and binaries are provided and verified; sample data is not a valid substitute.
+The absence of a source export is intentional and is no longer a release
+blocker. This decision does not claim that sample data represents migrated
+customer data; it records that no migration is required.

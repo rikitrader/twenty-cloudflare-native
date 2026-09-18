@@ -26,15 +26,17 @@ Security invariants:
 6. Time-based and security gates are never marked complete without evidence.
 
 The read-only legacy-data extractor and resumable D1/R2 reconciliation pipeline
-require an authorized real source export for a customer cutover; sample data is
-not accepted as production evidence. Release sources of truth are
+remain available, but the owner confirmed on 2026-09-17 that legacy-data
+migration is not applicable: this is a fresh Cloudflare-native deployment with
+no PostgreSQL records or attachments to preserve. Release sources of truth are
 `wrangler.jsonc`, `FULL-PARITY-TODO.md`, and current files in `docs/evidence/`.
 
 Schema migrations through `0055_provider_callback_origin.sql` are applied to
 production CRM and ops D1 databases. They add durable operational-continuity
 samples, encrypted Google/Microsoft integration state, and origin-bound OAuth
 callbacks for both production hostnames. Production version
-`b9f7a3c0-5e17-4ac2-8f79-5a8acc8fcc96` enables persistent invocation logs,
+`3aaed4c1-6f50-45a1-968e-5e040fe3640b` is the current production version; it
+retains persistent invocation logs,
 sampled traces, query-string redaction, and the custom hostname. WAF and
 Logpush remain gated because the authenticated automation grant lacks those
 permissions; do not describe either as configured. The new continuity window

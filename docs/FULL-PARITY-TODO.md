@@ -118,9 +118,10 @@ cache services, traditional application hosts, and persistent local disk are pro
   - [x] Include contacts, companies, pipelines, opportunities, activities, tasks/targets, notes/targets, relationships, custom metadata/records, views, attachment metadata, files, and file links in full-workspace exports.
   - [x] Stream dependency-ordered NDJSON uploads for all 17 exported standard/custom families directly to tenant-scoped R2 and process them with a resumable byte cursor in `CRM_IMPORT_WF`.
   - [x] Enable Twenty's shipped `IMPORT_RECORDS` spreadsheet wizard for column mapping and validation preview; expose the same parser through `/api/crm/imports/preview` for large-import clients.
-- [ ] Preserve IDs/relationships/timestamps where authorized and verify counts/values.
+- [x] Preserve IDs/relationships/timestamps where authorized and verify counts/values.
   - [x] Reconcile the deployed core tables after the 0048 migration (1 workspace, 1 member, 5 contacts, 3 companies, 4 opportunities, 6 activities; zero writes during verification).
-  - [x] Implement checksum-verified PostgreSQL artifact conversion, ordered D1/R2 transfer, target count/relationship/R2 verification, and persisted reconciliation reports. The production cutover run remains gated on a real source export.
+  - [x] Implement checksum-verified PostgreSQL artifact conversion, ordered D1/R2 transfer, target count/relationship/R2 verification, and persisted reconciliation reports.
+  - [x] Mark the real legacy-data cutover not applicable: the owner confirmed on 2026-09-17 that no PostgreSQL Twenty records or attachments must be preserved.
 - [ ] Add tenant authorization, duplicate delivery, restart, and cleanup tests.
   - [x] Persist and verify authorized resume/cancel/error-download API flows (the final shipped-UI browser journey remains part of the parent checkbox).
 
@@ -156,11 +157,11 @@ cache services, traditional application hosts, and persistent local disk are pro
 - [x] Build/document the read-only PostgreSQL extraction step.
 - [x] Complete resumable D1/R2 import for every supported object and attachment.
 - [x] Add relationship/count/value verification reports and sensitive-safe errors.
-- [ ] Rehearse write freeze or change capture, cutover, rollback, and post-cutover reconciliation without deleting the source.
+- [x] Rehearse migration, rollback, and post-import reconciliation without deleting a source.
   - [x] Export every workspace-schema table plus workspace-scoped core metadata/membership/file-reference rows inside a PostgreSQL `REPEATABLE READ READ ONLY` transaction, with per-table checksums, counts, resumable table checkpoints, and no source writes.
   - [x] Convert verified source artifacts into dependency-ordered per-family NDJSON, upload required binary objects to tenant-scoped R2, resume Workflow imports, and persist final target reconciliation evidence.
   - [x] Apply all 55 migrations to an isolated remote D1 database, verify representative relationships/foreign keys, and prove Time Travel rollback while preserving baseline records.
-  - [ ] Repeat the rehearsal with the authorized real Twenty export, attachment manifest, write freeze/change capture, and post-cutover reconciliation.
+  - [x] Real-source repetition is not applicable because this deployment starts Cloudflare-native and has no legacy PostgreSQL or attachment source.
 
 ## 15. Release and operational gates
 
@@ -177,7 +178,7 @@ cache services, traditional application hosts, and persistent local disk are pro
 - [ ] Add structured SLOs, alerts, synthetic journeys, cost budgets, backup/restore, DLQ replay, and incident runbooks.
 - [ ] Run the architecture, security, data-integrity, reliability, cost, UX/accessibility, and release-evidence adversarial reviews with no unresolved critical/high finding.
   - [ ] Run production-browser authentication and critical CRM journeys in the existing signed-in Chrome profile.
-  - [x] Record Wrangler dry-run, production smoke, migrations through 0055, deployed version `b9f7a3c0-5e17-4ac2-8f79-5a8acc8fcc96`, previous code version `54181337-b0e4-4dcc-a304-dfe5e54250d1`, rollback target `a6988e56-5895-45d2-b9b8-f28bf42b97fe`, signed webhook receipt evidence, and an exactly-once manual replay verification.
+  - [x] Record Wrangler dry-run, production smoke, migrations through 0055, deployed version `3aaed4c1-6f50-45a1-968e-5e040fe3640b`, previous code version `b9f7a3c0-5e17-4ac2-8f79-5a8acc8fcc96`, rollback target `a6988e56-5895-45d2-b9b8-f28bf42b97fe`, signed webhook receipt evidence, and an exactly-once manual replay verification.
   - [x] Replace the eight-hour native-session expiry with one consistent seven-day TTL across credential login, signup, invitation signup, renewal, and REST session creation.
   - [x] Return protected GraphQL authentication loss as HTTP 200 with `extensions.code = UNAUTHENTICATED`, allowing Twenty's Apollo auth handling to recover instead of retrying raw HTTP 401 failures.
   - [x] Hard-reset concurrent expired-session errors to `/welcome`, reject `/not-found` as a saved return path, and redirect already-stranded `/not-found` tabs to the application root on reload.
