@@ -81,7 +81,7 @@
   },
   "dependencies": {
     "cron-parser": "^5.6.2",
-    "jose": "^6.2.4",
+    "jose": "^6.2.12",
     "pg": "^8.16.3"
   },
   "overrides": {
