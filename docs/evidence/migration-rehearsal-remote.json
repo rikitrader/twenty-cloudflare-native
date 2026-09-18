@@ -1,0 +1,60 @@
+{
+  "result": "passed",
+  "executedAt": "2026-09-18T01:43:17Z",
+  "environment": {
+    "platform": "Cloudflare D1 remote",
+    "databaseName": "twenty-crm-rehearsal-20260917",
+    "databaseId": "0f2d2a01-c787-405b-be18-ae29adc14596",
+    "region": "ENAM",
+    "data": "synthetic rehearsal records only"
+  },
+  "migration": {
+    "migrationCount": 55,
+    "through": "0055_provider_callback_origin.sql",
+    "controlPlaneElapsedSeconds": 17.4,
+    "pendingAfterApply": 0
+  },
+  "verification": {
+    "expectedProductionReadinessTables": 5,
+    "expectedProductionReadinessTablesPresent": 5,
+    "contactRows": 1,
+    "validCompanyAndContactRelationships": 1,
+    "foreignKeyViolations": 0,
+    "callbackOriginBeforeMutation": "https://crm.mipolitico.com"
+  },
+  "recovery": {
+    "method": "Cloudflare D1 Time Travel bookmark restore",
+    "bookmark": "00000000-0000007c-000050ea-e23301b236bf623e54d248a0e616a8b6",
+    "previousBookmark": "00000000-ffffffff-000050ea-a806f50025312f300b2e84c2be996e91",
+    "rollbackMarkerBeforeRestore": 1,
+    "rollbackMarkerAfterRestore": 0,
+    "restoredContactRows": 1,
+    "restoredOpportunityRows": 1,
+    "foreignKeyViolationsAfterRestore": 0,
+    "finalSchemaBookmark": "00000002-00000006-000050ea-3c5e431b696d33719152c9a45726d903",
+    "callbackOriginAfterMutation": "https://invalid.example",
+    "callbackOriginAfterRestore": "https://crm.mipolitico.com"
+  },
+  "atomicityObservation": {
+    "description": "A deliberately invalid synthetic fixture referenced a nonexistent contacts.company_id column. D1 rejected the batch and persisted none of its preceding statements.",
+    "workspaceRowsAfterRejectedBatch": 0,
+    "companyRowsAfterRejectedBatch": 0
+  },
+  "productionImpact": {
+    "productionDatabaseRead": false,
+    "productionDatabaseModified": false,
+    "sourceDatabaseDeleted": false,
+    "rehearsalDatabaseRetainedForAudit": true
+  },
+  "commands": [
+    "npx wrangler d1 create twenty-crm-rehearsal-20260917",
+    "npx wrangler d1 migrations apply twenty-crm-rehearsal-20260917 --remote --config /private/tmp/twenty-rehearsal-wrangler.jsonc",
+    "npx wrangler d1 migrations list twenty-crm-rehearsal-20260917 --remote --config /private/tmp/twenty-rehearsal-wrangler.jsonc",
+    "npx wrangler d1 time-travel info twenty-crm-rehearsal-20260917 --json --config /private/tmp/twenty-rehearsal-wrangler.jsonc",
+    "npx wrangler d1 time-travel restore twenty-crm-rehearsal-20260917 --bookmark <recorded-bookmark> --json --config /private/tmp/twenty-rehearsal-wrangler.jsonc"
+  ],
+  "limitations": [
+    "This proves the schema chain and D1 restore procedure with representative synthetic relationships; it does not replace a rehearsal using the actual, read-only Twenty export.",
+    "Production cutover remains blocked until the real source export, attachment manifest, write-freeze procedure, and post-import reconciliation inputs are available."
+  ]
+}

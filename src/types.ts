@@ -73,6 +73,16 @@ export interface Env {
   AUTO_PROVISION_ACCESS_MEMBERS?: string;
   /** Server-controlled Workers AI model. Client-supplied model identifiers are ignored. */
   AI_MODEL?: string;
+  /** 32-byte base64 key used only for provider OAuth token encryption. */
+  INTEGRATION_ENCRYPTION_KEY?: string;
+  GOOGLE_OAUTH_CLIENT_ID?: string;
+  GOOGLE_OAUTH_CLIENT_SECRET?: string;
+  MICROSOFT_OAUTH_CLIENT_ID?: string;
+  MICROSOFT_OAUTH_CLIENT_SECRET?: string;
+  MICROSOFT_OAUTH_TENANT_ID?: string;
+  BILLING_PROVIDER_ENABLED?: string;
+  STRIPE_SECRET_KEY?: string;
+  STRIPE_WEBHOOK_SECRET?: string;
   // R2 via Twenty's native S3 driver. Upstream names take precedence;
   // AWS_* kept as aliases for older credential chains.
   STORAGE_S3_ENDPOINT?: string; // https://<account_id>.r2.cloudflarestorage.com

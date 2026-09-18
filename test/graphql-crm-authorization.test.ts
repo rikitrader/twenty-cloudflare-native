@@ -116,6 +116,35 @@ it('cannot bypass core permissions or trash behavior by renaming the operation',
     .toMatchObject({ name: 'Private company', deleted_at: null });
 });
 
+it('fails closed on the legacy CRM REST surface for custom roles', async () => {
+  db.prepare('INSERT INTO custom_roles VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+    .run('sales', workspace, 'Sales', null, null, 0, 0, 1, 0, 0, 0, 1, 0, 0, now, now);
+  db.prepare('INSERT INTO role_assignments VALUES (?,?,?,?,?)').run(workspace, subject, 'sales', now, now);
+  const response = (await handleD1Crm(new Request('https://crm.example.test/api/crm/contacts', {
+    headers: { cookie: `twenty_session=${session}`, 'x-workspace-id': workspace },
+  }), env))!;
+  expect(response.status).toBe(403);
+  expect(await response.json()).toMatchObject({ error: expect.stringContaining('permission-aware GraphQL') });
+});
+
+it('denies member access to administrative REST resources and cross-tenant selection', async () => {
+  const memberResponse = (await handleD1Crm(new Request('https://crm.example.test/api/crm/members', {
+    headers: { cookie: `twenty_session=${session}`, 'x-workspace-id': workspace },
+  }), env))!;
+  expect(memberResponse.status).toBe(403);
+  for (const path of ['/api/crm/exports/synthetic-export', '/api/crm/import/synthetic-import', '/api/crm/outbox']) {
+    const response = (await handleD1Crm(new Request(`https://crm.example.test${path}`, {
+      headers: { cookie: `twenty_session=${session}`, 'x-workspace-id': workspace },
+    }), env))!;
+    expect(response.status, path).toBe(403);
+  }
+
+  const crossTenantResponse = (await handleD1Crm(new Request('https://crm.example.test/api/crm/contacts', {
+    headers: { cookie: `twenty_session=${session}`, 'x-workspace-id': otherWorkspace },
+  }), env))!;
+  expect(crossTenantResponse.status).toBe(403);
+});
+
 it('does not expose records through renamed search or chart compatibility branches', async () => {
   expect((await post('SearchCompany', 'search', { query: 'Private' })).status).toBe(403);
   expect((await post('BarChartData', 'barChartData', { objectName: 'opportunity' })).status).toBe(403);

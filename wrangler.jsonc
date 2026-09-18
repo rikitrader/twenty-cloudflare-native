@@ -3,8 +3,18 @@
   "account_id": "0dd0d155f8dafdca9d2bade1141986a2",
   "main": "src/index-native.ts",
   "compatibility_date": "2026-06-08",
+  "workers_dev": true,
+  "preview_urls": true,
+  "routes": [
+    { "pattern": "crm.mipolitico.com", "custom_domain": true }
+  ],
   "secrets": {
-    "required": ["INTERNAL_SERVICE_TOKEN", "WEBHOOK_TOKEN", "OUTBOUND_WEBHOOK_SECRET"]
+    "required": [
+      "INTERNAL_SERVICE_TOKEN",
+      "WEBHOOK_TOKEN",
+      "OUTBOUND_WEBHOOK_SECRET",
+      "INTEGRATION_ENCRYPTION_KEY"
+    ]
   },
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
   "assets": { "directory": "./frontend", "binding": "ASSETS", "run_worker_first": true },
@@ -131,7 +141,23 @@
     "OPS_ALERT_FROM": "twenty-alerts@sismo911.com",
     "OPS_ALERT_TO": "rikitrader@gmail.com"
     ,"CRM_EMAIL_FROM": "crm@mipolitico.com",
-    "WEBHOOK_ALLOWED_HOSTS": "twenty-crm.observatorio-publico.workers.dev"
+    "WEBHOOK_ALLOWED_HOSTS": "twenty-crm.observatorio-publico.workers.dev,crm.mipolitico.com"
   },
-  "observability": { "enabled": true }
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "redact_query_string": true,
+    "issues": { "enabled": true },
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true,
+      "persist": true
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 0.1,
+      "persist": true
+    }
+  }
 }

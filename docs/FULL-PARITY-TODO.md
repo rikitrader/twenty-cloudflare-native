@@ -88,9 +88,11 @@ cache services, traditional application hosts, and persistent local disk are pro
 
 - [x] Route Twenty `SendEmail` through Cloudflare Email Service for the verified `mipolitico.com` domain, with Queue retries, delivery state, sender enforcement, recipient validation, and rate limiting.
 - [ ] Separate saved provider configuration from verified connected state.
-- [ ] Implement real OAuth/credential validation and encrypted secret storage.
+- [x] Implement real Google/Microsoft OAuth authorization-code + PKCE, provider-profile validation, replay-resistant state, AES-GCM credential storage, and serialized refresh.
 - [ ] Implement message folders, inbound/outbound sync, calendar sync, cursors, retries, disconnect, and reconciliation.
-- [ ] Prevent provider-dependent actions from returning synthetic success.
+  - [x] Persist Google Gmail labels and Microsoft mail folders; synchronize Google/Microsoft calendar events through retryable Queue jobs.
+  - [ ] Add provider delta cursors, message-body synchronization, reconciliation, and production reconnect evidence after real provider registrations exist.
+- [x] Prevent provider-dependent actions from returning synthetic success; disabled providers return explicit configuration errors.
 
 ## 8. Notifications
 
@@ -139,7 +141,8 @@ cache services, traditional application hosts, and persistent local disk are pro
 ## 13. SSO and external integrations
 
 - [ ] Implement OIDC authorization-code + PKCE and SAML validation with exact redirect/entity configuration.
-- [ ] Encrypt credentials, serialize refresh, revoke on disconnect, and bind installations to workspaces.
+- [x] Encrypt Google/Microsoft credentials, serialize refresh, validate the current actor/workspace on callback, and remotely revoke Google on disconnect.
+- [ ] Implement workspace-level SAML and provider production-registration evidence; Microsoft has no equivalent token-revocation endpoint and is explicitly local-disconnect only.
 - [ ] Verify outbound webhooks with SSRF controls, signatures, retries, DLQ, and replay.
   - [x] Implement Twenty-compatible inbound HMAC-SHA256 validation over the exact timestamp/raw-body bytes, a five-minute replay window, deterministic event IDs, payload limits, and durable Queue acceptance.
   - [x] Configure the production `WEBHOOK_TOKEN` secret and verify the public `/webhooks/twenty` receiver with a correctly signed request persisted through Queue to OPS D1.
@@ -156,6 +159,8 @@ cache services, traditional application hosts, and persistent local disk are pro
 - [ ] Rehearse write freeze or change capture, cutover, rollback, and post-cutover reconciliation without deleting the source.
   - [x] Export every workspace-schema table plus workspace-scoped core metadata/membership/file-reference rows inside a PostgreSQL `REPEATABLE READ READ ONLY` transaction, with per-table checksums, counts, resumable table checkpoints, and no source writes.
   - [x] Convert verified source artifacts into dependency-ordered per-family NDJSON, upload required binary objects to tenant-scoped R2, resume Workflow imports, and persist final target reconciliation evidence.
+  - [x] Apply all 55 migrations to an isolated remote D1 database, verify representative relationships/foreign keys, and prove Time Travel rollback while preserving baseline records.
+  - [ ] Repeat the rehearsal with the authorized real Twenty export, attachment manifest, write freeze/change capture, and post-cutover reconciliation.
 
 ## 15. Release and operational gates
 
@@ -164,14 +169,15 @@ cache services, traditional application hosts, and persistent local disk are pro
   - [ ] Accumulate 673 consecutive passing samples over at least 604,800,000 ms with no gap over 30 minutes.
 - [ ] Complete G10 WAF/Logpush/secrets/binding inspection.
   - [x] Inspect and record Worker bindings, required secret names, Workers observability, account MFA enforcement, route topology, and Logpush visibility.
-  - [ ] Move the production hostname onto a Cloudflare zone/custom domain and verify zone WAF managed/custom/rate-limit rules.
+  - [x] Move the Worker onto `crm.mipolitico.com` while retaining the prior workers.dev hostname for compatibility.
+  - [ ] Stage, observe, and then enforce the host-scoped WAF managed/custom/rate-limit rules; the current automation grant lacks WAF edit permission.
   - [ ] Grant narrowly scoped Logpush inspection access and verify an enabled `workers_trace_events` job and destination.
   - [ ] Enable account-wide two-factor enforcement and recapture the account security evidence.
 - [ ] Complete G13 production observation after the final cutover.
 - [ ] Add structured SLOs, alerts, synthetic journeys, cost budgets, backup/restore, DLQ replay, and incident runbooks.
 - [ ] Run the architecture, security, data-integrity, reliability, cost, UX/accessibility, and release-evidence adversarial reviews with no unresolved critical/high finding.
   - [ ] Run production-browser authentication and critical CRM journeys in the existing signed-in Chrome profile.
-  - [x] Record Wrangler dry-run, production smoke, migrations through 0053, deployed version `54181337-b0e4-4dcc-a304-dfe5e54250d1`, previous version `39d1d932-4e38-4d77-aab2-c0e73f1c1f30`, rollback target `a6988e56-5895-45d2-b9b8-f28bf42b97fe`, signed webhook receipt evidence, and an exactly-once manual replay verification.
+  - [x] Record Wrangler dry-run, production smoke, migrations through 0055, deployed version `b9f7a3c0-5e17-4ac2-8f79-5a8acc8fcc96`, previous code version `54181337-b0e4-4dcc-a304-dfe5e54250d1`, rollback target `a6988e56-5895-45d2-b9b8-f28bf42b97fe`, signed webhook receipt evidence, and an exactly-once manual replay verification.
   - [x] Replace the eight-hour native-session expiry with one consistent seven-day TTL across credential login, signup, invitation signup, renewal, and REST session creation.
   - [x] Return protected GraphQL authentication loss as HTTP 200 with `extensions.code = UNAUTHENTICATED`, allowing Twenty's Apollo auth handling to recover instead of retrying raw HTTP 401 failures.
   - [x] Hard-reset concurrent expired-session errors to `/welcome`, reject `/not-found` as a saved return path, and redirect already-stranded `/not-found` tabs to the application root on reload.

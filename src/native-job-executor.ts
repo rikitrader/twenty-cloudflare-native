@@ -2,6 +2,7 @@ import type { CloudflareTwentyJob, Env } from './types';
 import { compatibilityId } from './compatibility-id';
 import { executeWebhookDelivery } from './outbound-webhooks';
 import { executeEmailDelivery } from './crm-email';
+import { executeProviderSync } from './provider-sync';
 
 type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 type Step = { id: string; type: string; config?: Record<string, unknown> };
@@ -122,5 +123,6 @@ export async function executeNativeJob(job: CloudflareTwentyJob, env: Env): Prom
   if (job.jobName === 'ai.chat') return executeAiChat(job, env);
   if (job.jobName === 'webhook.deliver') return executeWebhookDelivery(job, env);
   if (job.jobName === 'email.send') return executeEmailDelivery(job, env);
+  if (job.jobName === 'provider.sync') return executeProviderSync(job, env);
   return new Response(`unsupported native job: ${job.jobName}`, { status: 409 });
 }

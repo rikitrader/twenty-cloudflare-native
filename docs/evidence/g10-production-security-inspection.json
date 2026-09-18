@@ -1,11 +1,20 @@
 {
   "gate": "G10",
   "result": "partial",
-  "inspectedAt": "2026-09-17T20:08:02.632Z",
+  "inspectedAt": "2026-09-18T01:46:32.000Z",
   "worker": "twenty-crm",
-  "deployedVersion": "9f9349e8-27c5-4446-a01a-bfd58755783f",
+  "deployedVersion": "b9f7a3c0-5e17-4ac2-8f79-5a8acc8fcc96",
   "accountId": "0dd0d155f8dafdca9d2bade1141986a2",
-  "hostname": "twenty-crm.observatorio-publico.workers.dev",
+  "hostnames": [
+    "crm.mipolitico.com",
+    "twenty-crm.observatorio-publico.workers.dev"
+  ],
+  "zone": {
+    "name": "mipolitico.com",
+    "id": "a331800c10c2d88ef61b99ab9763f15b",
+    "status": "active",
+    "plan": "Free Website"
+  },
   "checks": {
     "bindings": {
       "result": "passed",
@@ -36,6 +45,7 @@
     "requiredSecrets": {
       "result": "passed",
       "namesOnly": [
+        "INTEGRATION_ENCRYPTION_KEY",
         "INTERNAL_SERVICE_TOKEN",
         "OUTBOUND_WEBHOOK_SECRET",
         "WEBHOOK_TOKEN"
@@ -44,15 +54,21 @@
     },
     "observability": {
       "result": "passed",
-      "workersObservabilityEnabled": true
+      "workersObservabilityEnabled": true,
+      "persistentInvocationLogs": true,
+      "persistentTraces": true,
+      "traceSamplingRate": 0.1,
+      "queryStringRedaction": true
     },
     "waf": {
       "result": "blocked",
-      "reason": "The release is hosted only on workers.dev. Zone-level WAF rules require a Cloudflare zone/custom production hostname; no such route is declared in wrangler.jsonc."
+      "customDomainConfigured": true,
+      "customDomainHealthStatus": 200,
+      "reason": "The zone/custom-domain prerequisite is complete, but the authenticated Wrangler OAuth grant has Zone read only and cannot inspect or change WAF rulesets. The existing signed-in Chrome profile was actively in use during the change window, so no dashboard rule was changed without verifiable UI state."
     },
     "logpush": {
       "result": "blocked",
-      "reason": "No Workers Logpush job was verified and the authenticated deployment token does not expose Logpush read/write permission. Workers observability is enabled but is not equivalent to exported Logpush evidence."
+      "reason": "No Workers Logpush job was verified. The authenticated deployment grant does not expose Logpush read/write permission, and the Free Website zone entitlement does not establish availability of the workers_trace_events dataset. Persisted Workers logs/traces are enabled but are not claimed as Logpush."
     },
     "accountMfaEnforcement": {
       "result": "failed",
@@ -60,16 +76,16 @@
     }
   },
   "requiredActions": [
-    "Map a production custom hostname in a Cloudflare zone, then inspect and record its WAF managed/custom/rate-limit rules.",
-    "Grant a narrowly scoped Logpush inspection credential and verify an enabled workers_trace_events job and destination.",
+    "Using a Cloudflare credential with Zone WAF edit, first deploy CRM-host-only rules in log/disabled mode, validate legitimate authentication/API/webhook traffic, then enforce the tested rules.",
+    "Grant a narrowly scoped Account Logpush read/write credential, confirm workers_trace_events entitlement, configure a customer-owned encrypted destination and retention, and verify delivered events.",
     "Enable account-wide two-factor enforcement and recapture this evidence."
   ],
   "sources": [
     "wrangler whoami --json",
     "wrangler secret list --config wrangler.jsonc",
     "wrangler deploy --dry-run --config wrangler.jsonc",
-    "wrangler deploy --config wrangler.jsonc",
-    "production /healthz and /_status responses",
+    "wrangler deploy --config wrangler.jsonc (version b9f7a3c0-5e17-4ac2-8f79-5a8acc8fcc96)",
+    "production /healthz and /_status responses on both hostnames",
     "wrangler.jsonc"
   ]
 }

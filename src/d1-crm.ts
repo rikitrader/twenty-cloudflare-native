@@ -220,6 +220,29 @@ export async function handleD1Crm(request: Request, env: Env): Promise<Response 
     const limited = await env.OPS_RATE_LIMITER.limit({ key: `crm:${workspaceId}:${auth.actor.subject}` });
     if (!limited.success) return json({ error: "rate limit exceeded" }, 429);
   }
+  // The legacy REST surface predates field and row-level role policies. Until
+  // each endpoint can project and filter through the shared record compiler,
+  // custom roles fail closed here and use the permission-aware GraphQL API.
+  if (auth.role.startsWith('custom:') && url.pathname.startsWith('/api/crm/')) {
+    return json({ error: 'This REST route is unavailable for custom roles; use the permission-aware GraphQL API' }, 403);
+  }
+  const restObject = url.pathname.startsWith('/api/crm/contacts') ? 'person'
+    : url.pathname.startsWith('/api/crm/companies') ? 'company'
+    : url.pathname.startsWith('/api/crm/opportunities') ? 'opportunity'
+    : url.pathname.startsWith('/api/crm/activities') ? 'activity'
+    : url.pathname.startsWith('/api/crm/pipelines') ? 'pipeline'
+    : null;
+  if (restObject) {
+    const restAction = request.method === 'GET' || request.method === 'HEAD' ? 'read'
+      : request.method === 'POST' ? 'create'
+      : request.method === 'DELETE' ? 'delete' : 'update';
+    if (!await permission(env, workspaceId, auth.role, restAction, restObject)) return json({ error: `${restAction} access denied` }, 403);
+  }
+  if (url.pathname === '/api/crm/search' && !await permission(env, workspaceId, auth.role, 'read')) return json({ error: 'read access denied' }, 403);
+  const administrativeDataPath = /^\/api\/crm\/(?:export|exports|import|imports|reconciliation|migration-files|outbox|invitations)(?:\/|$)/.test(url.pathname);
+  if (administrativeDataPath && !['owner','admin'].includes(auth.role)) return json({ error: 'admin access required' }, 403);
+  if (url.pathname.startsWith('/api/crm/members') && !['owner','admin'].includes(auth.role)) return json({ error: 'admin access required' }, 403);
+  if ((url.pathname === '/api/crm/custom-objects' || url.pathname === '/api/crm/metadata/fields') && request.method !== 'GET' && !['owner','admin'].includes(auth.role)) return json({ error: 'admin access required' }, 403);
   if (url.pathname === "/api/crm/search" && request.method === "GET") {
     const q = (url.searchParams.get("q") ?? "").trim().slice(0, 120);
     if (!q) return json({ data: [] });

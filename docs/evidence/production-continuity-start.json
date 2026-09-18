@@ -1,0 +1,36 @@
+{
+  "capturedAt": "2026-09-18T02:07:29Z",
+  "workerVersion": "b9f7a3c0-5e17-4ac2-8f79-5a8acc8fcc96",
+  "productionReady": false,
+  "operationalContinuity": {
+    "status": "collecting",
+    "ready": false,
+    "requiredSamples": 673,
+    "consecutivePassedSamples": 1,
+    "requiredDurationMs": 604800000,
+    "observedDurationMs": 0,
+    "windowStartedAt": "2026-09-18T02:00:30.000Z",
+    "lastSampledAt": "2026-09-18T02:00:30.000Z",
+    "explanation": "The first real production sample passed. The gate remains collecting until 673 consecutive passing samples span at least 604,800,000 ms; no historical sample was synthesized."
+  },
+  "sessionCacheContinuity": {
+    "gate": "G3",
+    "status": "collecting",
+    "ready": false,
+    "firstAt": "2026-09-17T20:15:44.000Z",
+    "lastAt": "2026-09-18T02:00:30.000Z",
+    "samples": 24,
+    "consecutivePassedSamples": 24,
+    "failures": 0,
+    "observedDurationMs": 20686000,
+    "requiredDurationMs": 604800000,
+    "remainingDurationMs": 584114000,
+    "maxGapMs": 900000,
+    "maxAllowedGapMs": 1800000
+  },
+  "sourceEndpoints": [
+    "https://crm.mipolitico.com/_status/continuity",
+    "https://crm.mipolitico.com/_status/g3",
+    "https://crm.mipolitico.com/_status"
+  ]
+}

@@ -1,0 +1,304 @@
+{
+  "result": "passed",
+  "executedAt": "2026-09-18T01:59:37.636Z",
+  "environment": "isolated node:sqlite file database; synthetic data only",
+  "baselineThrough": "0034_password_resets.sql",
+  "upgradedThrough": "0055_provider_callback_origin.sql",
+  "migrationCount": 55,
+  "upgradeMigrationCount": 21,
+  "upgradeDurationMs": 52.516,
+  "totalMigrationDurationMs": 64.061,
+  "dataIntegrity": {
+    "before": {
+      "counts": {
+        "workspaces": 1,
+        "members": 1,
+        "companies": 1,
+        "contacts": 1
+      },
+      "representativeHash": "7deebea6aa10b35ebacf1dc94f45b6be3955e6a47e02a40690a675e614618919"
+    },
+    "after": {
+      "counts": {
+        "workspaces": 1,
+        "members": 1,
+        "companies": 1,
+        "contacts": 1
+      },
+      "representativeHash": "7deebea6aa10b35ebacf1dc94f45b6be3955e6a47e02a40690a675e614618919"
+    },
+    "postUpgrade": {
+      "integrity": "ok",
+      "foreignKeyViolations": 0
+    },
+    "expectedTables": [
+      {
+        "name": "operational_continuity_samples",
+        "present": true
+      },
+      {
+        "name": "provider_oauth_states",
+        "present": true
+      },
+      {
+        "name": "integration_credentials",
+        "present": true
+      },
+      {
+        "name": "integration_sync_state",
+        "present": true
+      },
+      {
+        "name": "integration_message_folders",
+        "present": true
+      }
+    ]
+  },
+  "recovery": {
+    "method": "restore immutable pre-upgrade database copy",
+    "restored": {
+      "counts": {
+        "workspaces": 1,
+        "members": 1,
+        "companies": 1,
+        "contacts": 1
+      },
+      "representativeHash": "7deebea6aa10b35ebacf1dc94f45b6be3955e6a47e02a40690a675e614618919"
+    },
+    "integrity": {
+      "integrity": "ok",
+      "foreignKeyViolations": 0
+    },
+    "sourceDatabaseDeleted": false
+  },
+  "commands": [
+    "npm run migrations:rehearse",
+    "npx wrangler d1 migrations apply <preview-db> --remote (required before preview deployment)"
+  ],
+  "limitations": [
+    "Local SQLite validates SQL, data preservation, and restore mechanics; a separate isolated remote D1 rehearsal is still required to measure Cloudflare network/control-plane execution time.",
+    "No production or customer records were read or modified."
+  ],
+  "timings": [
+    {
+      "file": "0001_init.sql",
+      "durationMs": 0.924
+    },
+    {
+      "file": "0002_job_failures.sql",
+      "durationMs": 0.592
+    },
+    {
+      "file": "0003_backup_integrity.sql",
+      "durationMs": 0.571
+    },
+    {
+      "file": "0004_release_control.sql",
+      "durationMs": 0.669
+    },
+    {
+      "file": "0005_crm_core.sql",
+      "durationMs": 1.195
+    },
+    {
+      "file": "0006_activity_pipeline.sql",
+      "durationMs": 0.546
+    },
+    {
+      "file": "0007_metadata_views.sql",
+      "durationMs": 0.861
+    },
+    {
+      "file": "0008_custom_values.sql",
+      "durationMs": 0.886
+    },
+    {
+      "file": "0009_custom_objects.sql",
+      "durationMs": 0.537
+    },
+    {
+      "file": "0010_relationships.sql",
+      "durationMs": 0.607
+    },
+    {
+      "file": "0011_sessions.sql",
+      "durationMs": 0.655
+    },
+    {
+      "file": "0012_files_imports.sql",
+      "durationMs": 0.773
+    },
+    {
+      "file": "0013_file_links.sql",
+      "durationMs": 0.686
+    },
+    {
+      "file": "0014_audit_events.sql",
+      "durationMs": 0.534
+    },
+    {
+      "file": "0015_membership_indexes.sql",
+      "durationMs": 0.526
+    },
+    {
+      "file": "0016_invitations.sql",
+      "durationMs": 0.658
+    },
+    {
+      "file": "0017_voter_profiles.sql",
+      "durationMs": 0.49
+    },
+    {
+      "file": "0018_crm_outbox.sql",
+      "durationMs": 0.61
+    },
+    {
+      "file": "0019_crm_exports.sql",
+      "durationMs": 0.54
+    },
+    {
+      "file": "0020_record_ownership.sql",
+      "durationMs": 2.083
+    },
+    {
+      "file": "0021_api_keys.sql",
+      "durationMs": 0.778
+    },
+    {
+      "file": "0022_workspace_settings.sql",
+      "durationMs": 0.464
+    },
+    {
+      "file": "0023_ai_chat.sql",
+      "durationMs": 0.868
+    },
+    {
+      "file": "0024_webhooks.sql",
+      "durationMs": 0.507
+    },
+    {
+      "file": "0025_installed_apps.sql",
+      "durationMs": 0.492
+    },
+    {
+      "file": "0026_security_settings.sql",
+      "durationMs": 0.658
+    },
+    {
+      "file": "0027_billing.sql",
+      "durationMs": 0.567
+    },
+    {
+      "file": "0028_integrations.sql",
+      "durationMs": 0.685
+    },
+    {
+      "file": "0029_native_users.sql",
+      "durationMs": 0.555
+    },
+    {
+      "file": "0030_workflows.sql",
+      "durationMs": 0.548
+    },
+    {
+      "file": "0031_automation_resources.sql",
+      "durationMs": 0.586
+    },
+    {
+      "file": "0032_messaging.sql",
+      "durationMs": 0.679
+    },
+    {
+      "file": "0033_calendar_events.sql",
+      "durationMs": 1.989
+    },
+    {
+      "file": "0034_password_resets.sql",
+      "durationMs": 2.486
+    },
+    {
+      "file": "0035_crm_record_lifecycle.sql",
+      "durationMs": 3.692
+    },
+    {
+      "file": "0036_custom_field_families.sql",
+      "durationMs": 3.108
+    },
+    {
+      "file": "0037_direct_file_uploads.sql",
+      "durationMs": 0.909
+    },
+    {
+      "file": "0038_workflow_run_steps.sql",
+      "durationMs": 0.957
+    },
+    {
+      "file": "0039_supported_locale.sql",
+      "durationMs": 0.033
+    },
+    {
+      "file": "0040_api_key_roles.sql",
+      "durationMs": 1.786
+    },
+    {
+      "file": "0041_attachments.sql",
+      "durationMs": 1.353
+    },
+    {
+      "file": "0042_tasks_notes.sql",
+      "durationMs": 1.158
+    },
+    {
+      "file": "0043_event_delivery_idempotency.sql",
+      "durationMs": 1.106
+    },
+    {
+      "file": "0044_custom_roles_permissions.sql",
+      "durationMs": 1.687
+    },
+    {
+      "file": "0045_workflow_versions.sql",
+      "durationMs": 0.646
+    },
+    {
+      "file": "0046_resumable_transfers.sql",
+      "durationMs": 6.427
+    },
+    {
+      "file": "0047_notifications.sql",
+      "durationMs": 1.093
+    },
+    {
+      "file": "0048_role_flags_agents.sql",
+      "durationMs": 0.842
+    },
+    {
+      "file": "0049_imports_webhook_delivery.sql",
+      "durationMs": 3.859
+    },
+    {
+      "file": "0050_email_deliveries.sql",
+      "durationMs": 0.721
+    },
+    {
+      "file": "0051_import_reconciliation_webhook_receiver.sql",
+      "durationMs": 2.064
+    },
+    {
+      "file": "0052_blocklist.sql",
+      "durationMs": 0.735
+    },
+    {
+      "file": "0053_webhook_replay.sql",
+      "durationMs": 3.062
+    },
+    {
+      "file": "0054_production_readiness.sql",
+      "durationMs": 0.998
+    },
+    {
+      "file": "0055_provider_callback_origin.sql",
+      "durationMs": 1.02
+    }
+  ]
+}

@@ -5,7 +5,7 @@ import { workspaceSignup } from "./workspace-signup";
 import { currentUserResponse } from "./current-user";
 import { workspaceBootstrap } from "./workspace-bootstrap";
 import { frontendClientConfig } from "./frontend-config";
-import { crmRecords, crmPermissions } from "./crm-records";
+import { crmCanAccessRecord, crmRecords, crmPermissions } from "./crm-records";
 import { crmRoles } from "./crm-roles";
 import { workflowEditor } from "./crm-workflow-editor";
 import { crmSearch } from "./crm-search";
@@ -380,11 +380,32 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
   if (/UpdateCalendarChannel|UpdateEmailGroupChannel|UpdateMessageChannel/i.test(op)) {
     const input = unwrapInput(vars); const id = String(vars.id ?? vars.channelId ?? input.id ?? "");
     if (!id) return Response.json({ errors: [{ message: 'channel id is required' }] }, { status: 400 });
-    const changed = await env.CRM_DB.prepare("UPDATE integration_accounts SET name = COALESCE(?, name), config_json = COALESCE(?, config_json), updated_at = ? WHERE workspace_id = ? AND id = ?").bind(input.name ? String(input.name).slice(0, 160) : null, Object.keys(input).length ? JSON.stringify(input) : null, new Date().toISOString(), workspaceId, id).run();
+    // Channel settings may contain credentials in the upstream client shape.
+    // Only a display name is accepted here; OAuth secrets use the encrypted
+    // provider integration flow and are never serialized into config_json.
+    const changed = await env.CRM_DB.prepare("UPDATE integration_accounts SET name = COALESCE(?, name), updated_at = ? WHERE workspace_id = ? AND id = ?").bind(input.name ? String(input.name).slice(0, 160) : null, new Date().toISOString(), workspaceId, id).run();
     if (Number(changed.meta?.changes ?? 0) !== 1) return Response.json({ errors: [{ message: 'channel not found' }] }, { status: 404 });
     return Response.json({ data: { updateCalendarChannel: { id }, updateEmailGroupChannel: { id }, updateMessageChannel: { id } } });
   }
-  if (/ConnectedAccount|CalendarChannel|MessageChannel|ImapSmtpCaldav|MyCalendar|MyMessage/i.test(op)) { const input = unwrapInput(vars); const accountId = String(vars.id ?? vars.accountId ?? input.id ?? ""); const accountType = /Calendar/i.test(op) ? "calendar" : /Message|Imap|Smtp|Caldav/i.test(op) ? "messaging" : "connected"; if (/Get|My|FindMany/i.test(op)) { const rows = await env.CRM_DB.prepare("SELECT id, account_type as accountType, name, status, config_json as config, created_at as createdAt, updated_at as updatedAt FROM integration_accounts WHERE workspace_id = ? AND account_type = ? ORDER BY updated_at DESC").bind(workspaceId, accountType).all(); return Response.json({ data: { connectedAccounts: rows.results, calendarChannels: rows.results, messageChannels: rows.results, myCalendarChannels: rows.results, myMessageChannels: rows.results, myMessageFolders: [], messageFolders: [] } }); } if (!['owner','admin'].includes(member.role)) return Response.json({errors:[{message:'admin access required'}]},{status:403}); if (/Start.*Sync/i.test(op)) return unavailable(op, 'Provider synchronization is unavailable until the account connection is verified', 'PROVIDER_NOT_CONFIGURED'); if (/Save|Create/i.test(op)) { const id = accountId || crypto.randomUUID(); const now = new Date().toISOString(); await env.CRM_DB.prepare("INSERT INTO integration_accounts (id, workspace_id, account_type, name, config_json, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'configured', ?, ?) ON CONFLICT(id) DO UPDATE SET name = excluded.name, config_json = excluded.config_json, status = 'configured', updated_at = excluded.updated_at").bind(id, workspaceId, accountType, String(input.name ?? `${accountType} account`).slice(0, 160), JSON.stringify(input), now, now).run(); return Response.json({ data: { saveImapSmtpCaldavAccount: { id, status: "configured" }, createEmailGroupChannel: { id, status: "configured" } } }); } if (/Delete|Disconnect/i.test(op) && accountId) { const changed = await env.CRM_DB.prepare("UPDATE integration_accounts SET status = 'disconnected', updated_at = ? WHERE workspace_id = ? AND id = ? AND status <> 'disconnected'").bind(new Date().toISOString(), workspaceId, accountId).run(); if (Number(changed.meta?.changes ?? 0) !== 1) return Response.json({ errors: [{ message: 'connected account not found' }] }, { status: 404 }); return Response.json({ data: { deleteConnectedAccount: { id: accountId }, deleteEmailGroupChannel: { id: accountId } } }); } }
+  if (/ConnectedAccount|CalendarChannel|MessageChannel|ImapSmtpCaldav|MyCalendar|MyMessage/i.test(op)) {
+    const input = unwrapInput(vars); const accountId = String(vars.id ?? vars.accountId ?? input.id ?? "");
+    if (/Get|My|FindMany/i.test(op)) {
+      const rows = await env.CRM_DB.prepare("SELECT id, account_type as accountType, name, status, created_at as createdAt, updated_at as updatedAt FROM integration_accounts WHERE workspace_id = ? ORDER BY updated_at DESC").bind(workspaceId).all();
+      const folders = accountId ? await env.CRM_DB.prepare("SELECT provider_folder_id as id,name,folder_type as folderType,updated_at as updatedAt FROM integration_message_folders WHERE workspace_id=? AND account_id=? ORDER BY name").bind(workspaceId,accountId).all() : {results:[]};
+      return Response.json({ data: { connectedAccounts: rows.results, calendarChannels: rows.results, messageChannels: rows.results, myCalendarChannels: rows.results, myMessageChannels: rows.results, myMessageFolders: folders.results, messageFolders: folders.results } });
+    }
+    if (!['owner','admin'].includes(member.role)) return Response.json({errors:[{message:'admin access required'}]},{status:403});
+    if (/Start.*Sync/i.test(op)) {
+      if(!env.JOBS_QUEUE)return unavailable(op,'Provider synchronization queue is unavailable','PROVIDER_NOT_CONFIGURED');
+      const account=await env.CRM_DB.prepare("SELECT id FROM integration_accounts WHERE workspace_id=? AND id=? AND status='connected'").bind(workspaceId,accountId).first();
+      const credential=account?await env.CRM_DB.prepare('SELECT 1 FROM integration_credentials WHERE workspace_id=? AND account_id=?').bind(workspaceId,accountId).first():null;
+      if(!account||!credential)return unavailable(op,'A verified OAuth connection is required','PROVIDER_NOT_CONFIGURED');
+      const now=new Date().toISOString(),jobId=crypto.randomUUID();await env.JOBS_QUEUE.send({schemaVersion:1,id:jobId,queueName:'twenty-jobs',jobName:'provider.sync',data:{workspaceId,accountId},createdAt:now,retryLimit:5,priority:0,dedupeKey:`provider-sync:${workspaceId}:${accountId}:${now.slice(0,16)}`});
+      return Response.json({data:{startSync:{queued:true,jobId},startCalendarChannelSync:{queued:true,jobId},startMessageChannelSync:{queued:true,jobId}}},{status:202});
+    }
+    if (/Save|Create/i.test(op)) return unavailable(op,'Connect Google or Microsoft through the OAuth integration endpoint; plaintext provider configuration is rejected','PROVIDER_NOT_CONFIGURED');
+    if (/Delete|Disconnect/i.test(op)) return unavailable(op,'Disconnect through the provider integration endpoint so remote revocation and local credential deletion complete together','PROVIDER_NOT_CONFIGURED');
+  }
   if (/AutoCompleteAddress|AddressDetails/i.test(op)) {
     // Address lookup is optional in Twenty; keep the workflow valid without a required
     // third-party geocoder. Consumers already handle an empty suggestion list/null detail.
@@ -604,11 +625,19 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
   if (/View/i.test(op)) { const rows = await env.CRM_DB.prepare("SELECT id, object_type as objectType, name, filters_json as filters, sort_json as sort, created_at as createdAt, updated_at as updatedAt FROM saved_views WHERE workspace_id = ? ORDER BY updated_at DESC").bind(workspaceId).all(); return Response.json({ data: { views: { edges: rows.results.map((node) => ({ node })), nodes: rows.results, totalCount: rows.results.length }, findManyViews: rows.results } }); }
   if (/Relation/i.test(op) || vars.relationKey) {
     const input = unwrapInput(vars); const sourceType = String(vars.sourceType ?? input.sourceType ?? vars.objectName ?? ""); const sourceId = String(vars.sourceId ?? input.sourceId ?? vars.recordId ?? ""); const targetType = String(vars.targetType ?? input.targetType ?? ""); const targetId = String(vars.targetId ?? input.targetId ?? ""); const relationKey = String(vars.relationKey ?? input.relationKey ?? "related");
+    if(member.role.startsWith('custom:')&&(sourceType.startsWith('custom:')||targetType.startsWith('custom:')))return Response.json({errors:[{message:'Custom-object relationship policies are not available for custom roles',extensions:{code:'FORBIDDEN'}}]},{status:403});
+    const policyType=(value:string)=>value==='contact'?'person':value.startsWith('custom:')?null:value;
+    const write=/Create|Connect|Update|Add|Delete|Disconnect|Remove/i.test(op);
+    const sourcePolicy=policyType(sourceType),targetPolicy=policyType(targetType);
+    if(sourcePolicy&&sourceId&&!await crmCanAccessRecord(env,workspaceId,member.role,sourcePolicy,actor.subject,sourceId,write?'update':'read'))return Response.json({errors:[{message:'related record not found',extensions:{code:'FORBIDDEN'}}]},{status:403});
+    if(targetPolicy&&targetId&&!await crmCanAccessRecord(env,workspaceId,member.role,targetPolicy,actor.subject,targetId,write?'update':'read'))return Response.json({errors:[{message:'related record not found',extensions:{code:'FORBIDDEN'}}]},{status:403});
     if (/Create|Connect|Update|Add/i.test(op) && sourceId && targetId) { const tableForType = (type: string) => entityFromVars({ objectType: type })?.table ?? null; const sourceTable = tableForType(sourceType); const targetTable = tableForType(targetType); const [sourceExists, targetExists] = await Promise.all([sourceTable ? env.CRM_DB.prepare(`SELECT 1 FROM ${sourceTable} WHERE workspace_id = ? AND id = ? LIMIT 1`).bind(workspaceId, sourceId).first() : Promise.resolve(true), targetTable ? env.CRM_DB.prepare(`SELECT 1 FROM ${targetTable} WHERE workspace_id = ? AND id = ? LIMIT 1`).bind(workspaceId, targetId).first() : Promise.resolve(true)]); if (!sourceExists || !targetExists) return Response.json({ errors: [{ message: "related record not found in workspace" }] }, { status: 404 }); const now = new Date().toISOString(); await env.CRM_DB.prepare("INSERT OR IGNORE INTO record_relationships (id, workspace_id, source_type, source_id, target_type, target_id, relation_key, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").bind(crypto.randomUUID(), workspaceId, sourceType, sourceId, targetType, targetId, relationKey, now).run(); }
     if (/Delete|Disconnect|Remove/i.test(op) && sourceId && targetId) await env.CRM_DB.prepare("DELETE FROM record_relationships WHERE workspace_id = ? AND source_type = ? AND source_id = ? AND target_type = ? AND target_id = ? AND relation_key = ?").bind(workspaceId, sourceType, sourceId, targetType, targetId, relationKey).run();
     const rows = await env.CRM_DB.prepare("SELECT id, source_type as sourceType, source_id as sourceId, target_type as targetType, target_id as targetId, relation_key as relationKey, created_at as createdAt FROM record_relationships WHERE workspace_id = ? AND ((source_type = ? AND source_id = ?) OR (target_type = ? AND target_id = ?)) ORDER BY created_at DESC LIMIT 200").bind(workspaceId, sourceType, sourceId, sourceType, sourceId).all(); return Response.json({ data: { recordRelations: rows.results, relations: rows.results, relation: rows.results[0] ?? null } });
   }
   if (/FileUpload|File/i.test(op) && !entityFor(op)) {
+    if (!(await crmPermissions(env,workspaceId,member.role,'attachment')).read) return Response.json({errors:[{message:'Read access denied',extensions:{code:'FORBIDDEN'}}]},{status:403});
+    if(member.role.startsWith('custom:')) return Response.json({errors:[{message:'File listing is unavailable until every file can be projected through the custom-role record policy',extensions:{code:'FORBIDDEN'}}]},{status:403});
     const rows = await env.CRM_DB.prepare("SELECT id, filename, content_type as contentType, bytes, created_at as createdAt FROM crm_files WHERE workspace_id = ? ORDER BY created_at DESC LIMIT 100").bind(workspaceId).all();
     return Response.json({ data: { files: { edges: rows.results.map((node) => ({ node })), nodes: rows.results, totalCount: rows.results.length }, fileUploads: rows.results } });
   }
@@ -623,6 +652,7 @@ export async function handleGraphql(request: Request, env: Env): Promise<Respons
     ]); const results = people.results.concat(companies.results, opportunities.results); return Response.json({ data: { search: results, combinedFindManyRecords: results, records: results } });
   }
   if (/BarChartData|LineChartData|PieChartData|GroupBy|ChartData/i.test(op)) {
+    if(member.role.startsWith('custom:'))return Response.json({errors:[{message:'Chart aggregation is unavailable for custom roles until field and row policies can be applied to the aggregation',extensions:{code:'FORBIDDEN'}}]},{status:403});
     if (!(await crmPermissions(env, workspaceId, member.role)).read) return Response.json({errors:[{message:'Read access denied'}]},{status:403});
     const entity = entityFor(op) ?? entityFromVars(vars) ?? entityForRoot(rootField(body.query)); const allowed: Record<string, string> = { stage: "stage", type: "type", domain: "domain", createdAt: "created_at", created_at: "created_at" }; const requestedGroup = allowed[String(vars.groupBy ?? vars.groupField ?? vars.field ?? "")]; const group = requestedGroup && entity?.columns.includes(requestedGroup) ? requestedGroup : entity?.columns.includes("stage") ? "stage" : entity?.columns.includes("type") ? "type" : "created_at";
     if (!entity) return Response.json({ data: { barChartData: [], lineChartData: [], pieChartData: [], groupBy: [] } });

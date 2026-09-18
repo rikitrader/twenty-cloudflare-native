@@ -23,7 +23,8 @@ Required non-secret variable:
 
 The controlled production receiver is
 `https://twenty-crm.observatorio-publico.workers.dev/webhooks/receiver`; the
-exact allowlisted hostname is `twenty-crm.observatorio-publico.workers.dev`.
+allowlist contains only `twenty-crm.observatorio-publico.workers.dev` and
+`crm.mipolitico.com`.
 `POST /_ops/webhooks/self-test` registers that receiver for one workspace and
 queues a signed round trip; it requires an authenticated workspace owner/admin
 session or a workspace-scoped admin API key.
@@ -44,11 +45,40 @@ Never reuse either generated secret outside its documented direction.
 
 ## Calendar and mailbox OAuth
 
-Google and Microsoft require externally registered OAuth applications with exact
-production redirect URIs. Required credentials include client IDs and client
-secrets. Do not store provider refresh tokens in `integration_accounts.config_json`;
-encrypted token storage and refresh serialization must be deployed before these
-providers are enabled.
+The Worker implements authorization-code + PKCE, one-time/replay-resistant
+state, provider profile validation, AES-GCM token storage, serialized refresh,
+bounded Queue retries, Gmail label / Microsoft mail-folder synchronization,
+and Google / Microsoft calendar synchronization. Provider tokens are never
+stored in `integration_accounts.config_json`, returned to the browser, or
+written to logs.
+
+The shared production encryption secret `INTEGRATION_ENCRYPTION_KEY` is
+provisioned. Provider registration is still externally blocked because the
+following Cloudflare secrets do not exist:
+
+- Google: `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`.
+- Microsoft: `MICROSOFT_OAUTH_CLIENT_ID`,
+  `MICROSOFT_OAUTH_CLIENT_SECRET`.
+- Optional Microsoft tenant restriction:
+  `MICROSOFT_OAUTH_TENANT_ID` (defaults to `common`).
+
+Register these exact callbacks at the providers:
+
+- `https://twenty-crm.observatorio-publico.workers.dev/api/integrations/oauth/google/callback`
+- `https://twenty-crm.observatorio-publico.workers.dev/api/integrations/oauth/microsoft/callback`
+- `https://crm.mipolitico.com/api/integrations/oauth/google/callback`
+- `https://crm.mipolitico.com/api/integrations/oauth/microsoft/callback`
+
+The OAuth state stores and validates the initiating origin, so the callback and
+post-connect redirect stay on the hostname that owns the user's host-only
+session cookie.
+
+After credentials are provisioned, an owner/admin starts connection at
+`POST /api/integrations/oauth/{provider}/start`; the callback validates the
+same logged-in actor and workspace. `POST /api/integrations/{accountId}/sync`
+durably queues synchronization. `POST /api/integrations/{accountId}/disconnect` revokes
+Google remotely before local deletion; Microsoft documents local disconnect
+because that provider does not expose an equivalent token-revocation endpoint.
 
 ## Billing
 
@@ -56,6 +86,11 @@ Billing intentionally remains disabled. Activation requires an authoritative
 processor registration, product/price identifiers, a restricted API secret, and
 a signed webhook secret. Checkout, portal, entitlements, refunds, and
 reconciliation must use processor state rather than client input.
+
+The absent names are `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`;
+`BILLING_PROVIDER_ENABLED` must remain unset/false until real checkout, portal,
+signed event reconciliation, refunds, and entitlement tests pass. No billing
+mutation may report success while this gate is closed.
 
 No secret value belongs in this repository, frontend assets, logs, or D1 export
 artifacts. Provision production secrets with `wrangler secret put` or Cloudflare

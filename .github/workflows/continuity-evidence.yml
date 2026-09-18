@@ -1,0 +1,27 @@
+name: Production continuity evidence
+
+on:
+  schedule:
+    - cron: '20 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Capture public no-store readiness evidence
+        run: node scripts/capture-production-readiness-evidence.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: continuity-${{ github.run_id }}
+          path: artifacts/*.json
+          retention-days: 14
+          if-no-files-found: error
