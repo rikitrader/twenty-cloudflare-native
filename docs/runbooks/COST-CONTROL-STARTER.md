@@ -1,11 +1,39 @@
-# Starter-scale cost control
+# Cloudflare-native starter cost controls
 
-Attribute usage by Cloudflare resource before optimizing. Production uses one
-Worker plus D1, R2, KV, Queues, Workflows, Durable Objects, Email, and Workers
-AI bindings. Use bounded queries, indexed filters, Queue batching, explicit R2
-retention, and sampled observability outside incident windows.
+The starter profile intentionally excludes PostgreSQL, Redis, Hyperdrive,
+Containers, persistent local disks, and external application hosting.
 
-Create account budget alerts and review D1 rows read/written, R2 operations,
-Queue backlog, Workflow duration, DO requests, and Worker CPU after releases.
-Never delete a database, bucket, queue, audit ledger, or backup as a cost
-measure without a verified export and recovery test.
+Run the executable guard with:
+
+```bash
+npm run cost:starter:check
+```
+
+The guard validates both the reference production configuration and the
+portable example configuration. It requires:
+
+- exactly two D1 bindings (`CRM_DB` and `OPS_DB`);
+- one R2 binding for tenant files, transfers, and backups;
+- KV only for disposable status state;
+- bounded event, job, and dead-letter Queues;
+- backup, import, and export Workflows;
+- state, scheduler, and pubsub Durable Objects;
+- Static Assets served behind the Worker;
+- query-string-redacted Worker observability;
+- scheduled maintenance and continuity triggers;
+- no Container, Hyperdrive, external SQL, or Redis runtime dependency.
+
+## Cost controls for forks
+
+- Start with conservative Queue batch sizes and concurrency.
+- Keep trace sampling below full volume unless debugging a bounded incident.
+- Review every Cron Trigger; the reference schedules serve distinct scheduler,
+  continuity, and backup responsibilities.
+- Apply lifecycle/retention policies to R2 artifacts and GitHub evidence.
+- Keep AI and Email bindings optional and expose disabled states explicitly.
+- Add account budgets and alerts before enabling high-volume providers,
+  imports, exports, or AI use.
+
+This check validates architecture, not a fixed bill. Cloudflare prices,
+included quotas, and product availability vary by plan and can change; review
+the current Cloudflare dashboard and official pricing before deployment.

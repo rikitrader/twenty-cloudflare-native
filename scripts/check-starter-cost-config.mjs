@@ -1,141 +1,60 @@
-import { readFile } from "node:fs/promises";
+import { readFile } from 'node:fs/promises';
 
-const files = ["wrangler.jsonc", "wrangler.canary.jsonc", "wrangler.staging.jsonc"];
+const files = ['wrangler.jsonc', 'wrangler.example.jsonc'];
 
 function stripJsonComments(input) {
-  let out = "";
-  let quoted = false;
-  let escaped = false;
-  let line = false;
-  let block = false;
-  for (let i = 0; i < input.length; i += 1) {
-    const c = input[i];
-    const n = input[i + 1];
-    if (line) {
-      if (c === "\n") {
-        line = false;
-        out += c;
-      }
-      continue;
-    }
-    if (block) {
-      if (c === "*" && n === "/") {
-        block = false;
-        i += 1;
-      }
-      continue;
-    }
+  let out = '', quoted = false, escaped = false, line = false, block = false;
+  for (let index = 0; index < input.length; index += 1) {
+    const current = input[index], next = input[index + 1];
+    if (line) { if (current === '\n') { line = false; out += current; } continue; }
+    if (block) { if (current === '*' && next === '/') { block = false; index += 1; } continue; }
     if (quoted) {
-      out += c;
+      out += current;
       if (escaped) escaped = false;
-      else if (c === "\\") escaped = true;
-      else if (c === '"') quoted = false;
+      else if (current === '\\') escaped = true;
+      else if (current === '"') quoted = false;
       continue;
     }
-    if (c === '"') {
-      quoted = true;
-      out += c;
-    } else if (c === "/" && n === "/") {
-      line = true;
-      i += 1;
-    } else if (c === "/" && n === "*") {
-      block = true;
-      i += 1;
-    } else out += c;
+    if (current === '"') { quoted = true; out += current; }
+    else if (current === '/' && next === '/') { line = true; index += 1; }
+    else if (current === '/' && next === '*') { block = true; index += 1; }
+    else out += current;
   }
   return out;
 }
 
 const errors = [];
 const warnings = [];
-let productionConfig;
+const requireValue = (condition, message) => { if (!condition) errors.push(message); };
+
 for (const file of files) {
-  const config = JSON.parse(stripJsonComments(await readFile(file, "utf8")));
-  if (file === "wrangler.jsonc") productionConfig = config;
-  const crons = config.triggers?.crons ?? [];
-  if (crons.some((cron) => cron === "*/5 * * * *"))
-    errors.push(`${file}: five-minute cron keeps starter containers hot`);
-  const instances = (config.containers ?? []).reduce(
-    (sum, container) => sum + Number(container.max_instances ?? 0),
-    0,
-  );
-  if (file === "wrangler.staging.jsonc" && instances !== 3)
-    errors.push(
-      `${file}: staging must remain capped at one server, one worker, and one backup`,
-    );
-  if (file === "wrangler.jsonc" && instances !== 3)
-    errors.push(
-      `${file}: production must define exactly two core containers and one backup`,
-    );
-}
+  const config = JSON.parse(stripJsonComments(await readFile(file, 'utf8')));
+  const bindings = values => new Set((values ?? []).map(value => value.binding));
+  const d1 = bindings(config.d1_databases);
+  const r2 = bindings(config.r2_buckets);
+  const kv = bindings(config.kv_namespaces);
+  const queueProducers = bindings(config.queues?.producers);
+  const workflows = bindings(config.workflows);
+  const durableObjects = bindings(config.durable_objects?.bindings?.map(value => ({ binding: value.name })));
 
-const productionServer = productionConfig?.containers?.find(
-  (container) => container.class_name === "TwentyServer",
-);
-const productionWorker = productionConfig?.containers?.find(
-  (container) => container.class_name === "TwentyWorker",
-);
-const productionBackup = productionConfig?.containers?.find(
-  (container) => container.class_name === "TwentyBackup",
-);
-const stagingConfig = JSON.parse(
-  stripJsonComments(await readFile("wrangler.staging.jsonc", "utf8")),
-);
-if (
-  productionConfig?.containers?.some(
-    (container) => container.class_name === "TwentyContainer",
-  )
-)
-  errors.push("wrangler.jsonc: legacy all-in-one container must remain retired");
-for (const [role, container] of [
-  ["server", productionServer],
-  ["worker", productionWorker],
-]) {
-  if (container?.instance_type !== "standard-1")
-    errors.push(`wrangler.jsonc: production ${role} must remain standard-1`);
-  if (container?.max_instances !== 1)
-    errors.push(`wrangler.jsonc: production ${role} must remain capped at one instance`);
+  requireValue(!('containers' in config), `${file}: Containers must not be a runtime dependency`);
+  requireValue(!('hyperdrive' in config), `${file}: Hyperdrive/external SQL must not be a runtime dependency`);
+  requireValue(config.vars?.REDIS_BACKEND === 'cloudflare', `${file}: Redis replacement must remain Cloudflare-native`);
+  requireValue(d1.has('CRM_DB') && d1.has('OPS_DB') && d1.size === 2, `${file}: exactly CRM_DB and OPS_DB D1 bindings are required`);
+  requireValue(r2.has('STORAGE') && r2.size === 1, `${file}: exactly one tenant file/backup R2 binding is required`);
+  requireValue(kv.has('STATUS_KV'), `${file}: STATUS_KV must remain a disposable status cache`);
+  requireValue(['EVENTS_QUEUE', 'JOBS_QUEUE', 'JOBS_DLQ'].every(value => queueProducers.has(value)), `${file}: event, job, and DLQ producers are required`);
+  requireValue(['BACKUP_WF', 'CRM_EXPORT_WF', 'CRM_IMPORT_WF'].every(value => workflows.has(value)), `${file}: backup, export, and import Workflows are required`);
+  requireValue(['STATE_DO', 'SCHEDULER_DO', 'PUBSUB_DO'].every(value => durableObjects.has(value)), `${file}: state, scheduler, and pubsub Durable Objects are required`);
+  requireValue(config.assets?.binding === 'ASSETS' && config.assets?.run_worker_first === true, `${file}: Workers Static Assets must remain behind the Worker authorization boundary`);
+  requireValue(config.observability?.enabled === true && config.observability?.redact_query_string === true, `${file}: persisted observability and query-string redaction are required`);
+  requireValue(Array.isArray(config.triggers?.crons) && config.triggers.crons.length > 0, `${file}: scheduled maintenance and continuity triggers are required`);
 }
-if (productionBackup?.instance_type !== "basic")
-  errors.push("wrangler.jsonc: production backup must remain basic");
-if (productionBackup?.max_instances !== 1)
-  errors.push("wrangler.jsonc: production backup must remain capped at one instance");
-for (const role of ["TwentyServer", "TwentyWorker", "TwentyBackup"]) {
-  const container = stagingConfig.containers?.find(
-    (candidate) => candidate.class_name === role,
-  );
-  if (container?.max_instances !== 1)
-    errors.push(
-      `wrangler.staging.jsonc: ${role} must remain capped at one instance`,
-    );
-}
-if (
-  stagingConfig.vars?.SERVER_REPLICAS !== "1" ||
-  stagingConfig.vars?.WORKER_REPLICAS !== "1"
-)
-  errors.push(
-    "wrangler.staging.jsonc: application replica routing must remain one server and one worker",
-  );
-
-const [containerSource, workerSource, backupSource] = await Promise.all([
-  readFile("src/containers.ts", "utf8"),
-  readFile("src/index.ts", "utf8"),
-  readFile("src/backup.ts", "utf8"),
-]);
-if (!containerSource.includes('sleepAfter = "20m"'))
-  errors.push("src/containers.ts: idle containers must retain the 20-minute sleep policy");
-if (
-  !workerSource.includes('STATUS_KV.get("last-customer-activity")') ||
-  !workerSource.includes("hasRecentCustomerActivity(")
-)
-  errors.push("src/index.ts: health probes must remain customer-activity-aware");
-if (!backupSource.includes('STATUS_KV.get("last-customer-activity")'))
-  errors.push("src/backup.ts: idle backups must use customer activity, not cron health writes");
 
 const result = {
   checkedAt: new Date().toISOString(),
-  profile: "starter",
-  result: errors.length === 0 ? "passed" : "failed",
+  profile: 'cloudflare-native-starter',
+  result: errors.length === 0 ? 'passed' : 'failed',
   errors,
   warnings,
 };
