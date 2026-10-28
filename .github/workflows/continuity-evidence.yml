@@ -19,7 +19,7 @@ jobs:
           node-version: '22'
       - name: Capture public no-store readiness evidence
         run: node scripts/capture-production-readiness-evidence.mjs
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: continuity-${{ github.run_id }}
           path: artifacts/*.json
